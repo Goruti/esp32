@@ -69,8 +69,7 @@ def wifi_connect(network_config=None, re_config=False):
     """
     if not network_config:
         network_config = manage_data.get_network_config()
-        #network_config = {"ssid": "Mateo's Kingdom", "password": "Di3g0&C@rl@&M@t30"}
-
+        
     if not network_config:
         gc.collect()
         raise Exception("There is not Network Configuration")

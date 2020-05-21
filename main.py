@@ -1,24 +1,25 @@
-from irrigation_modules.wifi import start_ap, stop_ap, wifi_connect
+from wifi import start_ap, stop_ap, wifi_connect
 from irrigation_modules.irrigation_app import main_app
+from irrigation_modules import manage_data
+
 import gc
 import os
 
 try:
-    wifi_connect()
+    wifi_connect(manage_data.get_network_config())
 except Exception as e:
     print("main, no wifi connections".format(e))
-    start_ap()
+    start_ap('IrrigationSystem')
 else:
     stop_ap()
 
-#  Clean-up old templates
-for file in os.listdir('templates'):
+#  Clean-up old irrigation_templates
+for file in os.listdir('irrigation_templates'):
     if file.endswith("_tpl.py"):
-        os.remove("templates/{}".format(file))
+        os.remove("irrigation_templates/{}".format(file))
 
 gc.collect()
 
-load
 try:
     main_app()
 except Exception as e:

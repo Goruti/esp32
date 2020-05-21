@@ -3,8 +3,6 @@ import machine
 import gc
 import utime
 
-from irrigation_modules import manage_data
-
 
 def is_connected():
     """
@@ -22,17 +20,20 @@ def is_connected():
     return ip_address
 
 
-def start_ap():
+def start_ap(essid_name=None):
     """
     Set up a WiFi Access Point so that you can initially connect to the device and configure it.
     """
+    if not essid_name:
+        raise ValueError("Network ESSID was not provided")
+
     ap = WLAN(AP_IF)
     ap.active(True)
-    ap.config(essid='IrrigationSystem')
+    ap.config(essid=essid_name)
     ip = ap.ifconfig()[0]
-    print("AP is ON. Please connect to 'IrrigationSystem' network. AP_GW: {}".format(ip))
+    print("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid_name, ip))
     gc.collect()
-    return {"ssid": 'IrrigationSystem', "ip": ip}
+    return {"ssid": essid_name, "ip": ip}
 
 
 def stop_ap():
@@ -65,14 +66,11 @@ def get_available_networks(wlan=None):
 
 def wifi_connect(network_config=None, re_config=False):
     """
-    Connect to the WiFi network based on the configuration. Fails silently if there is no configuration.
+    Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
     if not network_config:
-        network_config = manage_data.get_network_config()
-        
-    if not network_config:
         gc.collect()
-        raise Exception("There is not Network Configuration")
+        raise ValueError("Network Configuration was not provided")
 
     try:
         wlan = WLAN(STA_IF)
@@ -92,13 +90,11 @@ def wifi_connect(network_config=None, re_config=False):
             while not wlan.isconnected():
                 attempts -= 1
                 if not attempts:
-                    raise Exception("Reached the maximum (150000) number of attempts to connect to Wifi")
+                    raise RuntimeError("Reached the maximum (150000) number of attempts to connect to Wifi")
                 machine.idle()
             print("Connected to {} with IP address: {}".format(network_config["ssid"], wlan.ifconfig()[0]))
-            #  Disable AP since the device is already connected
-            # stop_ap()
         else:
-            raise Exception("Could not find network: {}".format(network_config["ssid"]))
+            raise RuntimeError("Could not find network: {}".format(network_config["ssid"]))
 
     except Exception as e:
         print("Failed to connect to  '{}' network. \nError: {}".format(network_config["ssid"], e))

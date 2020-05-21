@@ -43,34 +43,32 @@ def get_net_configuration():
 def get_irrigation_status():
     systems_info = manage_data.get_irrigation_config()
     for key, values in systems_info["pump_info"].items():
-        systems_info["pump_info"][key]["pump_status"] = read_port(values["pin_pump"])
-        systems_info["pump_info"][key]["moisture"] = read_port(values["pin_sensor"], type="ADC")
+        systems_info["pump_info"][key]["pump_status"] = read_gpio(values["pin_pump"])
+        systems_info["pump_info"][key]["moisture"] = read_adc(values["pin_sensor"])
 
-    systems_info["water_level"] = read_port(conf.water_level_sensor_pin)
+    systems_info["water_level"] = read_gpio(conf.water_level_sensor_pin)
 
     gc.collect()
     return systems_info
 
 
-def read_port(pin, type="GPIO"):
+def read_gpio(pin):
+    gc.collect()
+    return Pin(pin).value()
 
-    if type == "GPIO_ADC":
-        adc = ADC(Pin(pin))  # create ADC object on ADC pin
-        adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
-        read = 0
-        for i in range(0, 5):
-            read += adc.read()
-            utime.sleep_ms(1)
+def read_adc(pin):
+    adc = ADC(Pin(pin))  # create ADC object on ADC pin
+    adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
+    read = 0
+    for i in range(0, 5):
+        read += adc.read()
+        utime.sleep_ms(1)
 
-        gc.collect()
-        return read/5
-
-    else:
-        gc.collect()
-        return Pin(pin).value()
+    gc.collect()
+    return read / 5
 
 
-def load_irrigation_configuration():
+def init_irrigation_app():
     #  set low water interruption pin
     pir = Pin(conf.water_level_sensor_pin, Pin.IN, Pin.PULL_UP)
     pir.irq(trigger=3, handler=water_level_interruption)

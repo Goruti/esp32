@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import btree
 from contextlib import contextmanager
 
@@ -16,7 +16,6 @@ def _get_db():
     yield db
     db.close()
     db_file.close()
-
 
 def _get_db_entry(key, default=None, as_json=True):
     """
@@ -36,7 +35,6 @@ def _get_db_entry(key, default=None, as_json=True):
     elif not value:
         value = default
     return value
-
 
 def _save_db_entry(key, value):
     """
@@ -65,11 +63,6 @@ def get_network_config():
 def save_network(**kwargs):
     """
     Write the network config to file
-
-    config = get_network_config()
-    if not config:
-        config = {}
-    config.update(kwargs)
     """
     _save_db_entry('network', kwargs)
 

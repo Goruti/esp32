@@ -245,7 +245,7 @@ class WebApp:
     def _load_template(self, tmpl_name):
         if self.template_loader is None:
             import utemplate.source
-            self.template_loader = utemplate.source.Loader(self.pkg, "templates")
+            self.template_loader = utemplate.source.Loader(self.pkg, "irrigation_templates")
         return self.template_loader.load(tmpl_name)
 
     def render_template(self, writer, tmpl_name, args=()):

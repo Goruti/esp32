@@ -12,7 +12,6 @@ from irrigation_modules import libraries
 
 webapp = picoweb.WebApp(None)
 
-
 @webapp.route('/', method='GET')
 def index(request, response):
     """
@@ -126,7 +125,7 @@ def save_wifi_config(request, response):
 @webapp.route('/irrigation_config', method='GET')
 def irrigation_config(request, response):
     gc.collect()
-    html_page = open("templates/config_irrigation.tpl", 'r').read()
+    html_page = open("irrigation_templates/config_irrigation.tpl", 'r').read()
     yield from picoweb.start_response(response)
     yield from response.awrite(str(html_page))
 
@@ -192,7 +191,7 @@ def main_app():
     """
     Set up the tasks and start the event loop
     """
-    libraries.load_irrigation_configuration()
+    libraries.init_irrigation_app()
     try:
         loop = asyncio.get_event_loop()
         loop.create_task(libraries.initialize_rtc())

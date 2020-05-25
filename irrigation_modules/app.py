@@ -1,65 +1,71 @@
 import gc
 import picoweb
 import uasyncio as asyncio
-import ujson
 import utime
 import machine
+import sys
+import ujson
 
-from irrigation_modules import conf
-from irrigation_modules import wifi
-from irrigation_modules import manage_data
-from irrigation_modules import libraries
+from irrigation_tools import conf, wifi, manage_data, libraries
+from irrigation_modules import main_loops
 
-webapp = picoweb.WebApp(None)
+
+webapp = picoweb.WebApp(pkg="__main__", tmpl_dir=conf.TEMPLATES_DIR)
+
 
 @webapp.route('/', method='GET')
 def index(request, response):
     """
-    The main page
+    Main Page
     """
     gc.collect()
     data = {}
-    print(request.headers[b"Accept"])
+    #print(request.headers[b"Accept"])
 
     try:
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_configuration()
         data["irrigation_status"] = libraries.get_irrigation_status()
-
+        #rendered_template = webapp.render_str("index.tpl", (data,))
     except Exception as e:
-        print("'GET /', Exception: {}".format(e))
-        picoweb.http_error(response, "500")
-
+        sys.print_exception(e)
+        yield from picoweb.http_error(response, "500", "Server could't complete your request.")
     else:
         gc.collect()
-
-        if b"text/html" in request.headers[b"Accept"]:
-            yield from picoweb.start_response(response)
-            yield from webapp.render_template(response, "index.tpl", (data,))
-        else:
-            yield from picoweb.jsonify(response, data)
-
+        try:
+            if b"text/html" in request.headers[b"Accept"]:
+                yield from picoweb.start_response(response)
+                #yield from picoweb.template_string(response, rendered_template)
+                yield from webapp.render_template(response, "index.tpl", (data,))
+            else:
+                yield from picoweb.jsonify(response, data)
+        except BaseException as e:
+            sys.print_exception(e)
     finally:
         gc.collect()
 
 
 @webapp.route('/enable_ap', method='GET')
 def wifi_config(request, response):
-    ap_info = wifi.start_ap()
     gc.collect()
-    html_page = '''
-           <html>
-                <head><title>Irrigation System Home Page</title></head>
-                <body>
-                   <p>Please connect to <b>"{}"</b> Wifi Network and 
-                   <a href="http://{}/config_wifi" title="Configuration Page">click here</a> to configure it</p>
-                </body>
-           </html>
-           '''.format(ap_info['ssid'], ap_info['ip'])
-
-    gc.collect()
-    yield from picoweb.start_response(response)
-    yield from response.awrite(str(html_page))
+    try:
+        ap_info = wifi.start_ap(conf.WIFI_SSID)
+    except BaseException as e:
+        sys.print_exception(e)
+        yield from picoweb.http_error(response, "500", "Server could't complete your request")
+    else:
+        html_page = '''
+               <html>
+                    <head><title>Irrigation System Home Page</title></head>
+                    <body>
+                       <p>Please connect to <b>"{}"</b> Wifi Network and 
+                       <a href="http://{}/config_wifi" title="Configuration Page">click here</a> to configure it</p>
+                    </body>
+               </html>
+               '''.format(ap_info['ssid'], ap_info['ip'])
+        gc.collect()
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
 
 
 @webapp.route('/config_wifi', method='GET')
@@ -87,7 +93,7 @@ def save_wifi_config(request, response):
     try:
         wifi.wifi_connect(network_config=updated_net_config, re_config=True)
     except Exception as e:
-        print("fail to update Network Configuration. {}".format(e))
+        sys.print_exception(e)
         html_page = '''
                 <html>
                     <head><title>Irrigation System Home Page</title></head>
@@ -125,7 +131,7 @@ def save_wifi_config(request, response):
 @webapp.route('/irrigation_config', method='GET')
 def irrigation_config(request, response):
     gc.collect()
-    html_page = open("irrigation_templates/config_irrigation.tpl", 'r').read()
+    html_page = open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r').read()
     yield from picoweb.start_response(response)
     yield from response.awrite(str(html_page))
 
@@ -148,8 +154,8 @@ def save_irrigation_config(request, response):
                 "output_power": int(request.form["output_power_{}".format(pump)]),
                 "moisture_threshold": int(request.form["moisture_threshold_{}".format(pump)]),
                 "connected_to_port": request.form["connected_to_port_{}".format(pump)],
-                "pin_sensor": conf.port_pin_mapping[request.form["connected_to_port_{}".format(pump)]]["pin_sensor"],
-                "pin_pump": conf.port_pin_mapping[request.form["connected_to_port_{}".format(pump)]]["pin_pump"],
+                "pin_sensor": conf.PORT_PIN_MAPPING[request.form["connected_to_port_{}".format(pump)]]["pin_sensor"],
+                "pin_pump": conf.PORT_PIN_MAPPING[request.form["connected_to_port_{}".format(pump)]]["pin_pump"],
             }
         config["pump_info"] = pump_info
 
@@ -157,6 +163,7 @@ def save_irrigation_config(request, response):
         gc.collect()
 
     except Exception as e:
+        sys.print_exception(e)
         html_page = '''
                 <html>
                     <head><title>Irrigation System Home Page</title></head>
@@ -187,24 +194,22 @@ def save_irrigation_config(request, response):
         machine.reset()
 
 
-def main_app():
-    """
-    Set up the tasks and start the event loop
-    """
-    libraries.init_irrigation_app()
+def main_app(loop=None):
     try:
+        libraries.initialize_irrigation_app()
+
+        """
+        Set up the tasks and start the event loop
+        """
         loop = asyncio.get_event_loop()
-        loop.create_task(libraries.initialize_rtc())
-        #loop.create_task(calc_sunrise_sunset())
-        #loop.create_task(door_check())
+        loop.create_task(main_loops.initialize_rtc())
+        #loop.create_task(main_loops.reading_process())
+        webapp.run(host="0.0.0.0", port=80, debug=False)
 
-        #webapp.run(host="0.0.0.0", port=80, debug=True)
-
-    except Exception as e:
-        print(e)
+    except BaseException as e:
+        sys.print_exception(e)
         print("GOODBYE DUDE!!!")
-        loop.close()
 
-
-
-
+    finally:
+        if loop:
+            loop.close()

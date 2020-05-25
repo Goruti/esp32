@@ -1,6 +1,6 @@
 import ujson as json
 import btree
-from contextlib import contextmanager
+from ucontextlib import contextmanager
 
 
 @contextmanager
@@ -52,7 +52,33 @@ def _save_db_entry(key, value):
     with _get_db() as db:
         db[key] = value
 
-
+"""
+    DB STRUCTURE
+    
+    {
+        'network': {
+                    'ssid': yyyyy,
+                    'password': xxxx
+        },
+        'irrigation_config': {
+                    "total_pumps": 3,
+                    "pump_info": {
+                        1: { 
+                            "moisture_threshold": 31,
+                            "connected_to_port": "B"
+                        },
+                        2: {
+                            "moisture_threshold": 23,
+                            "connected_to_port": "C"
+                        },
+                        3: {
+                            "moisture_threshold": 65,
+                            "connected_to_port": "F"
+                        }
+                    }
+        }
+    }
+"""
 def get_network_config():
     """
     Get the WiFi config. If there is none, return None.
@@ -72,7 +98,6 @@ def get_irrigation_config():
     Load the irrigation configuration
     """
     return _get_db_entry('irrigation_config')
-
 
 def save_irrigation_config(**kwargs):
     """

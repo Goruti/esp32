@@ -2,11 +2,10 @@ from machine import Pin, ADC, PWM
 import micropython
 import utime
 import gc
-import uasyncio as asyncio
 
-from irrigation_modules import wifi
-from irrigation_modules import manage_data
-from irrigation_modules import conf
+
+from irrigation_tools import manage_data, conf
+from irrigation_tools.wifi import is_connected
 
 #micropython.alloc_emergency_exception_buf(100)
 
@@ -30,23 +29,37 @@ def init_adc_and_outputs(): ## TODO
 
 
 def get_net_configuration():
-    ip = wifi.is_connected()
-    if not ip:
-        data = {"connected": False, "ssid": None, "ip": None}
-    else:
+    ip = is_connected()
+    if ip:
         data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
+    else:
+        data = {"connected": False, "ssid": None, "ip": None}
 
     gc.collect()
     return data
 
 
+def get_irrigation_configuration():
+    conf = manage_data.get_irrigation_config()
+    if not conf:
+        conf = {
+            "total_pumps": 0,
+            "pump_info": {}
+        }
+    gc.collect()
+    return conf
+
+
 def get_irrigation_status():
     systems_info = manage_data.get_irrigation_config()
-    for key, values in systems_info["pump_info"].items():
-        systems_info["pump_info"][key]["pump_status"] = read_gpio(values["pin_pump"])
-        systems_info["pump_info"][key]["moisture"] = read_adc(values["pin_sensor"])
+    if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
+        for key, values in systems_info["pump_info"].items():
+            systems_info["pump_info"][key]["pump_status"] = read_gpio(values["pin_pump"])
+            systems_info["pump_info"][key]["moisture"] = read_adc(values["pin_sensor"])
+    else:
+        systems_info = {}
 
-    systems_info["water_level"] = read_gpio(conf.water_level_sensor_pin)
+    systems_info["water_level"] = read_gpio(conf.WATER_LEVEL_SENSOR_PIN)
 
     gc.collect()
     return systems_info
@@ -56,32 +69,38 @@ def read_gpio(pin):
     gc.collect()
     return Pin(pin).value()
 
+
 def read_adc(pin):
-    adc = ADC(Pin(pin))  # create ADC object on ADC pin
+    '''adc = ADC(Pin(pin))  # create ADC object on ADC pin
     adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
     read = 0
     for i in range(0, 5):
         read += adc.read()
         utime.sleep_ms(1)
-
+    '''
+    read = 4
     gc.collect()
     return read / 5
 
 
-def init_irrigation_app():
-    #  set low water interruption pin
-    pir = Pin(conf.water_level_sensor_pin, Pin.IN, Pin.PULL_UP)
-    pir.irq(trigger=3, handler=water_level_interruption)
+def initialize_irrigation_app():
+    try:
+        #  set low water interruption pin
+        pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
+        pir.irq(trigger=3, handler=water_level_interruption)
 
-    #  set pumps pin as OUT_PUTS
-    #for key, value in manage_data.get_irrigation_config()["pump_info"].items():
+        #  set pumps pin as OUT_PUTS
+        #for key, value in manage_data.get_irrigation_config()["pump_info"].items():
+
+    except Exception as e:
+        raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
 
 
 def water_level_interruption(irq):
     irrigation_config = manage_data.get_irrigation_config()
     utime.sleep(3)
 
-    if Pin(conf.water_level_sensor_pin).value():
+    if Pin(conf.WATER_LEVEL_SENSOR_PIN).value():
         stop_pumps(irrigation_config["pump_info"])
         irrigation_config.update({"water_level": "empty"})
         manage_data.save_irrigation_config(**irrigation_config)
@@ -98,31 +117,6 @@ def stop_pumps(pump_info):
     except Exception as e:
         print("Enable to stop Pumps. Exception: {}".format(e))
     gc.collect()
-
-
-def get_irrigation_configuration():
-    conf = manage_data.get_irrigation_config()
-    gc.collect()
-    return conf
-
-
-async def initialize_rtc():
-    while True:
-        try:
-            if wifi.is_connected():
-                try:
-                    from ntptime import settime
-                    settime()
-                    print("DateTime(UTC): {}".format(datetime_to_iso(utime.localtime())))
-                except Exception as e:
-                    print("Failed to initialize RTC: Error: {}".format(e))
-            else:
-                print("Device is Offline")
-        except Exception as e:
-            pass
-        finally:
-            gc.collect()
-            await asyncio.sleep(3600)
 
 
 def datetime_to_iso(time):

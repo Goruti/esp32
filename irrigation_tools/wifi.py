@@ -20,16 +20,14 @@ def is_connected():
     return ip_address
 
 
-def start_ap(essid_name=None):
+def start_ap(essid_name="ESP32 AP"):
     """
     Set up a WiFi Access Point so that you can initially connect to the device and configure it.
     """
-    if not essid_name:
-        raise ValueError("Network ESSID was not provided")
-
     ap = WLAN(AP_IF)
-    ap.active(True)
-    ap.config(essid=essid_name)
+    if not ap.active():
+        ap.config(essid=essid_name)
+        ap.active(True)
     ip = ap.ifconfig()[0]
     print("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid_name, ip))
     gc.collect()
@@ -38,10 +36,11 @@ def start_ap(essid_name=None):
 
 def stop_ap():
     """
-    Set up a WiFi Access Point so that you can initially connect to the device and configure it.
+    Stop WiFi Access Point
     """
     ap = WLAN(AP_IF)
-    ap.active(False)
+    if ap.active():
+        ap.active(False)
     print("AP is OFF")
     gc.collect()
 

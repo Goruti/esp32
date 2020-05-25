@@ -1,17 +1,17 @@
-# Picoweb web pico-framework for Pycopy
-# Copyright (c) 2014-2019 Paul Sokolovsky
+# Picoweb web pico-framework for Pycopy, https://github.com/pfalcon/pycopy
+# Copyright (c) 2014-2020 Paul Sokolovsky
 # SPDX-License-Identifier: MIT
-import sys
 import gc
 import micropython
 import utime
-import uio
 import ure as re
 import uerrno
 import uasyncio as asyncio
 import pkg_resources
 
 from .utils import parse_qs
+
+SEND_BUFSZ = 128
 
 
 def get_mime_type(fname):
@@ -26,7 +26,7 @@ def get_mime_type(fname):
     return "text/plain"
 
 def sendstream(writer, f):
-    buf = bytearray(64)
+    buf = bytearray(SEND_BUFSZ)
     while True:
         l = f.readinto(buf)
         if not l:
@@ -38,6 +38,10 @@ def jsonify(writer, dict):
     import ujson
     yield from start_response(writer, "application/json")
     yield from writer.awrite(ujson.dumps(dict))
+
+
+def template_string(writer, s):
+    yield from writer.awrite(s)
 
 
 def start_response(writer, content_type="text/html; charset=utf-8", status="200", headers=None):
@@ -59,9 +63,10 @@ def start_response(writer, content_type="text/html; charset=utf-8", status="200"
     yield from writer.awrite("\r\n")
 
 
-def http_error(writer, status):
+def http_error(writer, status, message=None):
     yield from start_response(writer, status=status)
-    yield from writer.awrite(status)
+    message = message if message else status
+    yield from writer.awrite(message)
 
 
 class HTTPRequest:
@@ -82,7 +87,7 @@ class HTTPRequest:
 
 class WebApp:
 
-    def __init__(self, pkg, routes=None, serve_static=True):
+    def __init__(self, pkg=None, routes=None, serve_static=True, tmpl_dir="templates"):
         if routes:
             self.url_map = routes
         else:
@@ -93,6 +98,8 @@ class WebApp:
             self.pkg = None
         if serve_static:
             self.url_map.append((re.compile("^/(static/.+)"), self.handle_static))
+
+        self.tmpl_dir = tmpl_dir
         self.mounts = []
         self.inited = False
         # Instantiated lazily
@@ -211,11 +218,21 @@ class WebApp:
         except Exception as e:
             if self.debug >= 0:
                 self.log.exc(e, "%.3f %s %s %r" % (utime.time(), req, writer, e))
+            yield from self.handle_exc(req, writer, e)
 
         if close is not False:
             yield from writer.aclose()
         if __debug__ and self.debug > 1:
             self.log.debug("%.3f %s Finished processing request", utime.time(), req)
+
+    def handle_exc(self, req, resp, e):
+        # Can be overriden by subclasses. req may be not (fully) initialized.
+        # resp may already have (partial) content written.
+        # NOTE: It's your responsibility to not throw exceptions out of
+        # handle_exc(). If exception is thrown, it will be propagated, and
+        # your webapp will terminate.
+        # This method is a coroutine.
+        if 0: yield
 
     def mount(self, url, app):
         "Mount a sub-app at the url of current app."
@@ -245,7 +262,7 @@ class WebApp:
     def _load_template(self, tmpl_name):
         if self.template_loader is None:
             import utemplate.source
-            self.template_loader = utemplate.source.Loader(self.pkg, "irrigation_templates")
+            self.template_loader = utemplate.source.Loader(self.pkg, self.tmpl_dir)
         return self.template_loader.load(tmpl_name)
 
     def render_template(self, writer, tmpl_name, args=()):
@@ -290,7 +307,6 @@ class WebApp:
         # (which are otherwise unhandled and will terminate a Picoweb app).
         # Note: name and signature of this method may change.
         loop.create_task(asyncio.start_server(self._handle, host, port))
-        gc.collect()
         loop.run_forever()
 
     def run(self, host="127.0.0.1", port=8081, debug=False, lazy_init=False, log=None):
@@ -308,6 +324,6 @@ class WebApp:
                 app.init()
         loop = asyncio.get_event_loop()
         if debug > 0:
-            print("Web Server Running on http:{}:{}".format(host, port))
+            print("* Running on http://%s:%s/" % (host, port))
         self.serve(loop, host, port)
         loop.close()

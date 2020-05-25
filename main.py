@@ -1,7 +1,6 @@
-from wifi import start_ap, stop_ap, wifi_connect
-from irrigation_modules.irrigation_app import main_app
-from irrigation_modules import manage_data
-
+from irrigation_tools.wifi import start_ap, stop_ap, wifi_connect
+from irrigation_tools import manage_data, conf
+from irrigation_modules.app import main_app
 import gc
 import os
 
@@ -9,7 +8,7 @@ try:
     wifi_connect(manage_data.get_network_config())
 except Exception as e:
     print("main, no wifi connections".format(e))
-    start_ap('IrrigationSystem')
+    start_ap(conf.WIFI_SSID)
 else:
     stop_ap()
 

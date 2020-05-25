@@ -28,10 +28,12 @@ def start_ap(essid_name="ESP32 AP"):
     if not ap.active():
         ap.config(essid=essid_name)
         ap.active(True)
+
     ip = ap.ifconfig()[0]
-    print("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid_name, ip))
+    essid = ap.config('essid')
+    print("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid, ip))
     gc.collect()
-    return {"ssid": essid_name, "ip": ip}
+    return {"ssid": essid, "ip": ip}
 
 
 def stop_ap():
@@ -45,25 +47,18 @@ def stop_ap():
     gc.collect()
 
 
-def get_available_networks(wlan=None):
-    if not wlan:
-        wlan = WLAN(STA_IF)
-
-    nets = [e[0].decode("utf-8") for e in wlan.scan()]
-    print("Scanning wifi nets")
-    if not nets:
-        wlan.active(False)
-        utime.sleep(2)
+def get_available_networks():
+    wlan = WLAN(STA_IF)
+    if not wlan.active():
         wlan.active(True)
         utime.sleep(2)
-        print("Re-scanning wifi nets")
-        nets = [e[0].decode("utf-8") for e in wlan.scan()]
-
+    print("Scanning wifi nets")
+    nets = [e[0].decode("utf-8") for e in wlan.scan()]
     gc.collect()
     return nets
 
 
-def wifi_connect(network_config=None, re_config=False):
+def wifi_connect(network_config=None):
     """
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
@@ -72,18 +67,9 @@ def wifi_connect(network_config=None, re_config=False):
         raise ValueError("Network Configuration was not provided")
 
     try:
-        wlan = WLAN(STA_IF)
-        if re_config:
-            wlan.active(False)
-            utime.sleep(1)
-
-        if not wlan.active():
-            wlan.active(True)
-            utime.sleep(2)
-
-        nets = get_available_networks(wlan)
-
+        nets = get_available_networks()
         if network_config["ssid"] in nets:
+            wlan = WLAN(STA_IF)
             wlan.connect(network_config["ssid"], network_config["password"])
             attempts = 150000
             while not wlan.isconnected():

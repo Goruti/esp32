@@ -1,4 +1,3 @@
-#from network import WLAN, AP_IF, STA_IF
 import network
 import machine
 import gc

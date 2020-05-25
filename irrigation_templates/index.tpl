@@ -25,7 +25,7 @@
         myHTML += `<p><button onclick="window.location.href = '/enable_ap';">Reconfigure Wifi</button>`;
     } else {
          myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure a Wifi Network</b></p>`;
-         myHTML += `<p><button onclick="window.location.href = '/enable_ap';">Configure Wifi</button>`;
+         myHTML += `<p><button onclick="window.location.href = '/config_wifi';">Configure Wifi</button>`;
     }
     net_wrapper.innerHTML = myHTML;
 

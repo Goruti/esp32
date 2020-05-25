@@ -15,8 +15,10 @@
     <body>
     <h1>Irrigation System Configuration</h1>
       <form action="/irrigation_config_2" method="post">
-      Number of Pumps to control:  <input type="number" name="total_pumps" placeholder="Enter Value" style="font-weight: bold;width: 7em;" min="1" max="6" oninput="if(value>6)value=6;if(value<1)value=1" id="total_pumps" onchange="totalPumpsFunction()"><br><br>
-        <p id="inject_pumps_config"></p>
+      Number of Pumps to control:  <input type="number" name="total_pumps" placeholder="Enter Value" style="font-weight: bold;width: 7.5em;" min="1" max="6" oninput="if(value>6)value=6;if(value<1)value=1" id="total_pumps" onchange="totalPumpsFunction()"><br><br>
+        <p id="inject_pumps_config">
+            <input type="button" name="Cancel" value="Cancel" onClick="window.location='/';"/>
+        </p>
       </form>
     </body>
 </html>
@@ -26,6 +28,7 @@
     var total_pump = document.getElementById("total_pumps").value
 
     var sys_wrapper = document.getElementById("inject_pumps_config");
+
     var myHTML = '<h2> Pumps Configuration </h2>'
 
     for (var i = 1; i <= total_pump; i++) {
@@ -41,7 +44,9 @@
       myHTML += '</select><br><br>';
       myHTML += 'Threshold:  <input type="number" value="400" style="font-weight: bold" name="moisture_threshold_' + i + '"><br><br>';
     }
-    myHTML += '<input type="submit" value="Save">'
+    myHTML += `<input type="submit" value="Save">`
+    myHTML += `<input type="button" name="Cancel" value="Cancel" onClick="window.location='/';">`
+
     sys_wrapper.innerHTML = myHTML
   }
 </script>

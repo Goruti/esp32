@@ -91,7 +91,7 @@ def save_wifi_config(request, response):
     # Now try to connect to the WiFi network
     print("trying to connect to wifi with {}".format(updated_net_config))
     try:
-        wifi.wifi_connect(network_config=updated_net_config, re_config=True)
+        wifi.wifi_connect(network_config=updated_net_config)
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -100,13 +100,14 @@ def save_wifi_config(request, response):
                     <body>
                         <p style="color: red;">Fail to connect to Network: <b>"{}"</b</p><br>
                         <button onclick="window.location.href = '/config_wifi';">Try again</button>
+                        <button onclick="window.location.href = '/' ;">Cancel</button>
                     </body>
                 </html>
                 '''.format(updated_net_config["ssid"])
     else:
         manage_data.save_network(**updated_net_config)
 
-        updated_net_config['message'] = "Please re-start your device"
+        #updated_net_config['message'] = "Please re-start your device"
         ip = wifi.is_connected()
 
         html_page = '''
@@ -151,11 +152,8 @@ def save_irrigation_config(request, response):
         pump_info = {}
         for pump in range(1, int(request.form["total_pumps"])+1):
             pump_info[pump] = {
-                "output_power": int(request.form["output_power_{}".format(pump)]),
                 "moisture_threshold": int(request.form["moisture_threshold_{}".format(pump)]),
                 "connected_to_port": request.form["connected_to_port_{}".format(pump)],
-                "pin_sensor": conf.PORT_PIN_MAPPING[request.form["connected_to_port_{}".format(pump)]]["pin_sensor"],
-                "pin_pump": conf.PORT_PIN_MAPPING[request.form["connected_to_port_{}".format(pump)]]["pin_pump"],
             }
         config["pump_info"] = pump_info
 

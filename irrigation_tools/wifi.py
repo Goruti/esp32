@@ -10,13 +10,12 @@ def is_connected():
     : if it's connected return the IP address
     : else None
     """
+    gc.collect()
     ip_address = None
     wlan = network.WLAN(network.STA_IF)
     if wlan.active() and wlan.isconnected():
         details = wlan.ifconfig()
         ip_address = details[0] if details else None
-
-    gc.collect()
     return ip_address
 
 

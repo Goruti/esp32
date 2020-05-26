@@ -58,40 +58,31 @@ def get_available_networks():
     return nets
 
 
-def wifi_connect(network_config=None, timeout=10000):
+def wifi_connect(network_config, timeout=10000):
     """
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
     gc.collect()
 
-    if not network_config:
-        raise ValueError("Network Configuration was not provided")
-
     wlan = network.WLAN(network.STA_IF)
-    if not wlan.isconnected():
-        if not wlan.active():
-            wlan.active(True)
-            utime.sleep(1)
+    wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
 
-        wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
-        t = utime.ticks_ms()
-        while not wlan.isconnected():
-            if utime.ticks_diff(utime.ticks_ms(), t) > timeout:
-                wlan.disconnect()
-                utime.sleep_ms(100)
-                wlan_status = wlan.status()
-                if wlan_status == network.STAT_NO_AP_FOUND:
-                    error_msg = "STAT_NO_AP_FOUND"
-                elif wlan_status == network.STAT_WRONG_PASSWORD or wlan_status == 8:
-                    error_msg = "STAT_WRONG_PASSWORD"
-                elif wlan_status == network.STAT_ASSOC_FAIL:
-                    error_msg = "STAT_ASSOC_FAIL"
-                elif wlan_status == network.STAT_HANDSHAKE_TIMEOUT:
-                    error_msg = "HANDSHAKE_TIMEOUT"
-                else:
-                    error_msg = "Undefined Error"
-                raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
-            machine.idle()
-        print("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
-    else:
-        print("Device is already connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
+    t = utime.ticks_ms()
+    while not wlan.isconnected():
+        if utime.ticks_diff(utime.ticks_ms(), t) > timeout:
+            wlan.disconnect()
+            utime.sleep_ms(100)
+            wlan_status = wlan.status()
+            if wlan_status == network.STAT_NO_AP_FOUND:
+                error_msg = "STAT_NO_AP_FOUND"
+            elif wlan_status == network.STAT_WRONG_PASSWORD or wlan_status == 8:
+                error_msg = "STAT_WRONG_PASSWORD"
+            elif wlan_status == network.STAT_ASSOC_FAIL:
+                error_msg = "STAT_ASSOC_FAIL"
+            elif wlan_status == network.STAT_HANDSHAKE_TIMEOUT:
+                error_msg = "HANDSHAKE_TIMEOUT"
+            else:
+                error_msg = "Undefined Error"
+            raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
+        machine.idle()
+    print("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))

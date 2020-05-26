@@ -129,10 +129,8 @@ def save_wifi_config(request, response):
                 '''.format(net_config["ssid"])
     else:
         manage_data.save_network(**net_config)
-
         #updated_net_config['message'] = "Please re-start your device"
         ip = wifi.is_connected()
-
         html_page = '''
         <html>
             <head><title>Irrigation System Home Page</title></head>

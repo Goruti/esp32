@@ -1,13 +1,14 @@
-from machine import Pin, ADC, PWM
+from machine import Pin, ADC
 import micropython
 import utime
 import gc
+import sys
 
 
 from irrigation_tools import manage_data, conf
 from irrigation_tools.wifi import is_connected
 
-#micropython.alloc_emergency_exception_buf(100)
+micropython.alloc_emergency_exception_buf(100)
 
 '''
 def init_adc_and_outputs(): ## TODO
@@ -44,7 +45,8 @@ def get_irrigation_configuration():
     if not conf:
         conf = {
             "total_pumps": 0,
-            "pump_info": {}
+            "pump_info": {},
+            "water_level": None
         }
     gc.collect()
     return conf
@@ -54,12 +56,12 @@ def get_irrigation_status():
     systems_info = manage_data.get_irrigation_config()
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
-            systems_info["pump_info"][key]["pump_status"] = read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+            systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
             systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
     else:
         systems_info = {}
 
-    systems_info["water_level"] = read_gpio(conf.WATER_LEVEL_SENSOR_PIN)
+    systems_info["water_level"] = "good" if not read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
 
     gc.collect()
     return systems_info
@@ -87,7 +89,8 @@ def initialize_irrigation_app():
     try:
         #  set low water interruption pin
         pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-        pir.irq(trigger=3, handler=water_level_interruption)
+        #pir.irq(Pin.IRQ_FALLING, handler=water_level_interruption)
+        pir.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=water_level_interruption)
 
         #  set pumps pin as OUT_PUTS
         #for key, value in manage_data.get_irrigation_config()["pump_info"].items():
@@ -98,24 +101,25 @@ def initialize_irrigation_app():
 
 def water_level_interruption(irq):
     irrigation_config = manage_data.get_irrigation_config()
-    utime.sleep(3)
 
     if Pin(conf.WATER_LEVEL_SENSOR_PIN).value():
-        stop_pumps(irrigation_config["pump_info"])
+        stop_pumps()
         irrigation_config.update({"water_level": "empty"})
-        manage_data.save_irrigation_config(**irrigation_config)
     else:
-        irrigation_config.update({"water_level": "ok"})
-        manage_data.save_irrigation_config(**irrigation_config)
+        irrigation_config.update({"water_level": "good"})
+
+    manage_data.save_irrigation_config(**irrigation_config)
 
 
-def stop_pumps(pump_info):
+def stop_pumps():
     try:
-        for key, value in pump_info.items():
-            PWM(Pin(value["pin_pump"])).deinit()
+        for key, value in conf.PORT_PIN_MAPPING.items():
             Pin(value["pin_pump"], Pin.OUT)(0)
     except Exception as e:
-        print("Enable to stop Pumps. Exception: {}".format(e))
+        print("Enable to stop Pumps")
+        sys.print_exception(e)
+        sys.exit()
+
     gc.collect()
 
 

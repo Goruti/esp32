@@ -1,3 +1,4 @@
+# Hardware Mapping
 PORT_PIN_MAPPING = {
     "A": {"pin_sensor": 10, "pin_pump": 1},
     "B": {"pin_sensor": 11, "pin_pump": 2},
@@ -8,8 +9,9 @@ PORT_PIN_MAPPING = {
     "G": {"pin_sensor": 16, "pin_pump": 7},
     "H": {"pin_sensor": 17, "pin_pump": 8}
 }
-
 WATER_LEVEL_SENSOR_PIN = 9
+
+# Software Configuration
 TEMPLATES_DIR = "irrigation_templates"
 AP_SSID = "My Awesome Irrigation System"
 AP_PWD = "My@wesomeP@sword"

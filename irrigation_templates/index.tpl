@@ -31,9 +31,13 @@
 
     var irrigation_wrapper = document.getElementById("irrigation_configuration");
     var myHTML = ``;
+
+    myHTML += `<p>Water Level: {{ data["irrigation_status"]["water_level"] }}</p>`
+
     if ( "{{ data["irrigation_config"]["total_pumps"] }}" !== "0" ) {
         var total_pump = {{ data["irrigation_config"]["total_pumps"] }}
         var pump_info = {{ data["irrigation_config"]["pump_info"] }}
+        var status_info = {{ data["irrigation_status"]["pump_info"] }}
 
         myHTML += `<p style="margin-left: 40px">Number of Pumps to control<: <b>` + total_pump + `</b></p>`;
         var myHTML = `<h2> Pumps Configuration </h2>`
@@ -41,6 +45,9 @@
         for (var i = 1; i <= total_pump; i++) {
             myHTML += `<h3>Pump #` + i + `</h3>`
             myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `</p>`;
+            myHTML += `<p style="margin-left: 40px">Status: ` + pump_info[i]["connected_to_port"] + `</p>`;
+
+            myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `</p>`;
         }
         myHTML += `<button onclick="window.location.href = '/irrigation_config';">Reconfigure Irrigation System</button>`;

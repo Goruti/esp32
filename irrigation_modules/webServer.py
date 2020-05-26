@@ -18,8 +18,8 @@ def index(request, response):
     data = {}
     try:
         data["net_config"] = libraries.get_net_configuration()
-        data["irrigation_config"] = libraries.get_irrigation_configuration()
-        data["irrigation_status"] = libraries.get_irrigation_status()
+        #data["irrigation_config"] = libraries.get_irrigation_configuration()
+        data["irrigation_config"] = libraries.get_irrigation_status()
     except Exception as e:
         sys.print_exception(e)
         html_page = '''

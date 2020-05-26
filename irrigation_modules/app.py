@@ -20,14 +20,10 @@ def index(request, response):
     """
     gc.collect()
     data = {}
-    error_code = "200"
-    #print(request.headers[b"Accept"])
-
     try:
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_configuration()
         data["irrigation_status"] = libraries.get_irrigation_status()
-        #rendered_template = webapp.render_str("index.tpl", (data,))
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -46,7 +42,6 @@ def index(request, response):
         try:
             if b"text/html" in request.headers[b"Accept"]:
                 yield from picoweb.start_response(response)
-                #yield from picoweb.template_string(response, rendered_template)
                 yield from webapp.render_template(response, "index.tpl", (data,))
             else:
                 yield from picoweb.jsonify(response, data)
@@ -94,9 +89,11 @@ def wifi_config(request, response):
 @webapp.route('/config_wifi', method='GET')
 def wifi_config(request, response):
     gc.collect()
-    yield from picoweb.start_response(response)
-    yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
-
+    try:
+        yield from picoweb.start_response(response)
+        yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
+    except BaseException as e:
+        sys.print_exception(e)
 
 @webapp.route('/config_wifi_2', method='POST')
 def save_wifi_config(request, response):
@@ -129,7 +126,6 @@ def save_wifi_config(request, response):
                 '''.format(net_config["ssid"])
     else:
         manage_data.save_network(**net_config)
-        #updated_net_config['message'] = "Please re-start your device"
         ip = wifi.is_connected()
         html_page = '''
         <html>

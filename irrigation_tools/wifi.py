@@ -67,7 +67,14 @@ def wifi_connect(network_config, timeout=10000):
     wlan = network.WLAN(network.STA_IF)
     if not wlan.active():
         wlan.active(True)
+
+    if wlan.isconnected():
+        wlan.disconnect()
+    #wlan.active(False)
+    #utime.sleep_ms(1)
+    #wlan.active(True)
         utime.sleep_ms(100)
+
     wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
 
     t = utime.ticks_ms()

@@ -20,6 +20,7 @@ def index(request, response):
     """
     gc.collect()
     data = {}
+    error_code = "200"
     #print(request.headers[b"Accept"])
 
     try:
@@ -29,9 +30,19 @@ def index(request, response):
         #rendered_template = webapp.render_str("index.tpl", (data,))
     except Exception as e:
         sys.print_exception(e)
-        yield from picoweb.http_error(response, "500", "Server could't complete your request.")
-    else:
+        html_page = '''
+                       <html>
+                            <head><title>Irrigation System Home Page</title></head>
+                            <body>
+                               <p>Server could't complete your request</p>
+                               <button onclick="window.location.href = '/' ;">Cancel</button>
+                            </body>
+                       </html>
+                       '''
         gc.collect()
+        yield from picoweb.start_response(writer=response, status="500")
+        yield from response.awrite(str(html_page))
+    else:
         try:
             if b"text/html" in request.headers[b"Accept"]:
                 yield from picoweb.start_response(response)
@@ -48,11 +59,21 @@ def index(request, response):
 @webapp.route('/enable_ap', method='GET')
 def wifi_config(request, response):
     gc.collect()
+    error_code = "200"
     try:
-        ap_info = wifi.start_ap(conf.WIFI_SSID)
+        ap_info = wifi.start_ap(conf.AP_SSID, conf.AP_PWD)
     except BaseException as e:
         sys.print_exception(e)
-        yield from picoweb.http_error(response, "500", "Server could't complete your request")
+        error_code = "500"
+        html_page = '''
+                       <html>
+                            <head><title>Irrigation System Home Page</title></head>
+                            <body>
+                               <p>Server could't complete your request</p>
+                               <button onclick="window.location.href = '/' ;">Cancel</button>
+                            </body>
+                       </html>
+                       '''
     else:
         html_page = '''
                <html>
@@ -63,8 +84,10 @@ def wifi_config(request, response):
                     </body>
                </html>
                '''.format(ap_info['ssid'], ap_info['ip'])
+
+    finally:
         gc.collect()
-        yield from picoweb.start_response(response)
+        yield from picoweb.start_response(writer=response, status=error_code)
         yield from response.awrite(str(html_page))
 
 

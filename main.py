@@ -8,7 +8,7 @@ try:
     wifi_connect(manage_data.get_network_config())
 except Exception as e:
     print("main, no wifi connections".format(e))
-    start_ap(conf.WIFI_SSID)
+    start_ap(conf.AP_SSID, conf.AP_PWD)
 else:
     stop_ap()
 

@@ -19,15 +19,15 @@ def is_connected():
     return ip_address
 
 
-def start_ap(essid_name="ESP32 AP"):
+def start_ap(essid_name="ESP32 AP", password="ESP32 P@assword"):
     """
     Set up a WiFi Access Point so that you can initially connect to the device and configure it.
     """
     gc.collect()
     ap = network.WLAN(network.AP_IF)
     if not ap.active():
-        ap.config(essid=essid_name)
         ap.active(True)
+        ap.config(essid=essid_name, authmode=network.AUTH_WPA_WPA2_PSK, password=password)
 
     ip = ap.ifconfig()[0]
     essid = ap.config('essid')

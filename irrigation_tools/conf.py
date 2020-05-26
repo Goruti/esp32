@@ -9,4 +9,5 @@ PORT_PIN_MAPPING = {
 
 WATER_LEVEL_SENSOR_PIN = 9
 TEMPLATES_DIR = "irrigation_templates"
-WIFI_SSID = "My Awesome Irrigation System"
+AP_SSID = "My Awesome Irrigation System"
+AP_PWD = "My@wesomeP@sword"

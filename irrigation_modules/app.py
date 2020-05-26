@@ -103,18 +103,18 @@ def save_wifi_config(request, response):
     """
     Save Network Configuration
     """
-    updated_net_config = {}
+    net_config = {}
     yield from request.read_form_data()
     print("request.form[key]: ", request.form)
     gc.collect()
     for key in ['ssid', 'password']:
         if key in request.form:
-            updated_net_config[key] = request.form[key]
+            net_config[key] = request.form[key]
 
     # Now try to connect to the WiFi network
-    print("trying to connect to wifi with {}".format(updated_net_config))
+    print("trying to connect to wifi with {}".format(net_config))
     try:
-        wifi.wifi_connect(network_config=updated_net_config)
+        wifi.wifi_connect(network_config=net_config)
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -126,9 +126,9 @@ def save_wifi_config(request, response):
                         <button onclick="window.location.href = '/' ;">Cancel</button>
                     </body>
                 </html>
-                '''.format(updated_net_config["ssid"])
+                '''.format(net_config["ssid"])
     else:
-        manage_data.save_network(**updated_net_config)
+        manage_data.save_network(**net_config)
 
         #updated_net_config['message'] = "Please re-start your device"
         ip = wifi.is_connected()
@@ -142,7 +142,7 @@ def save_wifi_config(request, response):
                 <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
             </body>
         </html>
-        '''.format(updated_net_config['ssid'], ip, ip)
+        '''.format(net_config['ssid'], ip, ip)
 
     finally:
         gc.collect()

@@ -3,6 +3,7 @@ from irrigation_tools import manage_data, conf
 from irrigation_modules.app import main_app
 import gc
 import os
+import sys
 
 try:
     wifi_connect(manage_data.get_network_config())
@@ -22,5 +23,5 @@ gc.collect()
 try:
     main_app()
 except Exception as e:
-    print(e)
+    sys.print_exception(e)
 

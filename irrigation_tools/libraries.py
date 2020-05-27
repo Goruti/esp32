@@ -88,7 +88,7 @@ def initialize_irrigation_app():
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-        pir.irq(Pin.IRQ_FALLING, handler=water_level_interruption)
+        pir.irq(trigger=Pin.IRQ_FALLING, handler=water_level_interruption)
 
         #  Initialize Pumps pin as OUT_PUTS
         for key, value in conf.PORT_PIN_MAPPING.items():

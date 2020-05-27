@@ -22,39 +22,38 @@
     if ("{{ data["net_config"]["connected"] }}" === "True") {
         myHTML += `<p style="margin-left: 40px"><u>SSID</u>: <b> {{ data["net_config"]["ssid"] }}</b></p>`;
         myHTML += `<p style="margin-left: 40px"><u>IP</u>: <b>{{ data["net_config"]["ip"] }}</b></p>`;
-        myHTML += `<p><button onclick="window.location.href = '/enable_ap';">Reconfigure Wifi</button>`;
+        myHTML += `<p><button onclick="window.location = '/enable_ap';">Reconfigure Wifi</button>`;
     } else {
          myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure a Wifi Network</b></p>`;
-         myHTML += `<p><button onclick="window.location.href = '/config_wifi';">Configure Wifi</button>`;
+         myHTML += `<p><button onclick="window.location = '/config_wifi';">Configure Wifi</button>`;
     }
     net_wrapper.innerHTML = myHTML;
 
     var irrigation_wrapper = document.getElementById("irrigation_configuration");
     var myHTML = ``;
 
-    myHTML += `<p>Water Level: {{ data["irrigation_status"]["water_level"] }}</p>`
+    myHTML += `<p style="margin-left: 40px">Water Level: <b>{{ data["irrigation_config"]["water_level"] }}</b></p>`;
 
     if ( "{{ data["irrigation_config"]["total_pumps"] }}" !== "0" ) {
         var total_pump = {{ data["irrigation_config"]["total_pumps"] }}
         var pump_info = {{ data["irrigation_config"]["pump_info"] }}
-        var status_info = {{ data["irrigation_status"]["pump_info"] }}
 
-        myHTML += `<p style="margin-left: 40px">Number of Pumps to control<: <b>` + total_pump + `</b></p>`;
-        var myHTML = `<h2> Pumps Configuration </h2>`
+        myHTML += `<p style="margin-left: 40px">Number of Pumps to control: <b>` + total_pump + `</b></p>`;
+        myHTML += `<h2> Pumps Configuration </h2>`
 
         for (var i = 1; i <= total_pump; i++) {
-            myHTML += `<h3>Pump #` + i + `</h3>`
-            myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `</p>`;
-            myHTML += `<p style="margin-left: 40px">Status: ` + pump_info[i]["connected_to_port"] + `</p>`;
-
-            myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `</p>`;
-            myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `</p>`;
+            myHTML += `<h3>Pump #` + i
+            myHTML += `<button onclick="window.location = '/pump_action?action=ON&pump=` + pump_info[i]["connected_to_port"] + `';" style="color: green;font-weight: bold;">Start</button>`;
+            myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color: red;font-weight: bold;">Stop</button>`;
+            myHTML += `</h3>`
+            myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `; Status: ` + pump_info[i]["pump_status"] + `</p>`;
+            myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;
         }
-        myHTML += `<button onclick="window.location.href = '/irrigation_config';">Reconfigure Irrigation System</button>`;
+        myHTML += `<button onclick="window.location = '/irrigation_config';">Reconfigure Irrigation System</button>`;
 
     } else {
          myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure your Irrigation System</b></p>`;
-         myHTML += `<p><button onclick="window.location.href = '/irrigation_config';">Configure Irrigation System</button>`;
+         myHTML += `<p><button onclick="window.location = '/irrigation_config';">Configure Irrigation System</button>`;
     }
     irrigation_wrapper.innerHTML = myHTML;
 

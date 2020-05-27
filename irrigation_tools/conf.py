@@ -1,15 +1,13 @@
 # Hardware Mapping
 PORT_PIN_MAPPING = {
-    "A": {"pin_sensor": 10, "pin_pump": 1},
-    "B": {"pin_sensor": 11, "pin_pump": 2},
-    "C": {"pin_sensor": 12, "pin_pump": 3},
-    "D": {"pin_sensor": 13, "pin_pump": 4},
-    "E": {"pin_sensor": 14, "pin_pump": 5},
-    "F": {"pin_sensor": 15, "pin_pump": 6},
-    "G": {"pin_sensor": 16, "pin_pump": 7},
-    "H": {"pin_sensor": 17, "pin_pump": 8}
+    "A": {"pin_sensor": 32, "pin_pump": 18},
+    "B": {"pin_sensor": 33, "pin_pump": 19},
+    "C": {"pin_sensor": 34, "pin_pump": 21},
+    "D": {"pin_sensor": 35, "pin_pump": 22},
+    "E": {"pin_sensor": 36, "pin_pump": 23},
+    "F": {"pin_sensor": 39, "pin_pump": 25}
 }
-WATER_LEVEL_SENSOR_PIN = 9
+WATER_LEVEL_SENSOR_PIN = 26
 
 # Software Configuration
 TEMPLATES_DIR = "irrigation_templates"

@@ -73,53 +73,61 @@ def read_gpio(pin):
 
 
 def read_adc(pin):
-    '''adc = ADC(Pin(pin))  # create ADC object on ADC pin
+    adc = ADC(Pin(pin))  # create ADC object on ADC pin
     adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
     read = 0
     for i in range(0, 5):
         read += adc.read()
         utime.sleep_ms(1)
-    '''
-    read = 4
+
     gc.collect()
     return read / 5
 
 
 def initialize_irrigation_app():
     try:
-        #  set low water interruption pin
+        #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-        #pir.irq(Pin.IRQ_FALLING, handler=water_level_interruption)
-        pir.irq(trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING, handler=water_level_interruption)
+        pir.irq(Pin.IRQ_FALLING, handler=water_level_interruption)
 
-        #  set pumps pin as OUT_PUTS
-        #for key, value in manage_data.get_irrigation_config()["pump_info"].items():
+        #  Initialize Pumps pin as OUT_PUTS
+        for key, value in conf.PORT_PIN_MAPPING.items():
+            Pin(value["pin_pump"], Pin.OUT, value=0)
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
 
 
 def water_level_interruption(irq):
+    stop_all_pumps()
     irrigation_config = manage_data.get_irrigation_config()
-
-    if Pin(conf.WATER_LEVEL_SENSOR_PIN).value():
-        stop_pumps()
-        irrigation_config.update({"water_level": "empty"})
-    else:
-        irrigation_config.update({"water_level": "good"})
-
+    irrigation_config.update({"water_level": "empty"})
     manage_data.save_irrigation_config(**irrigation_config)
 
 
-def stop_pumps():
+def stop_pump(pin):
+    try:
+        Pin(pin).off()
+    except Exception as e:
+        sys.print_exception(e)
+    gc.collect()
+
+
+def start_pump(pin):
+    try:
+        Pin(pin).on()
+    except Exception as e:
+        sys.print_exception(e)
+    gc.collect()
+
+
+def stop_all_pumps():
     try:
         for key, value in conf.PORT_PIN_MAPPING.items():
-            Pin(value["pin_pump"], Pin.OUT)(0)
+            stop_pump(value["pin_pump"])
     except Exception as e:
-        print("Enable to stop Pumps")
         sys.print_exception(e)
         sys.exit()
-
     gc.collect()
 
 

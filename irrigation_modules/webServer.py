@@ -97,8 +97,7 @@ def save_wifi_config(request, response):
     Save Network Configuration
     """
     net_config = {}
-    yield from request.read_form_data()
-    print("request.form[key]: ", request.form)
+    request.read_form_data()
     gc.collect()
     for key in ['ssid', 'password']:
         if key in request.form:
@@ -156,7 +155,7 @@ def save_irrigation_config(request, response):
     Save Irrigations Configuration
     """
     gc.collect()
-    yield from request.read_form_data()
+    request.read_form_data()
     try:
         config = {
             "total_pumps": int(request.form["total_pumps"])
@@ -189,17 +188,21 @@ def save_irrigation_config(request, response):
         yield from response.awrite(str(html_page))
 
     else:
-        html_page = '''
-                <html>
-                    <head><title>Irrigation System Home Page</title></head>
-                   <body>
-                       <p>Configuration was saved properly. Your device will be restarted :)</p>
-                       <a href="/" title="Main Page">Go Back to the main page</a>
-                   </body>
-               </html>'''
+        headers = {"Location": "/"}
+        yield from picoweb.start_response(response, status="303", headers=headers)
 
-        gc.collect()
-        yield from picoweb.start_response(response)
-        yield from response.awrite(str(html_page))
-        #utime.sleep(2)
-        #machine.reset()
+
+@webapp.route('/pump_action', method='GET')
+def start_pump(request, response):
+    gc.collect()
+    request.parse_qs()
+    pump = request.form["pump"]
+    action = request.form["action"]
+
+    if action == "ON":
+        libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+    else:
+        libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+
+    headers = {"Location": "/"}
+    yield from picoweb.start_response(response, status="303", headers=headers)

@@ -18,7 +18,6 @@ def index(request, response):
     data = {}
     try:
         data["net_config"] = libraries.get_net_configuration()
-        #data["irrigation_config"] = libraries.get_irrigation_configuration()
         data["irrigation_config"] = libraries.get_irrigation_status()
     except Exception as e:
         sys.print_exception(e)
@@ -97,7 +96,7 @@ def save_wifi_config(request, response):
     Save Network Configuration
     """
     net_config = {}
-    request.read_form_data()
+    yield from request.read_form_data()
     gc.collect()
     for key in ['ssid', 'password']:
         if key in request.form:
@@ -155,7 +154,7 @@ def save_irrigation_config(request, response):
     Save Irrigations Configuration
     """
     gc.collect()
-    request.read_form_data()
+    yield from request.read_form_data()
     try:
         config = {
             "total_pumps": int(request.form["total_pumps"])

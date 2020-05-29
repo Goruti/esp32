@@ -1,42 +1,44 @@
-import machine
 import utime
 import uasyncio as asyncio
 import gc
+import sys
 
-from irrigation_tools.wifi import is_connected
-from irrigation_tools.libraries import datetime_to_iso
+from irrigation_tools import wifi, libraries, conf, manage_data
 
 
 async def initialize_rtc(frequency_loop=3600):
     while True:
         try:
-            if is_connected():
+            if wifi.is_connected():
                 try:
                     from ntptime import settime
                     settime()
-                    print("DateTime(UTC): {}".format(datetime_to_iso(utime.localtime())))
+                    print("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
                 except Exception as e:
                     print("Failed to initialize RTC: Error: {}".format(e))
             else:
                 print("Device is Offline")
-        except Exception as e:
-            pass
+        except BaseException as e:
+            sys.print_exception(e)
         finally:
             gc.collect()
             await asyncio.sleep(frequency_loop)
 
 
-async def reading_process(frequency_loop=3600):
-    pin = machine.Pin(2, machine.Pin.OUT)
-    # adc_objects = [{"pin": moisture_sensor, "adc_object": adc}]
+async def reading_moister(frequency_loop=3600):
     while True:
-        #for moisture_sensor in adc_objects:
-        #    moisture = moisture_sensor["adc_object"].read()
-        #    if moisture > conf.sensor_pump_relation[moisture_sensor["pin"]]["moisture_threshold"]:
-        #        pass
+        systems_info = manage_data.get_irrigation_config()
+        try:
+            for key, values in systems_info["pump_info"].items():
+                moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
 
-        utime.sleep(1)
-        pin(1)
-        utime.sleep(1)
-        #print("{}-off".format("light_sensor"))
-        pin(0)
+                if moisture > values["moisture_threshold"]:
+                    libraries.start_irrigation(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),\
+                                               conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),\
+                                               moisture,\
+                                               values["moisture_threshold"])
+        except BaseException as e:
+            sys.print_exception(e)
+        finally:
+            gc.collect()
+            await asyncio.sleep(frequency_loop)

@@ -58,7 +58,7 @@ def get_available_networks():
     return nets
 
 
-def wifi_connect(network_config, timeout=10000):
+def wifi_connect(network_config, timeout_s=10):
     """
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
@@ -77,9 +77,9 @@ def wifi_connect(network_config, timeout=10000):
 
     wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
 
-    t = utime.ticks_ms()
+    t = utime.time()
     while not wlan.isconnected():
-        if utime.ticks_diff(utime.ticks_ms(), t) > timeout:
+        if utime.ticks_diff(utime.time(), t) > timeout_s:
             wlan.disconnect()
             utime.sleep_ms(100)
             wlan_status = wlan.status()

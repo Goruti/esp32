@@ -66,6 +66,14 @@ def get_irrigation_status():
     return systems_info
 
 
+def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_s=10):
+    start_pump(pump_pin)
+    t = utime.time()
+    while moisture > threshold and utime.ticks_diff(utime.time(), t) < max_irrigation_time_s:
+        moisture = read_adc(sensor_pin)
+    stop_pump(pump_pin)
+
+
 def read_gpio(pin):
     gc.collect()
     return Pin(pin).value()

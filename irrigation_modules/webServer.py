@@ -42,8 +42,6 @@ def index(request, response):
                 yield from picoweb.jsonify(response, data)
         except BaseException as e:
             sys.print_exception(e)
-    finally:
-        gc.collect()
 
 
 @webapp.route('/enable_ap', method='GET')
@@ -189,6 +187,8 @@ def save_irrigation_config(request, response):
     else:
         headers = {"Location": "/"}
         yield from picoweb.start_response(response, status="303", headers=headers)
+        utime.sleep(2)
+        machine.reset()
 
 
 @webapp.route('/pump_action', method='GET')

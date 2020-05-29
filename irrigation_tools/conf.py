@@ -7,7 +7,7 @@ PORT_PIN_MAPPING = {
     "E": {"pin_sensor": 36, "pin_pump": 23},
     "F": {"pin_sensor": 39, "pin_pump": 25}
 }
-WATER_LEVEL_SENSOR_PIN = 26
+WATER_LEVEL_SENSOR_PIN = 27
 
 # Software Configuration
 TEMPLATES_DIR = "irrigation_templates"

@@ -62,7 +62,6 @@ def get_irrigation_status():
         systems_info = {}
 
     systems_info["water_level"] = "good" if not read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
-
     gc.collect()
     return systems_info
 
@@ -85,20 +84,23 @@ def read_adc(pin):
 
 
 def initialize_irrigation_app():
+    print("Initializing Ports")
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
         pir.irq(trigger=Pin.IRQ_FALLING, handler=water_level_interruption)
 
-        #  Initialize Pumps pin as OUT_PUTS
         for key, value in conf.PORT_PIN_MAPPING.items():
+            #  Initialize Pumps pin as OUT_PUTS
             Pin(value["pin_pump"], Pin.OUT, value=0)
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
 
 
-def water_level_interruption(irq):
+def water_level_interruption(pin):
+    print("interrupion trigger - {}: {}".format(pin, pin.value()))
+
     stop_all_pumps()
     irrigation_config = manage_data.get_irrigation_config()
     irrigation_config.update({"water_level": "empty"})
@@ -106,6 +108,7 @@ def water_level_interruption(irq):
 
 
 def stop_pump(pin):
+    print("Stopping pump: {}".format(pin))
     try:
         Pin(pin).off()
     except Exception as e:
@@ -114,14 +117,17 @@ def stop_pump(pin):
 
 
 def start_pump(pin):
+    print("starting pump: {}".format(pin))
     try:
         Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
+
     gc.collect()
 
 
 def stop_all_pumps():
+    print("stopping all pumps")
     try:
         for key, value in conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])

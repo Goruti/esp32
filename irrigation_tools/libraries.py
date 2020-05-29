@@ -122,8 +122,8 @@ def start_pump(pin):
         Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
-
-    gc.collect()
+    finally:
+        gc.collect()
 
 
 def stop_all_pumps():

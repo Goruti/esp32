@@ -43,7 +43,7 @@
 
         for (var i = 1; i <= total_pump; i++) {
             myHTML += `<h3>Pump #` + i
-            myHTML += `<button onclick="window.location = '/pump_action?action=ON&pump=` + pump_info[i]["connected_to_port"] + `';" style="color: green;font-weight: bold;">Start</button>`;
+            myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;">Start</button>`;
             myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color: red;font-weight: bold;">Stop</button>`;
             myHTML += `</h3>`
             myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `; Status: ` + pump_info[i]["pump_status"] + `</p>`;
@@ -57,4 +57,11 @@
     }
     irrigation_wrapper.innerHTML = myHTML;
 
+    function onStartButton(pump) {
+        if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {
+            alert("Water level is to low. Please refill the water tank")
+        } else {
+            return `"window.location = '/pump_action?action=ON&pump=` + pump + `';"`
+        }
+    }
 </script>

@@ -107,12 +107,27 @@ def initialize_irrigation_app():
 
 
 def water_level_interruption(pin):
-    print("interrupion trigger - {}: {}".format(pin, pin.value()))
+    print("interruption has been triggered - {}: {}".format(pin, pin.value()))
+    try:
+        stop_all_pumps()
+        irrigation_config = manage_data.get_irrigation_config()
+        irrigation_config.update({"water_level": "empty"})
+        manage_data.save_irrigation_config(**irrigation_config)
+    except Exception as e:
+        sys.print_exception(e)
+    finally:
+        gc.collect()
 
-    stop_all_pumps()
-    irrigation_config = manage_data.get_irrigation_config()
-    irrigation_config.update({"water_level": "empty"})
-    manage_data.save_irrigation_config(**irrigation_config)
+
+def start_pump(pin):
+    print("starting pump: {}".format(pin))
+    try:
+        if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
+            Pin(pin).on()
+    except Exception as e:
+        sys.print_exception(e)
+    finally:
+        gc.collect()
 
 
 def stop_pump(pin):
@@ -122,16 +137,6 @@ def stop_pump(pin):
     except Exception as e:
         sys.print_exception(e)
     gc.collect()
-
-
-def start_pump(pin):
-    print("starting pump: {}".format(pin))
-    try:
-        Pin(pin).on()
-    except Exception as e:
-        sys.print_exception(e)
-    finally:
-        gc.collect()
 
 
 def stop_all_pumps():
@@ -144,6 +149,9 @@ def stop_all_pumps():
         sys.exit()
     gc.collect()
 
+
+def notify_st():
+    pass
 
 def datetime_to_iso(time):
     return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])

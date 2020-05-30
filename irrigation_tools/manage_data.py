@@ -100,6 +100,7 @@ def get_irrigation_config():
     """
     return _get_db_entry('irrigation_config')
 
+
 def save_irrigation_config(**kwargs):
     """
     Save the irrigation configuration

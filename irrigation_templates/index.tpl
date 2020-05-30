@@ -6,6 +6,9 @@
     </head>
     <body>
     <h1>Welcome to your Automated Irrigation System</h1>
+    <h2>Web REPL</h2>
+    <button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;">Enable </button>
+    <button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>
     <h2>Network Configuration</h2>
         <div id="network_configuration">
         </div>

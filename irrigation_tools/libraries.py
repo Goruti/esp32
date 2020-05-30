@@ -4,29 +4,10 @@ import utime
 import gc
 import sys
 
-
 from irrigation_tools import manage_data, conf
 from irrigation_tools.wifi import is_connected
 
 micropython.alloc_emergency_exception_buf(100)
-
-'''
-def init_adc_and_outputs(): ## TODO
-    adc_objects = []
-    for pin, info in conf.sensor_pump_relation.items():
-        try:
-            adc = ADC(Pin(pin))  # create ADC object on ADC pin
-            adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
-
-        except Exception as e:
-            print("Failed to init ADC for pin '{}': Error: {}".format(moisture_sensor, e))
-        else:
-            adc_objects.append({"pin": moisture_sensor, "adc_object": adc})
-
-    if not adc_objects:
-        raise Exception('System Could not initialize any ADC for PINs: {}'.format(conf.sensor_pump_relation.keys()))
-    return adc_objects
-'''
 
 
 def get_net_configuration():
@@ -149,9 +130,6 @@ def stop_all_pumps():
         sys.exit()
     gc.collect()
 
-
-def notify_st():
-    pass
 
 def datetime_to_iso(time):
     return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])

@@ -3,6 +3,8 @@ import picoweb
 import utime
 import machine
 import sys
+import webrepl
+
 
 from irrigation_tools import conf, wifi, manage_data, libraries
 
@@ -202,6 +204,21 @@ def start_pump(request, response):
         libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
     else:
         libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+
+    headers = {"Location": "/"}
+    yield from picoweb.start_response(response, status="303", headers=headers)
+
+
+@webapp.route('/configWebRepl', method='GET')
+def configWebRepl(request, response):
+    gc.collect()
+    request.parse_qs()
+    action = request.form["action"]
+
+    if action == "enable":
+        webrepl.start(password=conf.WEBREPL_PWD)
+    else:
+        webrepl.stop()
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)

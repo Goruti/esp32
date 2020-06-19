@@ -81,7 +81,7 @@ def initialize_irrigation_app():
 
         for key, value in conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
-            Pin(value["pin_pump"], Pin.OUT, value=0)
+            Pin(value["pin_pump"], Pin.OUT, value=1)
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
@@ -104,7 +104,7 @@ def start_pump(pin):
     print("starting pump: {}".format(pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
-            Pin(pin).on()
+            Pin(pin).off()
     except Exception as e:
         sys.print_exception(e)
     finally:
@@ -114,7 +114,7 @@ def start_pump(pin):
 def stop_pump(pin):
     print("Stopping pump: {}".format(pin))
     try:
-        Pin(pin).off()
+        Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
     gc.collect()

@@ -5,6 +5,7 @@ import gc
 import os
 import sys
 
+
 try:
     wifi_connect(manage_data.get_network_config())
 except Exception as e:

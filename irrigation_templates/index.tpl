@@ -26,7 +26,7 @@
         myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>`
     } else {
         myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold; opacity:0.6">Disable </button>
+        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold; opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 

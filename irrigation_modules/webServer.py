@@ -3,7 +3,7 @@ import picoweb
 import utime
 import machine
 import sys
-import webrepl
+
 
 
 from irrigation_tools import conf, wifi, manage_data, libraries
@@ -224,6 +224,7 @@ def start_pump(request, response):
 
 @webapp.route('/configWebRepl', method='GET')
 def configWebRepl(request, response):
+    import webrepl
     gc.collect()
     gc.collect()
     request.parse_qs()

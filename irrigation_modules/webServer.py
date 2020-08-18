@@ -21,7 +21,7 @@ def index(request, response):
     try:
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_status()
-        data["WebRepl"] = manage_data.read_webrepl_config()
+        data["WebRepl"] = libraries.get_web_repl_configuration()
     except Exception as e:
         sys.print_exception(e)
         html_page = '''

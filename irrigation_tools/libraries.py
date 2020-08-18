@@ -27,7 +27,15 @@ def get_irrigation_configuration():
         conf = {
             "total_pumps": 0,
             "pump_info": {},
-            "water_level": None,
+            "water_level": None
+        }
+    gc.collect()
+    return conf
+
+def get_web_repl_configuration():
+    conf = manage_data.read_webrepl_config()
+    if not conf:
+        conf = {
             "WebRepl": False
         }
     gc.collect()

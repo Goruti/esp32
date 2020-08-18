@@ -225,15 +225,16 @@ def start_pump(request, response):
 @webapp.route('/configWebRepl', method='GET')
 def configWebRepl(request, response):
     gc.collect()
+    gc.collect()
     request.parse_qs()
     action = request.form["action"]
 
     if action == "enable":
         webrepl.start(password=conf.WEBREPL_PWD)
-        manage_data.save_webrepl_config(True)
+        manage_data.save_webrepl_config(**{"enable": True})
     else:
         webrepl.stop()
-        manage_data.save_webrepl_config(False)
+        manage_data.save_webrepl_config(**{"enable": False})
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)

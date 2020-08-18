@@ -32,11 +32,12 @@ def get_irrigation_configuration():
     gc.collect()
     return conf
 
+
 def get_web_repl_configuration():
     conf = manage_data.read_webrepl_config()
     if not conf:
         conf = {
-            "WebRepl": False
+            "enable": False
         }
     gc.collect()
     return conf

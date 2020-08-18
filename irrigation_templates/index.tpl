@@ -21,7 +21,7 @@
 <script>
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
-    if ("{{ data["WebRepl"] }}" === "True") {
+    if ("{{ data["WebRepl"]["enable"] }}" === "True") {
         myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold; opacity:0.6">Enable </button>`
         myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>`
     } else {

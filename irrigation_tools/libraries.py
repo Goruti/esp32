@@ -34,13 +34,16 @@ def get_irrigation_configuration():
 
 
 def get_irrigation_status():
-    systems_info = manage_data.get_irrigation_config()
+    systems_info = get_irrigation_configuration()
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
             systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
     else:
-        systems_info = {}
+        systems_info = {
+
+        }
+
 
     systems_info["water_level"] = "good" if not read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
     gc.collect()

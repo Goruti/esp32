@@ -77,7 +77,8 @@ def _save_db_entry(key, value):
                         }
                     },
                     "water_level": "good"
-        }
+        },
+        "WebRepl": False 
     }
 """
 def get_network_config():
@@ -94,7 +95,7 @@ def save_network(**kwargs):
     _save_db_entry('network', kwargs)
 
 
-def get_irrigation_config():
+def read_irrigation_config():
     """
     Load the irrigation configuration
     """
@@ -106,3 +107,17 @@ def save_irrigation_config(**kwargs):
     Save the irrigation configuration
     """
     _save_db_entry('irrigation_config', kwargs)
+
+
+def read_webrepl_config():
+    """
+    Load the irrigation configuration
+    """
+    return _get_db_entry('WebRepl')
+
+
+def save_webrepl_config(**kwargs):
+    """
+    Save the irrigation configuration
+    """
+    _save_db_entry('WebRepl', kwargs)

@@ -21,6 +21,7 @@ def index(request, response):
     try:
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_status()
+        data["WebRepl"] = manage_data.read_webrepl_config()
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -187,8 +188,20 @@ def save_irrigation_config(request, response):
         yield from response.awrite(str(html_page))
 
     else:
-        headers = {"Location": "/"}
-        yield from picoweb.start_response(response, status="303", headers=headers)
+        html_page = '''
+                <html>
+                    <head><title>Irrigation System Home Page</title></head>
+                    <body>
+                        <p>Your system has been configured. In order to apply these changes, your device will be restart it</p>
+                        <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
+                    </body>
+                </html>
+                '''.format(wifi.is_connected())
+        #headers = {"Location": "/"}
+        #yield from picoweb.start_response(response, status="303", headers=headers)
+        gc.collect()
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
         utime.sleep(2)
         machine.reset()
 
@@ -217,8 +230,10 @@ def configWebRepl(request, response):
 
     if action == "enable":
         webrepl.start(password=conf.WEBREPL_PWD)
+        manage_data.save_webrepl_config(True)
     else:
         webrepl.stop()
+        manage_data.save_webrepl_config(False)
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)

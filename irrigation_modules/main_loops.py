@@ -28,7 +28,7 @@ async def initialize_rtc(frequency_loop=3600):
 async def reading_moister(frequency_loop=300, report_freq_s=600):
     try:
         smartthings = smartthings_handler.SmartThings()
-        systems_info = manage_data.get_irrigation_config()
+        systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
         sys.print_exception(e)
         gc.collect()

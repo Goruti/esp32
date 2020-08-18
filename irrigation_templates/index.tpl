@@ -7,8 +7,8 @@
     <body>
     <h1>Welcome to your Automated Irrigation System</h1>
     <h2>Web REPL</h2>
-    <button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;">Enable </button>
-    <button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>
+    <div id="web_repl_config">
+    </div>
     <h2>Network Configuration</h2>
         <div id="network_configuration">
         </div>
@@ -19,24 +19,20 @@
 </html>
 
 <script>
-    var net_wrapper = document.getElementById("network_configuration");
-    var myHTML = `<p style="margin-left: 40px"><u>Wifi Connected</u>: <b>{{ data["net_config"]["connected"] }}</b></p>`;
-
-    if ("{{ data["net_config"]["connected"] }}" === "True") {
-        myHTML += `<p style="margin-left: 40px"><u>SSID</u>: <b> {{ data["net_config"]["ssid"] }}</b></p>`;
-        myHTML += `<p style="margin-left: 40px"><u>IP</u>: <b>{{ data["net_config"]["ip"] }}</b></p>`;
-        myHTML += `<p><button onclick="window.location = '/enable_ap';">Reconfigure Wifi</button>`;
+    var webRepl_wrapper = document.getElementById("web_repl_config");
+    var myHTML = ``;
+    if ("{{ data["WebRepl"] }}" === "True") {
+        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold; opacity:0.6">Enable </button>`
+        myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>`
     } else {
-         myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure a Wifi Network</b></p>`;
-         myHTML += `<p><button onclick="window.location = '/config_wifi';">Configure Wifi</button>`;
+        myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold; opacity:0.6">Disable </button>
     }
-    net_wrapper.innerHTML = myHTML;
+    webRepl_wrapper.innerHTML = myHTML;
 
     var irrigation_wrapper = document.getElementById("irrigation_configuration");
     var myHTML = ``;
-
     myHTML += `<p style="margin-left: 40px">Water Level: <b>{{ data["irrigation_config"]["water_level"] }}</b></p>`;
-
     if ( "{{ data["irrigation_config"]["total_pumps"] }}" !== "0" ) {
         var total_pump = {{ data["irrigation_config"]["total_pumps"] }}
         var pump_info = {{ data["irrigation_config"]["pump_info"] }}

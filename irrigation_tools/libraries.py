@@ -22,12 +22,13 @@ def get_net_configuration():
 
 
 def get_irrigation_configuration():
-    conf = manage_data.get_irrigation_config()
+    conf = manage_data.read_irrigation_config()
     if not conf:
         conf = {
             "total_pumps": 0,
             "pump_info": {},
-            "water_level": None
+            "water_level": None,
+            "WebRepl": False
         }
     gc.collect()
     return conf
@@ -35,15 +36,11 @@ def get_irrigation_configuration():
 
 def get_irrigation_status():
     systems_info = get_irrigation_configuration()
+
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
             systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
-    else:
-        systems_info = {
-
-        }
-
 
     systems_info["water_level"] = "good" if not read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
     gc.collect()

@@ -30,6 +30,19 @@
     }
     webRepl_wrapper.innerHTML = myHTML;
 
+    var net_wrapper = document.getElementById("network_configuration");
+    var myHTML = `<p style="margin-left: 40px"><u>Wifi Connected</u>: <b>{{ data["net_config"]["connected"] }}</b></p>`;
+
+    if ("{{ data["net_config"]["connected"] }}" === "True") {
+        myHTML += `<p style="margin-left: 40px"><u>SSID</u>: <b> {{ data["net_config"]["ssid"] }}</b></p>`;
+        myHTML += `<p style="margin-left: 40px"><u>IP</u>: <b>{{ data["net_config"]["ip"] }}</b></p>`;
+        myHTML += `<p><button onclick="window.location = '/enable_ap';">Reconfigure Wifi</button>`;
+    } else {
+         myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure a Wifi Network</b></p>`;
+         myHTML += `<p><button onclick="window.location = '/config_wifi';">Configure Wifi</button>`;
+    }
+    net_wrapper.innerHTML = myHTML;
+
     var irrigation_wrapper = document.getElementById("irrigation_configuration");
     var myHTML = ``;
     myHTML += `<p style="margin-left: 40px">Water Level: <b>{{ data["irrigation_config"]["water_level"] }}</b></p>`;

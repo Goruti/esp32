@@ -4,8 +4,6 @@ import utime
 import machine
 import sys
 
-
-
 from irrigation_tools import conf, wifi, manage_data, libraries
 
 webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
@@ -28,7 +26,7 @@ def index(request, response):
                        <html>
                             <head><title>Irrigation System Home Page</title></head>
                             <body>
-                               <p>Server could't complete your request</p>
+                               <p>Server couldn't complete your request</p>
                                <button onclick="window.location.href = '/' ;">Cancel</button>
                             </body>
                        </html>
@@ -60,7 +58,7 @@ def wifi_config(request, response):
                        <html>
                             <head><title>Irrigation System Home Page</title></head>
                             <body>
-                               <p>Server could't complete your request</p>
+                               <p>Server couldn't complete your request</p>
                                <button onclick="window.location.href = '/' ;">Cancel</button>
                             </body>
                        </html>
@@ -90,6 +88,7 @@ def wifi_config(request, response):
         yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
     except BaseException as e:
         sys.print_exception(e)
+
 
 @webapp.route('/config_wifi_2', method='POST')
 def save_wifi_config(request, response):
@@ -152,7 +151,7 @@ def irrigation_config(request, response):
 @webapp.route('/irrigation_config_2', method='POST')
 def save_irrigation_config(request, response):
     """
-    Save Irrigations Configuration
+    Save Irrigation Configuration
     """
     gc.collect()
     yield from request.read_form_data()
@@ -223,7 +222,7 @@ def start_pump(request, response):
 
 
 @webapp.route('/configWebRepl', method='GET')
-def configWebRepl(request, response):
+def config_web_repl(request, response):
     import webrepl
     gc.collect()
     gc.collect()

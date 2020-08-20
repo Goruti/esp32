@@ -55,7 +55,7 @@ async def reading_moister(frequency_loop=300, report_freq_s=600):
                             "body": moisture_status
                         }
                         print(payload)
-                        #smartthings.notify(payload)
+                        # smartthings.notify(payload)
 
                 except BaseException as e:
                     print("reading_moister Exception - key: {}, values: {}".format(key, values))
@@ -65,25 +65,25 @@ async def reading_moister(frequency_loop=300, report_freq_s=600):
                     await asyncio.sleep(frequency_loop)
 
 
-async def reading_water_level(frequency_loop=3600):
-    previous_water_level = 1
-    smartthings = smartthings_handler.SmartThings()
-    while True:
-        try:
-            water_level = "good" if not libraries.read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
-            if water_level != previous_water_level:
-                payload = {
-                    "type": "water_level_status",
-                    "body": {
-                        "status": water_level
-                    }
-                }
-                #smartthings.notify(payload})
-                print(payload)
-                previous_water_level = water_level
-
-        except BaseException as e:
-            sys.print_exception(e)
-        finally:
-            gc.collect()
-            await asyncio.sleep(frequency_loop)
+#async def reading_water_level(frequency_loop=3600):
+#    previous_water_level = "empty"
+#    smartthings = smartthings_handler.SmartThings()
+#    while True:
+#        try:
+#            water_level = "empty" if libraries.read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "good"
+#            if water_level != previous_water_level:
+#                payload = {
+#                    "type": "water_level_status",
+#                    "body": {
+#                        "status": water_level
+#                    }
+#                }
+#                # smartthings.notify(payload})
+#                print(payload)
+#                previous_water_level = water_level
+#
+#        except BaseException as e:
+#            sys.print_exception(e)
+#        finally:
+#            gc.collect()
+#            await asyncio.sleep(frequency_loop)

@@ -75,8 +75,7 @@ def _save_db_entry(key, value):
                             "moisture_threshold": 65,
                             "connected_to_port": "F"
                         }
-                    },
-                    "water_level": "good"
+                    }
         },
         "WebRepl": False 
     }

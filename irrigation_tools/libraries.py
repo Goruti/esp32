@@ -1,4 +1,5 @@
-from machine import Pin, ADC
+#from machine import Pin, ADC
+import machine
 import micropython
 import utime
 import gc
@@ -6,6 +7,7 @@ import sys
 
 from irrigation_tools import manage_data, conf
 from irrigation_tools.wifi import is_connected
+from irrigation_modules.water_level import WaterLevel, water_level_interruption_handler
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -51,27 +53,27 @@ def get_irrigation_status():
             systems_info["pump_info"][key]["pump_status"] = "Off" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "On"
             systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
 
-    systems_info["water_level"] = "good" if not read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "empty"
+    systems_info["water_level"] = "empty" if read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "good"
     gc.collect()
     return systems_info
 
 
-def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_s=10):
+def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=10000):
     start_pump(pump_pin)
-    t = utime.time()
-    while moisture > threshold and utime.ticks_diff(utime.time(), t) < max_irrigation_time_s:
+    t = utime.ticks_ms()
+    while moisture > threshold and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
         moisture = read_adc(sensor_pin)
     stop_pump(pump_pin)
 
 
 def read_gpio(pin):
     gc.collect()
-    return Pin(pin).value()
+    return machine.Pin(pin).value()
 
 
 def read_adc(pin):
-    adc = ADC(Pin(pin))  # create ADC object on ADC pin
-    adc.atten(ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
+    adc = machine.ADC(machine.Pin(pin))  # create ADC object on ADC pin
+    adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
     read = 0
     for i in range(0, 5):
         read += adc.read()
@@ -85,35 +87,23 @@ def initialize_irrigation_app():
     print("Initializing Ports")
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
-        pir = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-        pir.irq(trigger=Pin.IRQ_FALLING, handler=water_level_interruption)
+        pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
+        low_water_level = WaterLevel(pin=pir, callback=water_level_interruption_handler, falling=True)
+        high_water_level = WaterLevel(pin=pir, callback=water_level_interruption_handler, falling=False)
 
         for key, value in conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
-            Pin(value["pin_pump"], Pin.OUT, value=1)
+            machine.Pin(value["pin_pump"], machine.Pin.OUT, value=1)
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
-
-
-def water_level_interruption(pin):
-    print("interruption has been triggered - {}: {}".format(pin, pin.value()))
-    try:
-        stop_all_pumps()
-        irrigation_config = manage_data.get_irrigation_config()
-        irrigation_config.update({"water_level": "empty"})
-        manage_data.save_irrigation_config(**irrigation_config)
-    except Exception as e:
-        sys.print_exception(e)
-    finally:
-        gc.collect()
 
 
 def start_pump(pin):
     print("starting pump: {}".format(pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
-            Pin(pin).off()
+            machine.Pin(pin).off()
     except Exception as e:
         sys.print_exception(e)
     finally:
@@ -123,7 +113,7 @@ def start_pump(pin):
 def stop_pump(pin):
     print("Stopping pump: {}".format(pin))
     try:
-        Pin(pin).on()
+        machine.Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
     gc.collect()

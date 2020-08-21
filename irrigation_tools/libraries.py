@@ -52,7 +52,7 @@ def get_irrigation_status():
             systems_info["pump_info"][key]["pump_status"] = "Off" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "On"
             systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
 
-    systems_info["water_level"] = "empty" if read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "good"
+    systems_info["water_level"] = water_level.get_watter_level()
     gc.collect()
     return systems_info
 

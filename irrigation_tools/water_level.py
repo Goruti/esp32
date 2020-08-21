@@ -4,7 +4,7 @@ import gc
 import sys
 import machine
 
-from irrigation_tools import smartthings_handler, libraries
+from irrigation_tools import smartthings_handler, libraries, conf
 
 
 class WaterLevel:
@@ -20,13 +20,13 @@ class WaterLevel:
 
 
 def water_level_interruption_function(pin):
-    #value = pin.value()
+    value = pin.value()
     #utime.sleep(5)
     #if pin.value() != value:
-    print("Confirmed interruption - {}: {}".format(pin, pin.value()))
+    print("Confirmed interruption - {}: {}".format(pin, value))
     smartthings = smartthings_handler.SmartThings()
     try:
-        if not pin.value():
+        if value:
             libraries.stop_all_pumps()
         #irrigation_config = manage_data.get_irrigation_config()
         #irrigation_config.update({"water_level": "empty"})
@@ -35,7 +35,7 @@ def water_level_interruption_function(pin):
         payload = {
             "type": "water_level_status",
             "body": {
-                "status": "empty" if pin.value() else "good"
+                "status": get_watter_level(value)
             }
         }
         # smartthings.notify(payload})
@@ -53,3 +53,9 @@ def water_level_interruption_handler(pin):
     utime.sleep(5)
     if pin.value() == value:
         micropython.schedule(water_level_interruption_function, pin)
+
+
+def get_watter_level(value=None):
+    if not value:
+        value = libraries.read_gpio(conf.WATER_LEVEL_SENSOR_PIN)
+    return "empty" if value else "good"

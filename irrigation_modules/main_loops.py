@@ -15,7 +15,7 @@ async def initialize_rtc(frequency_loop=3600):
                     settime()
                     print("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
                 except Exception as e:
-                    print("Failed to initialize RTC: Error: {}".format(e))
+                    sys.print_exception(e)
             else:
                 print("Device is Offline")
         except BaseException as e:
@@ -42,7 +42,6 @@ async def reading_moister(frequency_loop=300, report_freq_s=600):
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = moisture
                         if moisture > values["moisture_threshold"]:
-                            print("moisture: {}, threshold: {}".format(moisture, values["moisture_threshold"]))
                             libraries.start_irrigation(pump_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),
                                                        sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
                                                        moisture=moisture,

@@ -57,12 +57,12 @@ def get_irrigation_status():
     return systems_info
 
 
-def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=10000):
+def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=15000):
     start_pump(pump_pin)
     t = utime.ticks_ms()
     while (moisture > threshold*0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms) \
             or \
-            (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 1000):
+            (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000):
 
         moisture = read_adc(sensor_pin)
     stop_pump(pump_pin)
@@ -79,7 +79,7 @@ def read_adc(pin):
     read = 0
     for i in range(0, 5):
         read += adc.read()
-        utime.sleep_ms(1)
+        utime.sleep_ms(50)
 
     gc.collect()
     return read / 5

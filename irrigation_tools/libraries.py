@@ -4,10 +4,10 @@ import micropython
 import utime
 import gc
 import sys
-
+import webrepl
 from irrigation_tools import manage_data, conf
 from irrigation_tools.wifi import is_connected
-from irrigation_modules.water_level import WaterLevel, water_level_interruption_handler
+from irrigation_tools import water_level
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -88,12 +88,15 @@ def initialize_irrigation_app():
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
-        low_water_level = WaterLevel(pin=pir, callback=water_level_interruption_handler, falling=True)
-        high_water_level = WaterLevel(pin=pir, callback=water_level_interruption_handler, falling=False)
+        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
+        high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
 
         for key, value in conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=1)
+
+        webrepl.stop()
+        manage_data.save_webrepl_config(**{"enable": False})
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))

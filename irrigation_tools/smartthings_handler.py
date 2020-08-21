@@ -1,7 +1,7 @@
 import gc
 import utime
 from irrigation_tools.conf import ST_IP_PORT
-from irrigation_tools.libraries import datetime_to_iso
+from irrigation_tools import libraries
 import urequests as requests
 import sys
 
@@ -26,7 +26,7 @@ class SmartThings():
 
             if not attempts:
                 print("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
-                    datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
+                    libraries.datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
 
         except Exception as e:
             sys.print_exception(e)
@@ -49,7 +49,7 @@ class SmartThings():
                 failed = False
             else:
                 print("{} - 'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(
-                    datetime_to_iso(utime.localtime()), r.get("status_code"), r.get("reason")))
+                    libraries.datetime_to_iso(utime.localtime()), r.get("status_code"), r.get("reason")))
             r.close()
         finally:
             gc.collect()

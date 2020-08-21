@@ -3,12 +3,11 @@ import micropython
 import gc
 import sys
 
-from irrigation_tools.libraries import stop_all_pumps
-from irrigation_tools import smartthings_handler
+from irrigation_tools import smartthings_handler, libraries
 
 
 class WaterLevel:
-    def __init__(self, pin, callback=None, debounce_ms=1000, falling=True):
+    def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
         self.last_time_ms = 0
         self.callback = callback
         self.debounce_ms = debounce_ms
@@ -28,7 +27,7 @@ def water_level_interruption_function(pin):
     smartthings = smartthings_handler.SmartThings()
     try:
         if not pin.value():
-            stop_all_pumps()
+            libraries.stop_all_pumps()
         #irrigation_config = manage_data.get_irrigation_config()
         #irrigation_config.update({"water_level": "empty"})
         #manage_data.save_irrigation_config(**irrigation_config)

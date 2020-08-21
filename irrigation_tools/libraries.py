@@ -62,7 +62,6 @@ def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_t
     t = utime.ticks_ms()
     while moisture > threshold*0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
         moisture = read_adc(sensor_pin)
-        print("new measurement: {}".format(moisture))
     stop_pump(pump_pin)
 
 

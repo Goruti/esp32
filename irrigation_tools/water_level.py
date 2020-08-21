@@ -2,6 +2,7 @@ import utime
 import micropython
 import gc
 import sys
+import machine
 
 from irrigation_tools import smartthings_handler, libraries
 
@@ -9,7 +10,7 @@ from irrigation_tools import smartthings_handler, libraries
 class WaterLevel:
     def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
         self.callback = callback
-        self.debounce_ms = debounce_ms
+        #self.debounce_ms = debounce_ms
         self.condition = 0 if falling else 1
         pin.irq(handler=self._irq_cb, trigger=pin.IRQ_FALLING if falling else pin.IRQ_RISING)
 
@@ -18,32 +19,45 @@ class WaterLevel:
             self.callback(pin)
 
 
-def water_level_interruption_function(pin):
-    print("interruption has been triggered - {}: {}".format(pin, pin.value()))
-    smartthings = smartthings_handler.SmartThings()
-    try:
-        if not pin.value():
-            libraries.stop_all_pumps()
-        #irrigation_config = manage_data.get_irrigation_config()
-        #irrigation_config.update({"water_level": "empty"})
-        #manage_data.save_irrigation_config(**irrigation_config)
+def water_level_interruption_function(args):
+    pin = args[0]
+    state= args[1]
+    value = pin.value()
+    utime.sleep(5)
+    if pin.value() != value:
+        print("Confirmed interruption - {}: {}".format(pin, pin.value()))
+        smartthings = smartthings_handler.SmartThings()
+        try:
+            if not pin.value():
+                libraries.stop_all_pumps()
+            #irrigation_config = manage_data.get_irrigation_config()
+            #irrigation_config.update({"water_level": "empty"})
+            #manage_data.save_irrigation_config(**irrigation_config)
 
-        payload = {
-            "type": "water_level_status",
-            "body": {
-                "status": "empty" if pin.value() else "good"
+            payload = {
+                "type": "water_level_status",
+                "body": {
+                    "status": "empty" if pin.value() else "good"
+                }
             }
-        }
-        # smartthings.notify(payload})
-        print(payload)
+            # smartthings.notify(payload})
+            print(payload)
 
-    except Exception as e:
-        sys.print_exception(e)
-    finally:
+        except Exception as e:
+            sys.print_exception(e)
+        finally:
+            machine.enable_irq(state)
+            gc.collect()
+    else:
+        machine.enable_irq(state)
         gc.collect()
 
 
 def water_level_interruption_handler(pin):
-    #state = machine.disable_irq()
-    micropython.schedule(water_level_interruption_function, pin)
-    #machine.enable_irq(state)
+    state = machine.disable_irq()
+    #value = pin.value()
+    print("interruption has been triggered - {}: {}".format(pin, pin.value()))
+    #utime.sleep(5)
+    #if pin.value() == value:
+    micropython.schedule(water_level_interruption_function, (pin, state))
+        #machine.enable_irq(state)

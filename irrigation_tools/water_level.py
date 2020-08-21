@@ -8,17 +8,13 @@ from irrigation_tools import smartthings_handler, libraries
 
 class WaterLevel:
     def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
-        self.last_time_ms = 0
         self.callback = callback
         self.debounce_ms = debounce_ms
+        self.condition = 0 if falling else 1
         pin.irq(handler=self._irq_cb, trigger=pin.IRQ_FALLING if falling else pin.IRQ_RISING)
 
     def _irq_cb(self, pin):
-        t = utime.ticks_ms()
-        if abs(utime.ticks_diff(t, self.last_time_ms)) < self.debounce_ms:
-            return
-        self.last_time_ms = t
-        if self.callback:
+        if pin.value() == self.condition and self.callback:
             self.callback(pin)
 
 

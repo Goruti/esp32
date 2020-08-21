@@ -60,8 +60,9 @@ def get_irrigation_status():
 def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=10000):
     start_pump(pump_pin)
     t = utime.ticks_ms()
-    while moisture > threshold and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
+    while moisture > threshold*0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
         moisture = read_adc(sensor_pin)
+        print("new measurement: {}".format(moisture))
     stop_pump(pump_pin)
 
 
@@ -102,7 +103,7 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
-    print("{} - starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
+    print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
             machine.Pin(pin).off()
@@ -122,7 +123,7 @@ def stop_pump(pin):
 
 
 def stop_all_pumps():
-    print("{} - stopping all pumps".format(datetime_to_iso(utime.localtime())))
+    print("{} - Stopping all pumps".format(datetime_to_iso(utime.localtime())))
     try:
         for key, value in conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])

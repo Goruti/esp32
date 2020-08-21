@@ -5,9 +5,8 @@ import utime
 import gc
 import sys
 import webrepl
-from irrigation_tools import manage_data, conf
+from irrigation_tools import manage_data, conf, water_level
 from irrigation_tools.wifi import is_connected
-from irrigation_tools import water_level
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -103,7 +102,7 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
-    print("starting pump: {}".format(pin))
+    print("{} - starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
             machine.Pin(pin).off()
@@ -114,7 +113,7 @@ def start_pump(pin):
 
 
 def stop_pump(pin):
-    print("Stopping pump: {}".format(pin))
+    print("{} - Stopping pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
         machine.Pin(pin).on()
     except Exception as e:
@@ -123,7 +122,7 @@ def stop_pump(pin):
 
 
 def stop_all_pumps():
-    print("stopping all pumps")
+    print("{} - stopping all pumps".format(datetime_to_iso(utime.localtime())))
     try:
         for key, value in conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])

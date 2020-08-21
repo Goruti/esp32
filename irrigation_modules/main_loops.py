@@ -42,11 +42,12 @@ async def reading_moister(frequency_loop=300, report_freq_s=600):
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = moisture
                         if moisture > values["moisture_threshold"]:
+                            print("moisture: {}, threshold: {}".format(moisture, values["moisture_threshold"]))
                             libraries.start_irrigation(pump_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),
                                                        sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
                                                        moisture=moisture,
                                                        threshold=values["moisture_threshold"],
-                                                       max_irrigation_time_s=10)
+                                                       max_irrigation_time_ms=10)
 
                     if utime.ticks_diff(utime.time(), t) >= report_freq_s:
                         t = utime.time()

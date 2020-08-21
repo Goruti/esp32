@@ -107,6 +107,9 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
+    if water_level.get_watter_level() == "empty":
+        gc.collect()
+        return
     print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):

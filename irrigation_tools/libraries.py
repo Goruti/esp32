@@ -76,13 +76,14 @@ def read_gpio(pin):
 def read_adc(pin):
     adc = machine.ADC(machine.Pin(pin))  # create ADC object on ADC pin
     adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
+    adc.width(machine.ADC.WIDTH_12BIT)
     read = 0
     for i in range(0, 5):
         read += adc.read()
         utime.sleep_ms(50)
 
     gc.collect()
-    return read / 5
+    return int(read / 5)
 
 
 def initialize_irrigation_app():

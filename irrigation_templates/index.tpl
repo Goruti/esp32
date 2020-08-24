@@ -55,8 +55,16 @@
 
         for (var i = 1; i <= total_pump; i++) {
             myHTML += `<h3>Pump #` + i
-            myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;">Start</button>`;
-            myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color: red;font-weight: bold;">Stop</button>`;
+
+            if ("{{ pump_info[i]["pump_status"] }}" === "On") {
+                myHTML += `<button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;margin-left:3em;opacity:0.6">Start</button>`;
+                myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;font-weight:bold;margin-left:1em;">Stop</button>`;
+            } else {
+                myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;margin-left:3em;">Start</button>`;
+                myHTML += `<button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;font-weight:bold;margin-left:1em;opacity:0.6;">Stop</button>`;
+            }
+            myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;margin-left:3em;">Start</button>`;
+            myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;font-weight:bold;margin-left:1em;">Stop</button>`;
             myHTML += `</h3>`
             myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `; Status: ` + pump_info[i]["pump_status"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;
@@ -71,7 +79,7 @@
 
     function onStartButton(pump) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {
-            alert("Water level is to low. Please refill the water tank")
+            alert("Water level is to low. Please refill the water tank before starting the pump")
         } else {
             return `"window.location = '/pump_action?action=ON&pump=` + pump + `';"`
         }

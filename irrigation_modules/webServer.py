@@ -206,19 +206,36 @@ def save_irrigation_config(request, response):
 
 
 @webapp.route('/pump_action', method='GET')
-def start_pump(request, response):
+def pump_action(request, response):
     gc.collect()
-    request.parse_qs()
-    pump = request.form["pump"]
-    action = request.form["action"]
+    try:
+        request.parse_qs()
+        pump = request.form["pump"]
+        action = request.form["action"]
 
-    if action == "ON":
-        libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
-    else:
-        libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+        if action == "ON":
+            libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+        else:
+            libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
 
-    headers = {"Location": "/"}
-    yield from picoweb.start_response(response, status="303", headers=headers)
+        headers = {"Location": "/"}
+        gc.collect()
+        yield from picoweb.start_response(response, status="303", headers=headers)
+
+    except Exception as e:
+        sys.print_exception(e)
+        html_page = '''
+                    <html>
+                        <head><title>Irrigation System Home Page</title></head>
+                       <body>
+                           <p style="color: red;">Coult not start the pump. Check the logs on the device.</p><br>
+                            <p>Error: "{}"</p><br>
+                            <button onclick="window.location.href = '/';">Go Home Page</button>
+                       </body>
+                   </html>'''.format(e)
+        gc.collect()
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
 
 
 @webapp.route('/configWebRepl', method='GET')

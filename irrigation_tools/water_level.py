@@ -8,7 +8,7 @@ from irrigation_tools import smartthings_handler, libraries, conf
 
 
 class WaterLevel:
-    def __init__(self, pin, callback=None, debounce_ms=1000, falling=True):
+    def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
         self.last_time_ms = 0
         self.callback = callback
         self.debounce_ms = debounce_ms
@@ -16,7 +16,8 @@ class WaterLevel:
 
     def _irq_cb(self, pin):
         t = utime.ticks_ms()
-        if abs(utime.ticks_diff(t, self.last_time_ms)) < self.debounce_ms:
+        diff = t - self.last_time_ms
+        if abs(diff) < self.debounce_ms:
             return
         self.last_time_ms = t
         if self.callback:
@@ -52,11 +53,11 @@ def water_level_interruption_function(pin):
 
 
 def water_level_interruption_handler(pin):
-    value = pin.value()
+    #value = pin.value()
     print("interruption has been triggered - {}: {}".format(pin, pin.value()))
-    utime.sleep(5)
-    if pin.value() == value:
-        micropython.schedule(water_level_interruption_function, pin)
+    #utime.sleep(5)
+    #if pin.value() == value:
+    micropython.schedule(water_level_interruption_function, pin)
 
 
 def get_watter_level(value=None):

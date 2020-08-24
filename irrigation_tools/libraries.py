@@ -92,12 +92,12 @@ def initialize_irrigation_app():
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
         #pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)
-        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
-        high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
+        #high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
+        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
 
         for key, value in conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
-            machine.Pin(value["pin_pump"], machine.Pin.OUT, value=1)
+            machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
         webrepl.stop()
         manage_data.save_webrepl_config(**{"enable": False})
@@ -108,12 +108,13 @@ def initialize_irrigation_app():
 
 def start_pump(pin):
     if water_level.get_watter_level() == "empty":
+        print("{} - cannot start pump {} since tank is empty".format(datetime_to_iso(utime.localtime()), pin))
         gc.collect()
         return
     print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
         if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
-            machine.Pin(pin).off()
+            machine.Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
     finally:
@@ -123,7 +124,7 @@ def start_pump(pin):
 def stop_pump(pin):
     print("{} - Stopping pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
-        machine.Pin(pin).on()
+        machine.Pin(pin).off()
     except Exception as e:
         sys.print_exception(e)
     gc.collect()

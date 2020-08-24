@@ -107,14 +107,13 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
-    if water_level.get_watter_level() == "empty":
-        print("{} - cannot start pump {} since tank is empty".format(datetime_to_iso(utime.localtime()), pin))
-        gc.collect()
-        return
-    print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
-        if read_gpio(conf.WATER_LEVEL_SENSOR_PIN):
-            machine.Pin(pin).on()
+        if water_level.get_watter_level() == "empty":
+            print("{} - cannot start pump {} since tank is empty".format(datetime_to_iso(utime.localtime()), pin))
+            gc.collect()
+            return
+        print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
+        machine.Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
     finally:
@@ -122,8 +121,8 @@ def start_pump(pin):
 
 
 def stop_pump(pin):
-    print("{} - Stopping pump: {}".format(datetime_to_iso(utime.localtime()), pin))
     try:
+        print("{} - Stopping pump: {}".format(datetime_to_iso(utime.localtime()), pin))
         machine.Pin(pin).off()
     except Exception as e:
         sys.print_exception(e)
@@ -131,8 +130,8 @@ def stop_pump(pin):
 
 
 def stop_all_pumps():
-    print("{} - Stopping all pumps".format(datetime_to_iso(utime.localtime())))
     try:
+        print("{} - Stopping all pumps".format(datetime_to_iso(utime.localtime())))
         for key, value in conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])
     except Exception as e:

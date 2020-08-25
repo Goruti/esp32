@@ -15,6 +15,8 @@
     <h2>Irrigation System Configuration</h2>
         <div id="irrigation_configuration">
         </div>
+    <h2>Restart the System</h2>
+     <button onclick="window.location = '/restartSystem';">Restart </button>
     </body>
 </html>
 
@@ -22,11 +24,11 @@
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
     if ("{{ data["WebRepl"]["enable"] }}" === "True") {
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold; opacity:0.6">Enable </button>`
-        myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold;">Disable </button>`
+        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
+        myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="color: red;margin-left:1em">Disable </button>`
     } else {
-        myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;font-weight: bold;">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="color: red;font-weight: bold; opacity:0.6">Disable </button>`
+        myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="color: green;">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="color: red;margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 
@@ -55,8 +57,15 @@
 
         for (var i = 1; i <= total_pump; i++) {
             myHTML += `<h3>Pump #` + i
-            myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;margin-left:3em;">Start</button>`;
-            myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;font-weight:bold;margin-left:1em;">Stop</button>`;
+            if ( pump_info[i]["pump_status"] === "On") {
+                myHTML += `<button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;margin-left:3em; opacity:0.6">Start</button>`;
+                myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;font-weight:bold;margin-left:1em;;border-width: thin">Stop</button>`;
+            }
+            else {
+                myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="color: green;font-weight: bold;margin-left:3em;;border-width: thin">Start</button>`;
+                myHTML += `<button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="color:red;margin-left:1em; opacity:0.6">Stop</button>`;
+
+            }
             myHTML += `</h3>`
             myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `; Status: ` + pump_info[i]["pump_status"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;

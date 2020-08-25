@@ -187,21 +187,38 @@ def save_irrigation_config(request, response):
         yield from response.awrite(str(html_page))
 
     else:
+        #html_page = '''
+        #        <html>
+        #            <head><title>Irrigation System Home Page</title></head>
+        #            <body>
+        #                <p>Your system has been configured. In order to apply these changes, your device will be restart it</p>
+        #                <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
+        #            </body>
+        #        </html>
+        #        '''.format(wifi.is_connected())
         html_page = '''
-                <html>
-                    <head><title>Irrigation System Home Page</title></head>
-                    <body>
-                        <p>Your system has been configured. In order to apply these changes, your device will be restart it</p>
-                        <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
-                    </body>
-                </html>
-                '''.format(wifi.is_connected())
-        #headers = {"Location": "/"}
-        #yield from picoweb.start_response(response, status="303", headers=headers)
-        gc.collect()
+                   <html>
+                       <p>Configuration was saved successfully.</p>
+                       <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
+                        <script type="text/javascript">
+                        function countdown() {
+                            var i = document.getElementById('counter');
+                            if (parseInt(i.innerHTML)<=0) {
+                                window.location.href = '/';
+                            }
+                            if (parseInt(i.innerHTML)!=0) {
+                                i.innerHTML = parseInt(i.innerHTML)-1;
+                            }
+                        }
+                        setInterval(function(){ countdown(); },1000);
+                        </script>
+                   </html>
+                '''
+
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
-        utime.sleep(2)
+        utime.sleep(1)
+        gc.collect()
         machine.reset()
 
 
@@ -228,7 +245,7 @@ def pump_action(request, response):
                     <html>
                         <head><title>Irrigation System Home Page</title></head>
                        <body>
-                           <p style="color: red;">Coult not start the pump. Check the logs on the device.</p><br>
+                           <p style="color: red;">Could not start the pump. Check the logs on the device.</p><br>
                             <p>Error: "{}"</p><br>
                             <button onclick="window.location.href = '/';">Go Home Page</button>
                        </body>
@@ -242,7 +259,6 @@ def pump_action(request, response):
 def config_web_repl(request, response):
     import webrepl
     gc.collect()
-    gc.collect()
     request.parse_qs()
     action = request.form["action"]
 
@@ -255,3 +271,46 @@ def config_web_repl(request, response):
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)
+
+
+@webapp.route('/restartSystem', method='GET')
+def restart_system(request, response):
+    gc.collect()
+    try:
+        html_page = '''
+           <html>
+               <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
+                <script type="text/javascript">
+                function countdown() {
+                    var i = document.getElementById('counter');
+                    if (parseInt(i.innerHTML)<=0) {
+                        window.location.href = '/';
+                    }
+                    if (parseInt(i.innerHTML)!=0) {
+                        i.innerHTML = parseInt(i.innerHTML)-1;
+                    }
+                }
+                setInterval(function(){ countdown(); },1000);
+                </script>
+           </html>
+        '''
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
+        utime.sleep(1)
+        gc.collect()
+        machine.reset()
+
+    except Exception as e:
+        sys.print_exception(e)
+        html_page = '''
+                    <html>
+                        <head><title>Irrigation System Home Page</title></head>
+                       <body>
+                           <p style="color: red;">Could not restart the system. Check the logs on the device.</p><br>
+                            <p>Error: "{}"</p><br>
+                            <button onclick="window.location.href = '/';">Go Home Page</button>
+                       </body>
+                   </html>'''.format(e)
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
+        gc.collect()

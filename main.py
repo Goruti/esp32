@@ -21,6 +21,7 @@ for file in os.listdir('irrigation_templates'):
 gc.collect()
 
 try:
+    import uftp
     main_app()
 except Exception as e:
     sys.print_exception(e)

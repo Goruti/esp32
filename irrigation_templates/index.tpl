@@ -2,11 +2,11 @@
 
 <html>
     <style>
-        .choice_A{ background-color: #FFE800;font-weight: bold }
-        .choice_B{ background-color: #0f81f1;font-weight: bold }
-        .choice_C{ background-color: white;font-weight: bold }
-        .choice_D{ background-color: #f44336;font-weight: bold }
-        .choice_E{ background-color: #7f7f7f;font-weight: bold }
+        .choice_A{ background-color: #FFE800;font-weight: bold; padding: 3.5px }
+        .choice_B{ background-color: #0f81f1;font-weight: bold; padding: 3.5px }
+        .choice_C{ background-color: white;font-weight: bold; padding: 3.5px }
+        .choice_D{ background-color: #f44336;font-weight: bold; padding: 3.5px }
+        .choice_E{ background-color: #7f7f7f;font-weight: bold; padding: 3.5px }
     </style>
     <head>
         <title>Irrigation System Home Page</title>
@@ -74,7 +74,8 @@
 
             }
             myHTML += `</h3>`
-            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</spam>; Status: ` + pump_info[i]["pump_status"] + `</p>`;
+            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</spam></p>`
+            myHTML += `<p style="margin-left: 40px"> Status: ` + pump_info[i]["pump_status"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;
         }
         myHTML += `<button onclick="window.location = '/irrigation_config';">Reconfigure Irrigation System</button>`;

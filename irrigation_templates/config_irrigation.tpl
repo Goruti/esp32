@@ -2,10 +2,10 @@
 <style>
 .choice{ background-color: white;font-weight: normal }
 .choice_A{ background-color: #FFE800;font-weight: bold }
-.choice_B{ background-color: #1E90FF;font-weight: bold }
+.choice_B{ background-color: #0f81f1;font-weight: bold }
 .choice_C{ background-color: white;font-weight: bold }
-.choice_D{ background-color: #DC143C;font-weight: bold }
-.choice_E{ background-color: #C0C0C0;font-weight: bold }
+.choice_D{ background-color: #f44336;font-weight: bold }
+.choice_E{ background-color: #7f7f7f;font-weight: bold }
 .selected_choice{ background-color: white;font-weight: bold}
 </style>
     <head>

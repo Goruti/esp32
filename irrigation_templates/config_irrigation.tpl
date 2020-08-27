@@ -1,12 +1,11 @@
 <html>
 <style>
 .choice{ background-color: white;font-weight: normal }
-.choice_A{ background-color: #009688;font-weight: bold }
-.choice_B{ background-color: #FFEB3B;font-weight: bold }
-.choice_C{ background-color: #f44336;font-weight: bold }
-.choice_D{ background-color: #9c27b0;font-weight: bold }
-.choice_E{ background-color: #03a9f4;font-weight: bold }
-.choice_F{ background-color: #607d8b;font-weight: bold }
+.choice_A{ background-color: #FFE800;font-weight: bold }
+.choice_B{ background-color: #1E90FF;font-weight: bold }
+.choice_C{ background-color: white;font-weight: bold }
+.choice_D{ background-color: #DC143C;font-weight: bold }
+.choice_E{ background-color: #C0C0C0;font-weight: bold }
 .selected_choice{ background-color: white;font-weight: bold}
 </style>
     <head>
@@ -40,7 +39,6 @@
       myHTML += '<option value=C class="choice_C">C</option>'
       myHTML += '<option value=D class="choice_D">D</option>'
       myHTML += '<option value=E class="choice_E">E</option>'
-      myHTML += '<option value=F class="choice_F">F</option>'
       myHTML += '</select><br><br>';
       myHTML += 'Threshold:  <input type="number" value="400" style="font-weight: bold" name="moisture_threshold_' + i + '" id="moisture_threshold_' + i + '" required><br><br>';
     }

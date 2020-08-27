@@ -1,6 +1,15 @@
 {% args data %}
 
 <html>
+    <style>
+    .choice{ background-color: white;font-weight: normal }
+    .A{ background-color: #FFE800;font-weight: bold }
+    .B{ background-color: #1E90FF;font-weight: bold }
+    .C{ background-color: white;font-weight: bold }
+    .D{ background-color: #DC143C;font-weight: bold }
+    .E{ background-color: #C0C0C0;font-weight: bold }
+    .selected_choice{ background-color: white;font-weight: bold}
+    </style>
     <head>
         <title>Irrigation System Home Page</title>
     </head>
@@ -67,7 +76,7 @@
 
             }
             myHTML += `</h3>`
-            myHTML += `<p style="margin-left: 40px">Connected to Port: ` + pump_info[i]["connected_to_port"] + `; Status: ` + pump_info[i]["pump_status"] + `</p>`;
+            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="A">` + pump_info[i]["connected_to_port"] + `</>spam; Status: ` + pump_info[i]["pump_status"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;
         }
         myHTML += `<button onclick="window.location = '/irrigation_config';">Reconfigure Irrigation System</button>`;

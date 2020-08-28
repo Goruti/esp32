@@ -96,3 +96,10 @@ def wifi_connect(network_config, timeout_s=10):
             raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
         machine.idle()
     print("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
+
+
+def wifi_disconnect():
+    gc.collect()
+    wlan = network.WLAN(network.STA_IF)
+    if wlan.active():
+        wlan.disconnect()

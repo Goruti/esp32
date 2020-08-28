@@ -208,6 +208,7 @@ def save_irrigation_config(request, response):
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
         utime.sleep(1)
+        wifi.wifi_disconnect()
         gc.collect()
         machine.reset()
 
@@ -287,6 +288,7 @@ def restart_system(request, response):
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
         utime.sleep(1)
+        wifi.wifi_disconnect()
         gc.collect()
         machine.reset()
 

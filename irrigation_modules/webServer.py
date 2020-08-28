@@ -120,22 +120,12 @@ def save_wifi_config(request, response):
                 '''.format(net_config["ssid"])
     else:
         manage_data.save_network(**net_config)
-        ip = wifi.is_connected()
-        html_page = '''
-        <html>
-            <head><title>Irrigation System Home Page</title></head>
-            <body>
-                <p>Your are now connected to "{}" Wifi with ip: {}</p>
-                <p><b>Your device will be reset it</b></p>
-                <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
-            </body>
-        </html>
-        '''.format(net_config['ssid'], ip, ip)
+        data = [net_config['ssid'], wifi.is_connected()]
 
     finally:
         gc.collect()
         yield from picoweb.start_response(response)
-        yield from response.awrite(str(html_page))
+        yield from webapp.render_template(response, "config_wifi_confirmation.tpl", (data,))
         utime.sleep(2)
         machine.reset()
 
@@ -197,23 +187,23 @@ def save_irrigation_config(request, response):
         #        </html>
         #        '''.format(wifi.is_connected())
         html_page = '''
-                   <html>
-                       <p>Configuration was saved successfully.</p>
-                       <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
-                        <script type="text/javascript">
-                        function countdown() {
-                            var i = document.getElementById('counter');
-                            if (parseInt(i.innerHTML)<=0) {
-                                window.location.href = '/';
-                            }
-                            if (parseInt(i.innerHTML)!=0) {
-                                i.innerHTML = parseInt(i.innerHTML)-1;
-                            }
-                        }
-                        setInterval(function(){ countdown(); },1000);
-                        </script>
-                   </html>
-                '''
+           <html>
+               <p>Configuration was saved successfully.</p>
+               <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
+                <script type="text/javascript">
+                function countdown() {
+                    var i = document.getElementById('counter');
+                    if (parseInt(i.innerHTML)<=0) {
+                        window.location.href = '/';
+                    }
+                    if (parseInt(i.innerHTML)!=0) {
+                        i.innerHTML = parseInt(i.innerHTML)-1;
+                    }
+                }
+                setInterval(function(){ countdown(); },1000);
+                </script>
+           </html>
+        '''
 
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))

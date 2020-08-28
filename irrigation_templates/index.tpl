@@ -74,7 +74,7 @@
 
             }
             myHTML += `</h3>`
-            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</spam></p>`
+            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</spam></p>`;
             myHTML += `<p style="margin-left: 40px"> Status: ` + pump_info[i]["pump_status"] + `</p>`;
             myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Moisture Value: ` + pump_info[i]["moisture"] + `</p>`;
         }

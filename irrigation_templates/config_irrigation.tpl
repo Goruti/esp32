@@ -33,12 +33,12 @@
     for (var i = 1; i <= total_pump; i++) {
       myHTML += '<h3>Pump #' + i + '</h3>'
       myHTML += 'Connected to Port:  <select input type="text" onchange="this.className=this.options[this.selectedIndex].className" name="connected_to_port_' + i + '" id="connected_to_port_' + i + '" required>';
-      myHTML += '<option value="" class="choice" selected="selected">--Please Select --</option>'
-      myHTML += '<option value=A class="choice_A">A</option>'
-      myHTML += '<option value=B class="choice_B">B</option>'
-      myHTML += '<option value=C class="choice_C">C</option>'
-      myHTML += '<option value=D class="choice_D">D</option>'
-      myHTML += '<option value=E class="choice_E">E</option>'
+      myHTML += '<option value="" class="choice" selected="selected">--Select Port--</option>'
+      myHTML += '<option value="A" class="choice_A">&#x1F7E8; A</option>'
+      myHTML += '<option value="B" class="choice_B">&#x1F7E6; B</option>'
+      myHTML += '<option value="C" class="choice_C">&#x2B1C; C</option>'
+      myHTML += '<option value="D" class="choice_D">&#x1F7E5; D</option>'
+      myHTML += '<option value="E" class="choice_E">&#x2B1B; E</option>'
       myHTML += '</select><br><br>';
       myHTML += 'Threshold:  <input type="number" value="400" style="font-weight: bold" name="moisture_threshold_' + i + '" id="moisture_threshold_' + i + '" required><br><br>';
     }

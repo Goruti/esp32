@@ -1,11 +1,11 @@
 <html>
 <style>
 .choice{ background-color: white;font-weight: normal }
-.choice_A{ background-color: #FFE800;font-weight: bold }
-.choice_B{ background-color: #0f81f1;font-weight: bold }
-.choice_C{ background-color: white;font-weight: bold }
-.choice_D{ background-color: #f44336;font-weight: bold }
-.choice_E{ background-color: #7f7f7f;font-weight: bold }
+.choice_A{ background-color:#FFE800; font-weight:bold; flex-wrap:wrap-reverse; padding-top:4px; }
+.choice_B{ background-color:#0f81f1; font-weight:bold; flex-wrap:wrap-reverse; padding-top:4px; }
+.choice_C{ background-colo: white; font-weight:bold; flex-wrap:wrap-reverse; padding-top:4px; }
+.choice_D{ background-color:#f44336; font-weight:bold; flex-wrap:wrap-reverse; padding-top:4px; }
+.choice_E{ background-color:#7f7f7f; font-weight:bold; flex-wrap:wrap-reverse; padding-top:4px; }
 .selected_choice{ background-color: white;font-weight: bold}
 </style>
     <head>
@@ -40,7 +40,7 @@
       myHTML += '<option value="D" class="choice_D">&#x1F7E5; D</option>'
       myHTML += '<option value="E" class="choice_E">&#x2B1B; E</option>'
       myHTML += '</select><br><br>';
-      myHTML += 'Threshold:  <input type="number" value="400" style="font-weight: bold" name="moisture_threshold_' + i + '" id="moisture_threshold_' + i + '" required><br><br>';
+      myHTML += 'Threshold:  <input type="number" value="700" style="font-weight: bold" name="moisture_threshold_' + i + '" id="moisture_threshold_' + i + '" required><br><br>';
     }
     myHTML += `<input type="submit" value="Save" onclick="validateForm()">`
     myHTML += `<input type="button" name="Cancel" value="Cancel" onClick="window.location='/';">`

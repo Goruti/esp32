@@ -140,6 +140,23 @@ def stop_all_pumps():
     gc.collect()
 
 
+def test_irrigation_system():
+    try:
+        systems_info = get_irrigation_configuration()
+        if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
+            for key, values in systems_info["pump_info"].items():
+                print("testing port {}").format(values["connected_to_port"])
+                moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                print("moisture_port_{}: {}").format(values["connected_to_port"], moisture)
+                start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+                utime.sleep(4)
+                stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+    except BaseException as e:
+        sys.print_exception(e)
+    finally:
+        gc.collect()
+
+
 def datetime_to_iso(time):
     return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])
 

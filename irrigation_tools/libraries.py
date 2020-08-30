@@ -99,8 +99,10 @@ def initialize_irrigation_app():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
-        webrepl.stop()
-        manage_data.save_webrepl_config(**{"enable": False})
+        #webrepl.stop()
+        #manage_data.save_webrepl_config(**{"enable": False})
+        webrepl.start(password=conf.WEBREPL_PWD)
+        manage_data.save_webrepl_config(**{"enable": True})
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
@@ -145,9 +147,9 @@ def test_irrigation_system():
         systems_info = get_irrigation_configuration()
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
             for key, values in systems_info["pump_info"].items():
-                print("testing port {}").format(values["connected_to_port"])
+                print("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
-                print("moisture_port_{}: {}").format(values["connected_to_port"], moisture)
+                print("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
                 start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
                 utime.sleep(4)
                 stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))

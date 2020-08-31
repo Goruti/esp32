@@ -4,11 +4,18 @@
     <style>
         .row { display: flex; }
         .column { flex: 50%; text-align: center;}
-        .choice_A { background-color:#FFE800; font-weight:bold; padding:2.5px; border:solid; border-color:black; border-width:thin; }
-        .choice_B { background-color:#0f81f1; font-weight:bold; padding:2.5px; border:solid; border-color:black; border-width:thin; }
-        .choice_C { background-color:white; font-weight:bold; padding:2.5px; border:solid; border-color:black; border-width:thin; }
-        .choice_D { background-color:#f44336; font-weight:bold; padding:2.5px; border:solid; border-color:black; border-width:thin; }
-        .choice_E { background-color:#7f7f7f; font-weight:bold; padding:2.5px; border:solid; border-color:black; border-width:thin; }
+        .choice_A { background-color:#FFE800; border-color:#000000;text-align:center;vertical-align:middle}
+        .choice_B { background-color:#0f81f1; border-color:#000000;text-align:center;vertical-align:middle}
+        .choice_C { background-color:white; border-color:#000000;text-align:center;vertical-align:middle }
+        .choice_D { background-color:#f44336; border-color:#000000;text-align:center;vertical-align:middle }
+        .choice_E { background-color:#7f7f7f; border-color:#000000;text-align:center;vertical-align:middle }
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg .tg-18eh{border-color:#000000;font-weight:bold;text-align:center;vertical-align:middle}
+        .tg .tg-xwyw{border-color:#000000;text-align:center;vertical-align:middle}
     </style>
     <head>
         <title>Irrigation System Home Page</title>
@@ -73,25 +80,47 @@
         var total_pump = {{ data["irrigation_config"]["total_pumps"] }}
         var pump_info = {{ data["irrigation_config"]["pump_info"] }}
 
-        myHTML += `<p style="margin-left: 40px">Number of Pumps to control: <b>` + total_pump + `</b></p>`;
+        myHTML += `<p style="margin-left: 40px">Number of Plant(s) to Irrigate: <b>` + total_pump + `</b></p>`;
         myHTML += `<h2> Pumps Configuration </h2>`
 
+        myHTML +=  `<table class="tg">
+                        <thead>
+                          <tr>
+                            <th class="tg-18eh" rowspan="2">Pant #</th>
+                            <th class="tg-18eh" rowspan="2">Connected to Port</th>
+                            <th class="tg-18eh" rowspan="2">Pump Status</th>
+                            <th class="tg-18eh" colspan="2">Moisture</th>
+                            <th class="tg-18eh" colspan="2" rowspan="2">Action</th>
+                          </tr>
+                          <tr>
+                            <td class="tg-18eh">Threshold</td>
+                            <td class="tg-18eh">Value</td>
+                          </tr>
+                        </thead>
+                    <tbody>`
+
         for (var i = 1; i <= total_pump; i++) {
-            myHTML += `<h3>Plant #` + i
+            myHTML += `<tr>`
+
+            myHTML += `<td class="tg-xwyw">#` + i + `</td>`
+            myHTML += `<td class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</td>
+            myHTML += `<td class="tg-xwyw">` + pump_info[i]["pump_status"] + `</td>`
+            myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture_threshold"] + `</td>`
+            myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture"] + `</td>`
+
             if ( pump_info[i]["pump_status"] === "On") {
-                myHTML += `<button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button>`;
-                myHTML += `<button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="font-weight:bold;margin-left:1em;;border-width: thin">Stop</button>`;
+                myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="font-weight:bold;margin-left:1em;;border-width: thin">Stop</button></td>`;
             }
             else {
-                myHTML += `<button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="ont-weight: bold;margin-left:3em;;border-width: thin">Start</button>`;
-                myHTML += `<button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; opacity:0.6">Stop</button>`;
+                myHTML += `<td class="tg-xwyw"><button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="ont-weight: bold;margin-left:3em;;border-width: thin">Start</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; opacity:0.6">Stop</button></td>`;
             }
-            myHTML += `</h3>`
-            myHTML += `<p style="margin-left: 40px">Connected to Port: <spam class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</spam></p>`;
-            myHTML += `<p style="margin-left: 40px">Pump Status: ` + pump_info[i]["pump_status"] + `</p>`;
-            myHTML += `<p style="margin-left: 40px">Moisture</p>`;
-            myHTML += `<p style="margin-left: 40px">Threshold: ` + pump_info[i]["moisture_threshold"] + `; Value: ` + pump_info[i]["moisture"] + `</p>`;
+            myHTML += `<tr>`
         }
+        myHTML += `</tbody>`
+        myHTML += `</table>`
+
         myHTML += `<button onclick="window.location = '/irrigation_config';">Reconfigure Irrigation System</button>`;
 
     } else {

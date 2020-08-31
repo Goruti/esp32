@@ -14,7 +14,7 @@
     <body>
     <h1>Irrigation System Configuration</h1>
       <form id="irrigationForm" action="/irrigation_config_2" method="post">
-      Number of Pumps to control:  <input type="number" name="total_pumps" placeholder="Enter Value" style="font-weight: bold;width: 7.5em;" min="1" max="5" oninput="if(value>5)value=5;if(value<1)value=1" id="total_pumps" onchange="totalPumpsFunction()"><br><br>
+      Number of Plant(s) to Irrigate:  <input type="number" name="total_pumps" placeholder="Enter Value" style="font-weight: bold;width: 7.5em;" min="1" max="5" oninput="if(value>5)value=5;if(value<1)value=1" id="total_pumps" onchange="totalPumpsFunction()"><br><br>
         <p id="inject_pumps_config">
             <input type="button" name="Cancel" value="Cancel" onClick="window.location='/';"/>
         </p>

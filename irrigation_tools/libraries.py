@@ -5,6 +5,8 @@ import utime
 import gc
 import sys
 import webrepl
+from collections import OrderedDict
+
 from irrigation_tools import manage_data, conf, water_level
 from irrigation_tools.wifi import is_connected
 
@@ -99,8 +101,11 @@ def initialize_irrigation_app():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
+        #  TODO (uncomment the following line)
         #webrepl.stop()
         #manage_data.save_webrepl_config(**{"enable": False})
+
+        #  TODO (Comment the following line)
         webrepl.start(password=conf.WEBREPL_PWD)
         manage_data.save_webrepl_config(**{"enable": True})
 
@@ -145,7 +150,9 @@ def stop_all_pumps():
 def test_irrigation_system():
     try:
         systems_info = get_irrigation_configuration()
+
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
+            systems_info["pump_info"] = OrderedDict(sorted(systems_info["pump_info"].items(), key=lambda t: t[0]))
             for key, values in systems_info["pump_info"].items():
                 print("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))

@@ -92,6 +92,7 @@ def read_adc(pin):
     return (int(read / 5))*(3.3/4096)
 
 
+
 def initialize_irrigation_app():
     print("Initializing Ports")
     try:

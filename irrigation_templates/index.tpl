@@ -26,7 +26,7 @@
     <hr>
     <div class="row">
         <div class="column">
-            <h2 style="text-align: left;margin-left: 40px;">Network Configuration</h2>
+            <h2>Network Configuration</h2>
             <div id="network_configuration"></div>
         </div>
         <div class="column">

@@ -177,33 +177,33 @@ def save_irrigation_config(request, response):
         yield from response.awrite(str(html_page))
 
     else:
-        #html_page = '''
-        #        <html>
-        #            <head><title>Irrigation System Home Page</title></head>
-        #            <body>
-        #                <p>Your system has been configured. In order to apply these changes, your device will be restart it</p>
-        #                <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
-        #            </body>
-        #        </html>
-        #        '''.format(wifi.is_connected())
         html_page = '''
-           <html>
-               <p>Configuration was saved successfully.</p>
-               <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
-                <script type="text/javascript">
-                function countdown() {
-                    var i = document.getElementById('counter');
-                    if (parseInt(i.innerHTML)<=0) {
-                        window.location.href = '/';
-                    }
-                    if (parseInt(i.innerHTML)!=0) {
-                        i.innerHTML = parseInt(i.innerHTML)-1;
-                    }
-                }
-                setInterval(function(){ countdown(); },1000);
-                </script>
-           </html>
-        '''
+                <html>
+                    <head><title>Irrigation System Home Page</title></head>
+                    <body>
+                        <p>Your system has been configured. In order to apply these changes, your device will be restarted</p>
+                        <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
+                    </body>
+                </html>
+                '''.format(wifi.is_connected())
+        #html_page = '''
+        #   <html>
+        #       <p>Configuration was saved successfully.</p>
+        #       <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
+        #        <script type="text/javascript">
+        #        function countdown() {
+        #            var i = document.getElementById('counter');
+        #            if (parseInt(i.innerHTML)<=0) {
+        #                window.location.href = '/';
+        #            }
+        #            if (parseInt(i.innerHTML)!=0) {
+        #                i.innerHTML = parseInt(i.innerHTML)-1;
+        #            }
+        #        }
+        #        setInterval(function(){ countdown(); },1000);
+        #        </script>
+        #   </html>
+        #'''
 
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
@@ -271,21 +271,31 @@ def restart_system(request, response):
         print("restarting the system")
         html_page = '''
            <html>
-               <p>Your System is restarting. You will be redirected to the home page in <span id="counter">20</span> second(s).</p>
-                <script type="text/javascript">
-                function countdown() {
-                    var i = document.getElementById('counter');
-                    if (parseInt(i.innerHTML)<=0) {
-                        window.location.href = '/';
-                    }
-                    if (parseInt(i.innerHTML)!=0) {
-                        i.innerHTML = parseInt(i.innerHTML)-1;
-                    }
-                }
-                setInterval(function(){ countdown(); },1000);
-                </script>
+               <head><title>Irrigation System Home Page</title></head>
+               <body>
+                   <p>Your system has been configured. In order to apply these changes, your device will be restarted</p>
+                   <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
+               </body>
            </html>
-        '''
+       '''.format(wifi.is_connected())
+
+        #html_page = '''
+        #   <html>
+        #       <p>Your System is restarting. You will be redirected to the home page in <span id="counter">20</span> second(s).</p>
+        #        <script type="text/javascript">
+        #        function countdown() {
+        #            var i = document.getElementById('counter');
+        #            if (parseInt(i.innerHTML)<=0) {
+        #                window.location.href = '/';
+        #            }
+        #            if (parseInt(i.innerHTML)!=0) {
+        #                i.innerHTML = parseInt(i.innerHTML)-1;
+        #            }
+        #        }
+        #        setInterval(function(){ countdown(); },1000);
+        #        </script>
+        #   </html>
+        #'''
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
         utime.sleep(1)

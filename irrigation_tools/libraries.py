@@ -87,11 +87,9 @@ def read_adc(pin):
     #    read += adc.read()
     #    utime.sleep_ms(5)
 
-    #gc.collect()
+    gc.collect()
     #return int(read / 8)
     return adc.read()
-    #return (int(read / 5))*(3.3/4096)
-
 
 
 def initialize_irrigation_app():

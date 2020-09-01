@@ -271,7 +271,7 @@ def restart_system(request, response):
         print("restarting the system")
         html_page = '''
            <html>
-               <p>Your System is restarting. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
+               <p>Your System is restarting. You will be redirected to the home page in <span id="counter">20</span> second(s).</p>
                 <script type="text/javascript">
                 function countdown() {
                     var i = document.getElementById('counter');

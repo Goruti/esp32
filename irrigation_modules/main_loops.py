@@ -6,7 +6,7 @@ import sys
 from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
 
 
-async def initialize_rtc(frequency_loop=3600):
+def initialize_rtc(frequency_loop=3600):
     while True:
         try:
             if wifi.is_connected():
@@ -22,10 +22,10 @@ async def initialize_rtc(frequency_loop=3600):
             sys.print_exception(e)
         finally:
             gc.collect()
-            await asyncio.sleep(frequency_loop)
+            utime.sleep(frequency_loop)
 
 
-async def reading_moister(frequency_loop=300, report_freq_s=600):
+def reading_moister(frequency_loop=300, report_freq_s=600):
     try:
         smartthings = smartthings_handler.SmartThings()
         systems_info = libraries.get_irrigation_configuration()
@@ -62,7 +62,7 @@ async def reading_moister(frequency_loop=300, report_freq_s=600):
                     sys.print_exception(e)
                 finally:
                     gc.collect()
-                    await asyncio.sleep(frequency_loop)
+                    utime.sleep(frequency_loop)
 
 
 #async def reading_water_level(frequency_loop=3600):

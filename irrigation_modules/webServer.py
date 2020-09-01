@@ -222,7 +222,7 @@ def pump_action(request, response):
         action = request.form["action"]
 
         if action == "ON":
-            libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            started = libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
         else:
             libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
 

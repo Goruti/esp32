@@ -80,7 +80,7 @@ def read_gpio(pin):
 
 def read_adc(pin):
     adc = machine.ADC(machine.Pin(pin))  # create ADC object on ADC pin
-    adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.6v)
+    adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.3v)
     adc.width(machine.ADC.WIDTH_12BIT)
     read = 0
     for i in range(0, 5):
@@ -88,7 +88,8 @@ def read_adc(pin):
         utime.sleep_ms(50)
 
     gc.collect()
-    return int(read / 5)
+    #return int(read / 5)
+    return (int(read / 5))*(3.3/4096)
 
 
 def initialize_irrigation_app():
@@ -164,9 +165,9 @@ def test_irrigation_system():
                 print("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                 print("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
-                start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
-                utime.sleep(4)
-                stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+                if start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
+                    utime.sleep(4)
+                    stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
     except BaseException as e:
         sys.print_exception(e)
     finally:

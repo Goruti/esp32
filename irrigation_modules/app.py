@@ -15,14 +15,13 @@ def main_app(loop=None):
         Set up the tasks and start the event loop
         """
 
-        _thread.start_new_thread(main_loops.initialize_rtc, ())
-        _thread.start_new_thread(main_loops.reading_moister, (300,))
+        #_thread.start_new_thread(main_loops.initialize_rtc, ())
+        #_thread.start_new_thread(main_loops.reading_moister, (300000,))
         #_thread.start_new_thread(webServer.webapp.run, ("0.0.0.0", 80))
 
-        #loop = asyncio.get_event_loop()
-        #loop.create_task(main_loops.initialize_rtc())
-        # TODO (uncomment the following line)
-        #loop.create_task(main_loops.reading_moister(frequency_loop=300))
+        loop = asyncio.get_event_loop()
+        loop.create_task(main_loops.initialize_rtc())
+        loop.create_task(main_loops.reading_moister(frequency_loop_ms=300000))
         #loop.create_task(main_loops.reading_water_level(frequency_loop=300))
         webServer.webapp.run(host="0.0.0.0", port=80, debug=False)
 

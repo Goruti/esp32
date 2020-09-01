@@ -58,7 +58,7 @@ def get_available_networks():
     return nets
 
 
-def wifi_connect(network_config, timeout_s=10):
+def wifi_connect(network_config, timeout_ms=10000):
     """
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
@@ -77,9 +77,11 @@ def wifi_connect(network_config, timeout_s=10):
 
     wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
 
-    t = utime.time()
+    t = utime.ticks_ms()
     while not wlan.isconnected():
-        if utime.ticks_diff(utime.time(), t) > timeout_s:
+        if utime.ticks_diff(utime.ticks_ms(), t) < timeout_ms:
+            machine.idle()
+        else:
             wlan.disconnect()
             utime.sleep_ms(100)
             wlan_status = wlan.status()
@@ -94,7 +96,7 @@ def wifi_connect(network_config, timeout_s=10):
             else:
                 error_msg = "Undefined Error"
             raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
-        machine.idle()
+
     print("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
 
 

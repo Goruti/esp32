@@ -1,4 +1,4 @@
-#from machine import Pin, ADC
+# from machine import Pin, ADC
 import machine
 import micropython
 import utime
@@ -51,8 +51,10 @@ def get_irrigation_status():
 
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
-            systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
-            systems_info["pump_info"][key]["moisture"] = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+            systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(
+                conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
+            systems_info["pump_info"][key]["moisture"] = read_adc(
+                conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
 
     systems_info["water_level"] = water_level.get_watter_level()
     gc.collect()
@@ -60,14 +62,15 @@ def get_irrigation_status():
 
 
 def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=15000):
-    start_pump(pump_pin)
+    started = start_pump(pump_pin)
     t = utime.ticks_ms()
-    while (moisture > threshold*0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms) \
-            or \
-            (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000):
-
+    while started and (
+            (moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms)
+            or
+            (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
         moisture = read_adc(sensor_pin)
-    stop_pump(pump_pin)
+    if started:
+        stop_pump(pump_pin)
 
 
 def read_gpio(pin):
@@ -93,17 +96,18 @@ def initialize_irrigation_app():
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
-        #pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)
-        #high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
-        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
+        # pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)
+        # high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
+        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler,
+                                                 falling=False)
 
         for key, value in conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
         #  TODO (uncomment the following line)
-        #webrepl.stop()
-        #manage_data.save_webrepl_config(**{"enable": False})
+        # webrepl.stop()
+        # manage_data.save_webrepl_config(**{"enable": False})
 
         #  TODO (Comment the following line)
         webrepl.start(password=conf.WEBREPL_PWD)
@@ -114,17 +118,20 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
+    started = False
     try:
-        if water_level.get_watter_level() == "empty":
+        if water_level.get_watter_level() != "empty":
+            print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
+            machine.Pin(pin).on()
+            started = True
+        else:
             print("{} - cannot start pump {} since tank is empty".format(datetime_to_iso(utime.localtime()), pin))
             gc.collect()
-            return
-        print("{} - Starting pump: {}".format(datetime_to_iso(utime.localtime()), pin))
-        machine.Pin(pin).on()
     except Exception as e:
         sys.print_exception(e)
     finally:
         gc.collect()
+        return started
 
 
 def stop_pump(pin):
@@ -168,6 +175,3 @@ def test_irrigation_system():
 
 def datetime_to_iso(time):
     return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])
-
-
-

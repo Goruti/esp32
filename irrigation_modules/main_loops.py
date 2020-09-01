@@ -6,7 +6,7 @@ import sys
 from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
 
 
-def initialize_rtc(frequency_loop=3600):
+async def initialize_rtc(frequency_loop=3600):
     while True:
         try:
             if wifi.is_connected():
@@ -22,10 +22,10 @@ def initialize_rtc(frequency_loop=3600):
             sys.print_exception(e)
         finally:
             gc.collect()
-            utime.sleep(frequency_loop)
+            await asyncio.sleep(frequency_loop)
 
 
-def reading_moister(frequency_loop=300, report_freq_s=600):
+async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     try:
         smartthings = smartthings_handler.SmartThings()
         systems_info = libraries.get_irrigation_configuration()
@@ -34,7 +34,7 @@ def reading_moister(frequency_loop=300, report_freq_s=600):
         gc.collect()
     else:
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
-            t = utime.time()
+            report_time = -1*report_freq_ms
             while True:
                 try:
                     moisture_status = {}
@@ -46,10 +46,10 @@ def reading_moister(frequency_loop=300, report_freq_s=600):
                                                        sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
                                                        moisture=moisture,
                                                        threshold=values["moisture_threshold"],
-                                                       max_irrigation_time_ms=15000)
+                                                       max_irrigation_time_ms=10000)
 
-                    if utime.ticks_diff(utime.time(), t) >= report_freq_s:
-                        t = utime.time()
+                    if utime.ticks_diff(utime.ticks_ms(), report_time) > 0:
+                        report_time = utime.ticks_add(utime.ticks_ms(), report_freq_ms)
                         payload = {
                             "type": "moisture_status",
                             "body": moisture_status
@@ -62,7 +62,7 @@ def reading_moister(frequency_loop=300, report_freq_s=600):
                     sys.print_exception(e)
                 finally:
                     gc.collect()
-                    utime.sleep(frequency_loop)
+                    await asyncio.sleep(frequency_loop_ms)
 
 
 #async def reading_water_level(frequency_loop=3600):

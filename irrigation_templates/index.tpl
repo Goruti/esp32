@@ -111,10 +111,10 @@
 
             if ( pump_info[i]["pump_status"] === "On") {
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button></td>`;
-                myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="font-weight:bold;margin-left:1em;;border-width: thin">Stop</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; border-width: thin">Stop</button></td>`;
             }
             else {
-                myHTML += `<td class="tg-xwyw"><button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="ont-weight: bold;margin-left:3em;;border-width: thin">Start</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em;border-width: thin">Start</button></td>`;
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; opacity:0.6">Stop</button></td>`;
             }
             myHTML += `<tr>`;

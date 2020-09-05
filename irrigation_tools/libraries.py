@@ -82,14 +82,14 @@ def read_adc(pin):
     adc = machine.ADC(machine.Pin(pin))  # create ADC object on ADC pin
     adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.3v)
     adc.width(machine.ADC.WIDTH_12BIT)
-    #read = 0
-    #for i in range(0, 8):
-    #    read += adc.read()
-    #    utime.sleep_ms(5)
+    read = 0
+    for i in range(0, 8):
+        read += adc.read()
+        utime.sleep_ms(10)
 
     gc.collect()
-    #return int(read / 8)
-    return adc.read()
+    return int(read / 8)
+    #return adc.read()
 
 
 def initialize_irrigation_app():

@@ -348,7 +348,7 @@ def save_smartthings_config(request, response):
             if key in request.form:
                 st_config[key] = request.form[key]
         st_config["enabled"] = True
-
+        manage_data.save_smartthings_config(**st_config)
 
         net_conf = libraries.get_net_configuration()
         payload = {
@@ -362,7 +362,7 @@ def save_smartthings_config(request, response):
         smartthings = smartthings_handler.SmartThings()
         smartthings.notify(payload)
 
-        manage_data.save_smartthings_config(**st_config)
+
 
     except Exception as e:
         sys.print_exception(e)

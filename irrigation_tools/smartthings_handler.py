@@ -7,11 +7,14 @@ import sys
 
 class SmartThings():
     def __init__(self, retry_num=5, retry_sec=1):
-        st_config = manage_data.read_smartthings_config()
-        if not st_config or not st_config["enabled"]:
+        try:
+            st_config = manage_data.read_smartthings_config()
+            if not st_config or not st_config["enabled"]:
+                self.URL = None
+            else:
+                self.URL = "http://{}:{}".format(st_config["st_ip"], st_config["st_port"])
+        except Exception:
             self.URL = None
-        else:
-            self.URL = "http://{}:{}".format(st_config["st_ip"], st_config["st_port"])
 
         self.retry_num = retry_num
         self.retry_sec = retry_sec

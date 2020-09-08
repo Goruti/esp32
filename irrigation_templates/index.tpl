@@ -26,22 +26,18 @@
     <hr>
     <div class="row">
         <div class="column">
-            <h2>Network Configuration</h2>
+            <h3>Network Configuration</h3>
             <div id="network_configuration"></div>
         </div>
         <div class="column">
             <h3>Web REPL</h3>
             <div id="web_repl_config"></div>
-        </div>
-        <div class="column">
             <h3>Smartthings</h3>
             <div id="smartthings_config"></div>
         </div>
         <div class="column">
             <h3>Restart System</h3>
             <button onclick="window.location = '/restartSystem';">Restart</button>
-        </div>
-        <div class="column">
             <h3>Test System</h3>
             <button onclick="window.location = '/testSystem';">Test</button>
         </div>
@@ -70,8 +66,8 @@
         myHTML += `<button disabled onclick="window.location = '/configSmartThings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
         myHTML += `<button onclick="window.location = '/configSmartThings?action=disable';" style="margin-left:1em">Disable </button>`
     } else {
-        myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
+        myHTML += `<button onclick="window.location = '/configSmartThings?action=enable';" style="">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/configSmartThings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 

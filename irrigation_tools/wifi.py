@@ -2,6 +2,7 @@ import network
 import machine
 import gc
 import utime
+import ubinascii
 
 
 def is_connected():
@@ -17,6 +18,12 @@ def is_connected():
         details = wlan.ifconfig()
         ip_address = details[0] if details else None
     return ip_address
+
+
+def get_mac_address():
+    gc.collect()
+    mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+    return mac
 
 
 def start_ap(essid_name="ESP32 AP", password="ESP32 P@assword"):

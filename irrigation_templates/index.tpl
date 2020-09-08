@@ -66,6 +66,7 @@
     if ("{{ data["net_config"]["connected"] }}" === "True") {
         myHTML += `<p><u>SSID</u>: <b> {{ data["net_config"]["ssid"] }}</b></p>`;
         myHTML += `<p><u>IP</u>: <b>{{ data["net_config"]["ip"] }}</b></p>`;
+        myHTML += `<p><u>Mac Address</u>: <b>{{ data["net_config"]["mac"] }}</b></p>`;
         myHTML += `<p><button onclick="window.location = '/enable_ap';">Reconfigure Wifi</button>`;
     } else {
          myHTML += `<p style="margin-left: 40px; text-align: left; color: #ff5722"><b>You need to configure a Wifi Network</b></p>`;

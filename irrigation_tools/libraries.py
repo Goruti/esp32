@@ -9,7 +9,7 @@ from collections import OrderedDict
 import asyncio
 
 from irrigation_tools import manage_data, conf, water_level
-from irrigation_tools.wifi import is_connected
+from irrigation_tools.wifi import is_connected, get_mac_address
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -20,6 +20,7 @@ def get_net_configuration():
         data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
     else:
         data = {"connected": False, "ssid": None, "ip": None}
+    data["mac"] = get_mac_address
 
     gc.collect()
     return data

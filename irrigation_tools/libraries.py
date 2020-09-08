@@ -42,7 +42,7 @@ def get_web_repl_configuration():
     conf = manage_data.read_webrepl_config()
     if not conf:
         conf = {
-            "enable": False
+            "enabled": False
         }
     gc.collect()
     return conf
@@ -52,7 +52,7 @@ def get_smartthings_configuration():
     conf = manage_data.read_smartthings_config()
     if not conf:
         conf = {
-            "enable": False
+            "enabled": False
         }
     gc.collect()
     return conf

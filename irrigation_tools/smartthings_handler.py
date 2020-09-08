@@ -8,10 +8,11 @@ import sys
 class SmartThings():
     def __init__(self, retry_num=5, retry_sec=1):
         st_config = manage_data.read_smartthings_config()
-        if not st_config:
-            raise RuntimeError("cannot initialize Smartyhing handler since there is not configuration")
+        if not st_config or not st_config["enabled"]:
+            self.URL = None
+        else:
+            self.URL = "http://{}:{}".format(st_config["st_ip"], st_config["st_port"])
 
-        self.ST_IP_PORT = "{}:{}".format(st_config["st_ip"], st_config["st_port"])
         self.retry_num = retry_num
         self.retry_sec = retry_sec
         self.requests = requests
@@ -44,7 +45,7 @@ class SmartThings():
 
         try:
             gc.collect()
-            r = self.requests.post(self.ST_IP_PORT, json=body, headers=headers)
+            r = self.requests.post(self.URL, json=body, headers=headers)
         except Exception as e:
             print("{} - Smartthings.send_values' - 'Exception': {}, free_memory: {}".format(libraries.datetime_to_iso(utime.localtime()), e, gc.mem_free()))
             sys.print_exception(e)

@@ -183,6 +183,7 @@ def save_irrigation_config(request, response):
                        <p style="color: red;">Configuration Failed :(.</p><br>
                         <p>Error: "{}"</p><br>
                         <button onclick="window.location.href = '/irrigation_config';">Try Again</button>
+                        <button onclick="window.location.href = '/' ;">Cancel</button>
                    </body>
                </html>'''.format(e)
         gc.collect()
@@ -268,57 +269,121 @@ def config_web_repl(request, response):
 
     if action == "enable":
         webrepl.start(password=conf.WEBREPL_PWD)
-        manage_data.save_webrepl_config(**{"enable": True})
+        manage_data.save_webrepl_config(**{"enabled": True})
     else:
         webrepl.stop()
-        manage_data.save_webrepl_config(**{"enable": False})
+        manage_data.save_webrepl_config(**{"enabled": False})
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)
 
 
-@webapp.route('/configSmartThings', method='GET')
-def config_smartthings(request, response):
+@webapp.route('/enableSmartThings', method='GET')
+def enable_smartthings(request, response):
     gc.collect()
-    request.parse_qs()
-    action = request.form["action"]
-    smartthings = smartthings_handler.SmartThings()
+    try:
+        request.parse_qs()
+        action = request.form["action"]
+        if action == "enable":
+            html_page = '''
+                        <html>
+                            <head>
+                                <title>Irrigation System Home Page</title>
+                            </head>
+                            <body>
+                            <h2>SmartThings Configuration</h2>
+                                <form action="/configSmartthings" method="post">
+                                    <p>Configure SmartThings Connectivity</p>
+                                    SmartTings IP: <select input type="text" name="st_ip">
+                                    </select><br><br>
+                                    SmartTings Port:  <input type="text" name="st_port"><br><br>
+                                    <input type="submit" value="OK">
+                                    <input type="button" name="Cancel" value="Cancel" onClick="window.location='/';">
+                                </form>
+                            </body>
+                        </html>'''
 
-    if action == "enable":
-        net_conf = libraries.get_net_configuration()
-        try:
+            gc.collect()
+            yield from picoweb.start_response(response)
+            yield from response.awrite(str(html_page))
+
+        else:
+            smartthings = smartthings_handler.SmartThings()
             payload = {
                 "type": "system_configuration",
                 "body": {
-                    "ssid": net_conf["ssid"],
-                    "ip": net_conf["ip"],
-                    "system": manage_data.read_irrigation_config()
+                    "status": "disable"
                 }
             }
             smartthings.notify(payload)
+            manage_data.save_smartthings_config(**{"enabled": False})
 
-        except Exception as e:
-            sys.print_exception(e)
-            html_page = '''
+            headers = {"Location": "/"}
+            gc.collect()
+            yield from picoweb.start_response(response, status="303", headers=headers)
+
+    except Exception as e:
+        sys.print_exception(e)
+        html_page = '''
                         <html>
                             <head><title>Irrigation System Home Page</title></head>
                            <body>
                                <p style="color: red;">Smartthings Configuration Failed :(.</p><br>
                                 <p>Error: "{}"</p><br>
-                                <button onclick="window.location.href = '/configSmartThings';">Try Again</button>
+                                <button onclick="window.location.href = '/configureSmartThings';">Try Again</button>
+                        <button onclick="window.location.href = '/' ;">Cancel</button>
                            </body>
                        </html>'''.format(e)
-            gc.collect()
-            yield from picoweb.start_response(response)
-            yield from response.awrite(str(html_page))
-        else:
-            manage_data.save_smartthings_config(**{"enable": True})
+        gc.collect()
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
 
+
+@webapp.route('/configSmartthings', method='POST')
+def save_smartthings_config(request, response):
+    gc.collect()
+    try:
+        yield from request.read_form_data()
+        st_config = {}
+        for key in ['st_ip', 'st_port']:
+            if key in request.form:
+                st_config[key] = request.form[key]
+        st_config["enabled"] = True
+
+
+        net_conf = libraries.get_net_configuration()
+        payload = {
+            "type": "system_configuration",
+            "body": {
+                "ssid": net_conf["ssid"],
+                "ip": net_conf["ip"],
+                "system": manage_data.read_irrigation_config()
+            }
+        }
+        smartthings = smartthings_handler.SmartThings()
+        smartthings.notify(payload)
+
+        manage_data.save_smartthings_config(**st_config)
+
+    except Exception as e:
+        sys.print_exception(e)
+        html_page = '''
+                    <html>
+                        <head><title>Irrigation System Home Page</title></head>
+                       <body>
+                           <p style="color: red;">Smartthings Configuration Failed :(.</p><br>
+                            <p>Error: "{}"</p><br>
+                            <button onclick="window.location.href = '/configureSmartThings';">Try Again</button>
+                    <button onclick="window.location.href = '/' ;">Cancel</button>
+                       </body>
+                   </html>'''.format(e)
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
     else:
-        manage_data.save_smartthings_config(**{"enable": False})
-
-    headers = {"Location": "/"}
-    yield from picoweb.start_response(response, status="303", headers=headers)
+        headers = {"Location": "/"}
+        yield from picoweb.start_response(response, status="303", headers=headers)
+    finally:
+        gc.collect()
 
 
 

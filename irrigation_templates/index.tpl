@@ -51,7 +51,7 @@
 <script>
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
-    if ("{{ data["WebRepl"]["enable"] }}" === "True") {
+    if ("{{ data["WebRepl"]["enabled"] }}" === "True") {
         myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
         myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="margin-left:1em">Disable </button>`
     } else {
@@ -62,12 +62,12 @@
 
     var webRepl_wrapper = document.getElementById("smartthings_config");
     var myHTML = ``;
-    if ("{{ data["smartThings"]["enable"] }}" === "True") {
-        myHTML += `<button disabled onclick="window.location = '/configSmartThings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
-        myHTML += `<button onclick="window.location = '/configSmartThings?action=disable';" style="margin-left:1em">Disable </button>`
+    if ("{{ data["smartThings"]["enabled"] }}" === "True") {
+        myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
+        myHTML += `<button onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em">Disable </button>`
     } else {
-        myHTML += `<button onclick="window.location = '/configSmartThings?action=enable';" style="">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/configSmartThings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
+        myHTML += `<button onclick="window.location = '/enableSmartThings?action=enable';" style="">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 

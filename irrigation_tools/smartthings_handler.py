@@ -1,13 +1,17 @@
 import gc
 import utime
-from irrigation_tools.conf import ST_IP_PORT
-from irrigation_tools import libraries
+from irrigation_tools import libraries, manage_data
 import urequests as requests
 import sys
 
 
 class SmartThings():
     def __init__(self, retry_num=5, retry_sec=1):
+        st_config = manage_data.read_smartthings_config()
+        if not st_config:
+            raise RuntimeError("cannot initialize Smartyhing handler since there is not configuration")
+
+        self.ST_IP_PORT = "{}:{}".format(st_config["st_ip"], st_config["st_port"])
         self.retry_num = retry_num
         self.retry_sec = retry_sec
         self.requests = requests
@@ -40,9 +44,9 @@ class SmartThings():
 
         try:
             gc.collect()
-            r = self.requests.post(ST_IP_PORT, json=body, headers=headers)
+            r = self.requests.post(self.ST_IP_PORT, json=body, headers=headers)
         except Exception as e:
-            print("{} - Smartthings.send_values' - 'Exception': {}, free_memory: {}".format(datetime_to_iso(utime.localtime()), e, gc.mem_free()))
+            print("{} - Smartthings.send_values' - 'Exception': {}, free_memory: {}".format(libraries.datetime_to_iso(utime.localtime()), e, gc.mem_free()))
             sys.print_exception(e)
         else:
             if r.status_code == 202 or r.status_code == 200:

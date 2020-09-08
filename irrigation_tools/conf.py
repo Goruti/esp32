@@ -22,7 +22,6 @@ WATER_LEVEL_SENSOR_PIN = 27
 TEMPLATES_DIR = "irrigation_templates"
 AP_SSID = "My Awesome Irrigation System"
 AP_PWD = "My@wesomeP@sword"
-WEBREPL_PWD = "S@mu3l"
-ST_IP_PORT = "http://xxxx.xxxx.xxxx.xxxx"
-ST_PORT = "39500"
+
+
 

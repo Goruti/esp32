@@ -79,8 +79,15 @@ def _save_db_entry(key, value):
                         }
                     }
         },
-        "WebRepl": False,
-        "smartThings": True
+        "WebRepl": {
+                        "enabled": False,
+                        "password": "asdas"
+        },
+        "smartThings": {
+                        "enabled": True,
+                        "st_ip": "x.x.x.x"
+                        "st_port": "39500"
+        }
     }
 """
 

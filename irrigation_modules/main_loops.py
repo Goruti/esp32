@@ -27,6 +27,7 @@ async def initialize_rtc(frequency_loop=3600):
 
 async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     try:
+        loop = asyncio.get_event_loop()
         smartthings = smartthings_handler.SmartThings()
         systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
@@ -42,11 +43,14 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = moisture
                         if moisture > values["moisture_threshold"]:
-                            libraries.start_irrigation(pump_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),
-                                                       sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
-                                                       moisture=moisture,
-                                                       threshold=values["moisture_threshold"],
-                                                       max_irrigation_time_ms=10000)
+                            loop.create_task(libraries.start_irrigation(
+                                                    pump_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),
+                                                    sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
+                                                    moisture=moisture,
+                                                    threshold=values["moisture_threshold"],
+                                                    max_irrigation_time_ms=10000
+                                            )
+                            )
 
                     if utime.ticks_diff(utime.ticks_ms(), report_time) > 0:
                         report_time = utime.ticks_add(utime.ticks_ms(), report_freq_ms)

@@ -6,6 +6,7 @@ import gc
 import sys
 import webrepl
 from collections import OrderedDict
+import asyncio
 
 from irrigation_tools import manage_data, conf, water_level
 from irrigation_tools.wifi import is_connected
@@ -61,7 +62,7 @@ def get_irrigation_status():
     return systems_info
 
 
-def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=15000):
+async def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=15000):
     started = start_pump(pump_pin)
     t = utime.ticks_ms()
     while started and (
@@ -69,6 +70,7 @@ def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_t
             or
             (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
         moisture = read_adc(sensor_pin)
+        await asyncio.sleep(1)
     if started:
         stop_pump(pump_pin)
 

@@ -20,8 +20,8 @@ def main_app(loop=None):
         #_thread.start_new_thread(webServer.webapp.run, ("0.0.0.0", 80))
 
         loop = asyncio.get_event_loop()
-        loop.create_task(main_loops.initialize_rtc())
-        loop.create_task(main_loops.reading_moister(frequency_loop_ms=300000))
+        loop.create_task(main_loops.initialize_rtc(frequency_loop=86400))
+        loop.create_task(main_loops.reading_moister(frequency_loop_ms=3600000, report_freq_ms=3600000))
         #loop.create_task(main_loops.reading_water_level(frequency_loop=300))
         webServer.webapp.run(host="0.0.0.0", port=80, debug=False)
 

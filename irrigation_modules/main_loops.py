@@ -62,7 +62,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     sys.print_exception(e)
                 finally:
                     gc.collect()
-                    await asyncio.sleep(frequency_loop_ms)
+                    await asyncio.sleep(frequency_loop_ms/1000)
 
 
 #async def reading_water_level(frequency_loop=3600):

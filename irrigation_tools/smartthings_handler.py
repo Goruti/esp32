@@ -21,17 +21,19 @@ class SmartThings():
         try:
             attempts = self.retry_num
             #print("{} - Smartthings.notify, Sent body: {}".format(datetime_to_iso(utime.localtime()), body))
+            if self.URL:
+                while attempts and self._send_values(body):
+                    attempts -= 1
+                    #print("{} - Smartthings.notify, Re-try: {} - Body: {}".format(datetime_to_iso(utime.localtime()),
+                    #                                                              (self.retry_num - attempts), body))
 
-            while attempts and self.send_values(body):
-                attempts -= 1
-                #print("{} - Smartthings.notify, Re-try: {} - Body: {}".format(datetime_to_iso(utime.localtime()),
-                #                                                              (self.retry_num - attempts), body))
+                    utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
-                utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
-
-            if not attempts:
-                print("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
-                    libraries.datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
+                if not attempts:
+                    print("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
+                        libraries.datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
+            else:
+                print("SmartThings is not configured. This how message would looks like: {}".format(body))
 
         except Exception as e:
             sys.print_exception(e)
@@ -39,7 +41,7 @@ class SmartThings():
         finally:
             gc.collect()
 
-    def send_values(self, body):
+    def _send_values(self, body):
         failed = True
         headers = {"Content-Type": "application/json"}
 

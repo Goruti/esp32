@@ -125,7 +125,7 @@ def initialize_irrigation_app():
 
         #  TODO (Comment the following line)
         webrepl.start(password=conf.WEBREPL_PWD)
-        manage_data.save_webrepl_config(**{"enable": True})
+        manage_data.save_webrepl_config(**{"enabled": True})
 
     except Exception as e:
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))

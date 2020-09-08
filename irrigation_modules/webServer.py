@@ -294,8 +294,7 @@ def enable_smartthings(request, response):
                             <h2>SmartThings Configuration</h2>
                                 <form action="/configSmartthings" method="post">
                                     <p>Configure SmartThings Connectivity</p>
-                                    SmartTings IP: <select input type="text" name="st_ip">
-                                    </select><br><br>
+                                    SmartTings IP: <input type="text" name="st_ip"><br><br>
                                     SmartTings Port:  <input type="text" name="st_port"><br><br>
                                     <input type="submit" value="OK">
                                     <input type="button" name="Cancel" value="Cancel" onClick="window.location='/';">

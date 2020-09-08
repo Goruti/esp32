@@ -17,6 +17,7 @@ def _get_db():
     db.close()
     db_file.close()
 
+
 def _get_db_entry(key, default=None, as_json=True):
     """
     Get a value out of the database
@@ -35,6 +36,7 @@ def _get_db_entry(key, default=None, as_json=True):
     elif not value:
         value = default
     return value
+
 
 def _save_db_entry(key, value):
     """
@@ -77,9 +79,12 @@ def _save_db_entry(key, value):
                         }
                     }
         },
-        "WebRepl": False 
+        "WebRepl": False,
+        "smartThings": True
     }
 """
+
+
 def get_network_config():
     """
     Get the WiFi config. If there is none, return None.
@@ -120,3 +125,18 @@ def save_webrepl_config(**kwargs):
     Save the irrigation configuration
     """
     _save_db_entry('WebRepl', kwargs)
+
+
+def read_smartthings_config():
+    """
+    Load the irrigation configuration
+    """
+    return _get_db_entry('smartThings')
+
+
+def save_smartthings_config(**kwargs):
+    """
+    Save the irrigation configuration
+    """
+    _save_db_entry('smartThings', kwargs)
+

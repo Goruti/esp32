@@ -4,7 +4,7 @@ import utime
 import machine
 import sys
 
-from irrigation_tools import conf, wifi, manage_data, libraries
+from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
 
 webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
 
@@ -20,6 +20,7 @@ def index(request, response):
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_status()
         data["WebRepl"] = libraries.get_web_repl_configuration()
+        data["smartThings"] = libraries.get_smartthings_configuration()
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -146,10 +147,11 @@ def save_irrigation_config(request, response):
     gc.collect()
     yield from request.read_form_data()
     try:
+        smartthings = smartthings_handler.SmartThings()
+
         config = {
             "total_pumps": int(request.form["total_pumps"])
         }
-
         pump_info = {}
         for pump in range(1, int(request.form["total_pumps"])+1):
             pump_info[pump] = {
@@ -157,6 +159,17 @@ def save_irrigation_config(request, response):
                 "connected_to_port": request.form["connected_to_port_{}".format(pump)],
             }
         config["pump_info"] = pump_info
+
+        net_conf = libraries.get_net_configuration()
+        payload = {
+            "type": "system_configuration",
+            "body": {
+                "ssid": net_conf["ssid"],
+                "ip": net_conf["ip"],
+                "system": config
+            }
+        }
+        smartthings.notify(payload)
 
         manage_data.save_irrigation_config(**config)
         gc.collect()
@@ -262,6 +275,51 @@ def config_web_repl(request, response):
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)
+
+
+@webapp.route('/configSmartThings', method='GET')
+def config_smartthings(request, response):
+    gc.collect()
+    request.parse_qs()
+    action = request.form["action"]
+    smartthings = smartthings_handler.SmartThings()
+
+    if action == "enable":
+        net_conf = libraries.get_net_configuration()
+        try:
+            payload = {
+                "type": "system_configuration",
+                "body": {
+                    "ssid": net_conf["ssid"],
+                    "ip": net_conf["ip"],
+                    "system": manage_data.read_irrigation_config()
+                }
+            }
+            smartthings.notify(payload)
+
+        except Exception as e:
+            sys.print_exception(e)
+            html_page = '''
+                        <html>
+                            <head><title>Irrigation System Home Page</title></head>
+                           <body>
+                               <p style="color: red;">Smartthings Configuration Failed :(.</p><br>
+                                <p>Error: "{}"</p><br>
+                                <button onclick="window.location.href = '/configSmartThings';">Try Again</button>
+                           </body>
+                       </html>'''.format(e)
+            gc.collect()
+            yield from picoweb.start_response(response)
+            yield from response.awrite(str(html_page))
+        else:
+            manage_data.save_smartthings_config(**{"enable": True})
+
+    else:
+        manage_data.save_smartthings_config(**{"enable": False})
+
+    headers = {"Location": "/"}
+    yield from picoweb.start_response(response, status="303", headers=headers)
+
 
 
 @webapp.route('/restartSystem', method='GET')

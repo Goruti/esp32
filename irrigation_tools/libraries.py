@@ -48,6 +48,16 @@ def get_web_repl_configuration():
     return conf
 
 
+def get_smartthings_configuration():
+    conf = manage_data.read_smartthings_config()
+    if not conf:
+        conf = {
+            "enable": False
+        }
+    gc.collect()
+    return conf
+
+
 def get_irrigation_status():
     systems_info = get_irrigation_configuration()
 

@@ -6,7 +6,7 @@ import gc
 import sys
 import webrepl
 from collections import OrderedDict
-import asyncio
+import uasyncio as asyncio
 
 from irrigation_tools import manage_data, conf, water_level
 from irrigation_tools.wifi import is_connected, get_mac_address
@@ -20,7 +20,7 @@ def get_net_configuration():
         data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
     else:
         data = {"connected": False, "ssid": None, "ip": None}
-    data["mac"] = get_mac_address
+    data["mac"] = get_mac_address()
 
     gc.collect()
     return data

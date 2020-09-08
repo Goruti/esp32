@@ -315,7 +315,12 @@ def enable_smartthings(request, response):
                 }
             }
             smartthings.notify(payload)
-            manage_data.save_smartthings_config(**{"enabled": False})
+            st_conf = {
+                "enabled": False,
+                "st_ip": None,
+                "st_port": None
+            }
+            manage_data.save_smartthings_config(**st_conf)
 
             headers = {"Location": "/"}
             gc.collect()

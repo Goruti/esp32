@@ -65,6 +65,8 @@
     if ("{{ data["smartThings"]["enabled"] }}" === "True") {
         myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
         myHTML += `<button onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em">Disable </button>`
+        myHTML += `<p><u>SmartThings IP</u>: <b>{{ data["smartThings"]["st_ip"] }}</b></p>`;
+        myHTML += `<p><u>SmartThings Port</u>: <b>{{ data["smartThings"]["st_port"] }}</b></p>`;
     } else {
         myHTML += `<button onclick="window.location = '/enableSmartThings?action=enable';" style="">Enable </button>`
         myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`

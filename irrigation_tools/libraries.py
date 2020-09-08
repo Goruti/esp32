@@ -50,9 +50,11 @@ def get_web_repl_configuration():
 
 def get_smartthings_configuration():
     conf = manage_data.read_smartthings_config()
-    if not conf:
+    if not conf or not conf["enabled"]:
         conf = {
-            "enabled": False
+            "enabled": False,
+            "st_ip": None,
+            "st_port": None
         }
     gc.collect()
     return conf

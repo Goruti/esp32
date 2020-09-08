@@ -307,14 +307,15 @@ def enable_smartthings(request, response):
             yield from response.awrite(str(html_page))
 
         else:
-            smartthings = smartthings_handler.SmartThings()
             payload = {
                 "type": "system_configuration",
                 "body": {
                     "status": "disable"
                 }
             }
+            smartthings = smartthings_handler.SmartThings()
             smartthings.notify(payload)
+
             st_conf = {
                 "enabled": False,
                 "st_ip": None,
@@ -359,6 +360,7 @@ def save_smartthings_config(request, response):
         payload = {
             "type": "system_configuration",
             "body": {
+                "status": "enabled",
                 "ssid": net_conf["ssid"],
                 "ip": net_conf["ip"],
                 "system": manage_data.read_irrigation_config()
@@ -366,8 +368,6 @@ def save_smartthings_config(request, response):
         }
         smartthings = smartthings_handler.SmartThings()
         smartthings.notify(payload)
-
-
 
     except Exception as e:
         sys.print_exception(e)
@@ -388,7 +388,6 @@ def save_smartthings_config(request, response):
         yield from picoweb.start_response(response, status="303", headers=headers)
     finally:
         gc.collect()
-
 
 
 @webapp.route('/restartSystem', method='GET')

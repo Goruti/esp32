@@ -58,8 +58,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                             "type": "moisture_status",
                             "body": moisture_status
                         }
-                        print(payload)
-                        # smartthings.notify(payload)
+                        smartthings.notify(payload)
 
                 except BaseException as e:
                     print("reading_moister Exception - key: {}, values: {}".format(key, values))

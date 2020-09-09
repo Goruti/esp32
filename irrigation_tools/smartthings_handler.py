@@ -5,15 +5,12 @@ import urequests as requests
 import sys
 
 
-class SmartThings():
-    def __init__(self, retry_num=5, retry_sec=1):
-        try:
-            st_config = manage_data.read_smartthings_config()
-            if not st_config or not st_config["enabled"]:
-                self.URL = None
-            else:
-                self.URL = "http://{}:{}".format(st_config["st_ip"], st_config["st_port"])
-        except Exception:
+class SmartThings:
+    def __init__(self, retry_num=5, retry_sec=1, st_ip=None, st_port=None):
+
+        if st_ip and st_port:
+            self.URL = self.URL = "http://{}:{}".format(st_ip, st_port)
+        else:
             self.URL = None
 
         self.retry_num = retry_num

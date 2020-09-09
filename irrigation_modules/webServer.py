@@ -147,7 +147,8 @@ def save_irrigation_config(request, response):
     gc.collect()
     yield from request.read_form_data()
     try:
-        smartthings = smartthings_handler.SmartThings()
+        st_conf = libraries.get_smartthings_configuration()
+        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
 
         config = {
             "total_pumps": int(request.form["total_pumps"])
@@ -313,7 +314,11 @@ def enable_smartthings(request, response):
                     "status": "disable"
                 }
             }
-            smartthings = smartthings_handler.SmartThings()
+            st_conf = libraries.get_smartthings_configuration()
+            smartthings = smartthings_handler.SmartThings(retry_num=1,
+                                                          retry_sec=1,
+                                                          st_ip=st_conf["st_ip"],
+                                                          st_port=st_conf["st_port"])
             smartthings.notify(payload)
 
             st_conf = {
@@ -366,7 +371,11 @@ def save_smartthings_config(request, response):
                 "system": manage_data.read_irrigation_config()
             }
         }
-        smartthings = smartthings_handler.SmartThings()
+        st_conf = libraries.get_smartthings_configuration()
+        smartthings = smartthings_handler.SmartThings(retry_num=1,
+                                                      retry_sec=1,
+                                                      st_ip=st_conf["st_ip"],
+                                                      st_port=st_conf["st_port"])
         smartthings.notify(payload)
 
     except Exception as e:

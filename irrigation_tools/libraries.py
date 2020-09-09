@@ -8,7 +8,7 @@ import webrepl
 from collections import OrderedDict
 import uasyncio as asyncio
 
-from irrigation_tools import manage_data, conf, water_level
+from irrigation_tools import manage_data, conf, water_level, smartthings_handler
 from irrigation_tools.wifi import is_connected, get_mac_address
 
 micropython.alloc_emergency_exception_buf(100)

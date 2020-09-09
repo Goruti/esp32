@@ -28,7 +28,9 @@ async def initialize_rtc(frequency_loop=3600):
 async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     try:
         loop = asyncio.get_event_loop()
-        smartthings = smartthings_handler.SmartThings()
+        st_conf = libraries.get_smartthings_configuration()
+        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
+
         systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
         sys.print_exception(e)
@@ -70,7 +72,8 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
 
 #async def reading_water_level(frequency_loop=3600):
 #    previous_water_level = "empty"
-#    smartthings = smartthings_handler.SmartThings()
+#    st_conf = libraries.get_smartthings_configuration()
+#    smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
 #    while True:
 #        try:
 #            water_level = "empty" if libraries.read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "good"

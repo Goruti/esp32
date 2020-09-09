@@ -29,7 +29,8 @@ def water_level_interruption_function(pin):
     #utime.sleep(5)
     #if pin.value() != value:
     print("Confirmed interruption - {}: {}".format(pin, value))
-    smartthings = smartthings_handler.SmartThings()
+    st_conf = libraries.get_smartthings_configuration()
+    smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
     try:
         if value:
             libraries.stop_all_pumps()
@@ -43,8 +44,7 @@ def water_level_interruption_function(pin):
                 "status": get_watter_level(value)
             }
         }
-        # smartthings.notify(payload})
-        print(payload)
+        smartthings.notify(payload)
 
     except Exception as e:
         sys.print_exception(e)

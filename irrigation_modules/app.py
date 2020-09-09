@@ -1,13 +1,11 @@
-import gc
 import uasyncio as asyncio
 import sys
-import _thread
 
 from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer
 
 
-def main_app(loop=None):
+def main_app():
     try:
         libraries.initialize_irrigation_app()
 

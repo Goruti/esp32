@@ -123,7 +123,7 @@ def initialize_irrigation_app():
 
         #  TODO (uncomment the following line)
         # webrepl.stop()
-        # manage_data.save_webrepl_config(**{"enable": False})
+        # manage_data.save_webrepl_config(**{"enabled": False})
 
         #  TODO (Comment the following line)
         webrepl.start(password=conf.WEBREPL_PWD)

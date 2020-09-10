@@ -106,14 +106,14 @@ def moisture_to_hum(port, moisture):
         dry = conf.PORT_PIN_MAPPING.get(port).get("dry_value")
         wet = conf.PORT_PIN_MAPPING.get(port).get("water_value")
         if moisture >= dry:
-            hum = 0
+            hum = 0.0
         elif moisture <= wet:
-            hum = 100
+            hum = 100.0
         else:
             hum = 100*((moisture-dry)/(wet-dry))
 
     except Exception as e:
-        hum = -1
+        hum = -1.0
     finally:
         gc.collect()
         return round(hum, 1)

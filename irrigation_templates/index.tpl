@@ -146,7 +146,7 @@
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["pump_status"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture_threshold"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture"] + `</td>`;
-            myHTML += `<td class="tg-xwyw">` + pump_info[i]["humidity"] + ` %</td>`;
+            myHTML += `<td class="tg-xwyw">` + pump_info[i]["humidity"].toFixed(1) + ` %</td>`;
 
             if ( pump_info[i]["pump_status"] === "On") {
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button></td>`;

@@ -19,8 +19,11 @@ def index(request, response):
     try:
         data["net_config"] = libraries.get_net_configuration()
         data["irrigation_config"] = libraries.get_irrigation_status()
+        data["irrigationState"] = libraries.get_irrigation_state()
         data["WebRepl"] = libraries.get_web_repl_configuration()
         data["smartThings"] = libraries.get_smartthings_configuration()
+        data["last_error"] = libraries.get_last_error()
+
     except Exception as e:
         sys.print_exception(e)
         html_page = '''
@@ -147,9 +150,6 @@ def save_irrigation_config(request, response):
     gc.collect()
     yield from request.read_form_data()
     try:
-        st_conf = libraries.get_smartthings_configuration()
-        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
-
         config = {
             "total_pumps": int(request.form["total_pumps"])
         }
@@ -170,7 +170,7 @@ def save_irrigation_config(request, response):
                 "system": config
             }
         }
-        smartthings.notify(payload)
+        libraries.notify_st(payload)
 
         manage_data.save_irrigation_config(**config)
         gc.collect()
@@ -235,15 +235,23 @@ def pump_action(request, response):
         request.parse_qs()
         pump = request.form["pump"]
         action = request.form["action"]
-
-        if action == "ON":
+        data = {}
+        if action == "on":
             libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
-        else:
+            data = {"status": action}
+        elif action == "off":
             libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            data = {"status": action}
 
-        headers = {"Location": "/"}
-        gc.collect()
-        yield from picoweb.start_response(response, status="303", headers=headers)
+        if b"text/html" in request.headers[b"Accept"]:
+            headers = {"Location": "/"}
+            gc.collect()
+            yield from picoweb.start_response(response, status="303", headers=headers)
+        else:
+            if data:
+                yield from picoweb.jsonify(response, data)
+
+
 
     except Exception as e:
         sys.print_exception(e)
@@ -314,12 +322,7 @@ def enable_smartthings(request, response):
                     "status": "disable"
                 }
             }
-            st_conf = libraries.get_smartthings_configuration()
-            smartthings = smartthings_handler.SmartThings(retry_num=1,
-                                                          retry_sec=1,
-                                                          st_ip=st_conf["st_ip"],
-                                                          st_port=st_conf["st_port"])
-            smartthings.notify(payload)
+            libraries.notify_st(payload)
 
             st_conf = {
                 "enabled": False,
@@ -371,12 +374,7 @@ def save_smartthings_config(request, response):
                 "system": manage_data.read_irrigation_config()
             }
         }
-        st_conf = libraries.get_smartthings_configuration()
-        smartthings = smartthings_handler.SmartThings(retry_num=1,
-                                                      retry_sec=1,
-                                                      st_ip=st_conf["st_ip"],
-                                                      st_port=st_conf["st_port"])
-        smartthings.notify(payload)
+        libraries.notify_st(payload)
 
     except Exception as e:
         sys.print_exception(e)

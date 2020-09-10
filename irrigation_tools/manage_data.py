@@ -79,6 +79,13 @@ def _save_db_entry(key, value):
                         }
                     }
         },
+        "irrigation_state": {
+                        "running": True
+        }
+        "last_error": {
+                        "error": "traceback....",
+                        "ts": "2020-09-09T14:03:01"
+        }
         "WebRepl": {
                         "enabled": False,
                         "password": "asdas"
@@ -92,13 +99,6 @@ def _save_db_entry(key, value):
 """
 
 
-def get_network_config():
-    """
-    Get the WiFi config. If there is none, return None.
-    """
-    return _get_db_entry('network')
-
-
 def save_network(**kwargs):
     """
     Write the network config to file
@@ -106,11 +106,11 @@ def save_network(**kwargs):
     _save_db_entry('network', kwargs)
 
 
-def read_irrigation_config():
+def get_network_config():
     """
-    Load the irrigation configuration
+    Get the WiFi config. If there is none, return None.
     """
-    return _get_db_entry('irrigation_config')
+    return _get_db_entry('network')
 
 
 def save_irrigation_config(**kwargs):
@@ -120,30 +120,64 @@ def save_irrigation_config(**kwargs):
     _save_db_entry('irrigation_config', kwargs)
 
 
-def read_webrepl_config():
+def read_irrigation_config():
     """
     Load the irrigation configuration
     """
-    return _get_db_entry('WebRepl')
+    return _get_db_entry('irrigation_config')
 
 
 def save_webrepl_config(**kwargs):
     """
-    Save the irrigation configuration
+    Save the webrepl configuration
     """
     _save_db_entry('WebRepl', kwargs)
 
 
-def read_smartthings_config():
+def read_webrepl_config():
     """
-    Load the irrigation configuration
+    Load the webrepl configuration
     """
-    return _get_db_entry('smartThings')
+    return _get_db_entry('WebRepl')
 
 
 def save_smartthings_config(**kwargs):
     """
-    Save the irrigation configuration
+    Save the SmartThings configuration
     """
     _save_db_entry('smartThings', kwargs)
 
+
+def read_smartthings_config():
+    """
+    Load the SmartThings configuration
+    """
+    return _get_db_entry('smartThings')
+
+
+def save_irrigation_state(**kwargs):
+    """
+    Save the irrigation status
+    """
+    _save_db_entry('irrigation_state', kwargs)
+
+
+def read_irrigation_state():
+    """
+    Load the irrigation status
+    """
+    return _get_db_entry('irrigation_state')
+
+
+def save_last_error(**kwargs):
+    """
+    Save the last error
+    """
+    _save_db_entry('last_error', kwargs)
+
+
+def read_last_error():
+    """
+    Load the last error
+    """
+    return _get_db_entry('last_error')

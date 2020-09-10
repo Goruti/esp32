@@ -21,7 +21,7 @@
         <title>Irrigation System Home Page</title>
     </head>
     <body>
-    <h1 style="background: #e4e4e4;padding: 8px;">Welcome to your Automated Irrigation System</h1>
+    <div id="irrigation_state"></div>
     <h2>System Tools</h2>
     <hr>
     <div class="row">
@@ -43,12 +43,33 @@
         </div>
     </div>
     <hr>
-    <h2>Irrigation System Configuration</h2>
-        <div id="irrigation_configuration"></div>
+    <div class="row">
+        <div class="column">
+            <h2>Irrigation System Configuration</h2>
+            <div id="irrigation_configuration"></div>
+        </div>
+        <div class="column">
+            <h2>Last Error Message</h2>
+            <div id="last_error"></div>
+        </div>
+    </div>
     </body>
 </html>
 
 <script>
+    var webRepl_wrapper = document.getElementById("irrigation_state");
+    var myHTML = ``;
+    if ("{{ data["irrigationState"]["running"] }}" === "True") {
+        myHTML += `<h1 style="background: #e4e4e4;padding: 8px;">Welcome to your Automated Irrigation System`
+        myHTML += `div style="font-size:14px; text-align:right; color:green;">Running</div>`
+        myHTML += `</h1>`
+    } else {
+        myHTML += `<h1 style="background: #e4e4e4;padding: 8px;">Welcome to your Automated Irrigation System`
+        myHTML += `div style="font-size:14px; text-align:right; color:red;">Stopped</div>`
+        myHTML += `</h1>`
+    }
+    webRepl_wrapper.innerHTML = myHTML;
+
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
     if ("{{ data["WebRepl"]["enabled"] }}" === "True") {
@@ -125,11 +146,11 @@
 
             if ( pump_info[i]["pump_status"] === "On") {
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button></td>`;
-                myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; border-width: thin">Stop</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=off&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; border-width: thin">Stop</button></td>`;
             }
             else {
                 myHTML += `<td class="tg-xwyw"><button onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em;border-width: thin">Start</button></td>`;
-                myHTML += `<td class="tg-xwyw"><button disabled onclick="window.location = '/pump_action?action=OFF&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; opacity:0.6">Stop</button></td>`;
+                myHTML += `<td class="tg-xwyw"><button disabled onclick="window.location = '/pump_action?action=off&pump=` + pump_info[i]["connected_to_port"] + `';" style="margin-left:1em; opacity:0.6">Stop</button></td>`;
             }
             myHTML += `<tr>`;
         }
@@ -142,15 +163,21 @@
          myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure your Irrigation System</b></p>`;
          myHTML += `<p><button onclick="window.location = '/irrigation_config';">Configure Irrigation System</button>`;
     }
-
     irrigation_wrapper.innerHTML = myHTML;
+
+
+
+
+    var webRepl_wrapper = document.getElementById("last_error");
+    var myHTML = ``;
+    var myHTML = `<p>{{ data["last_error"]}} </p>`
+    webRepl_wrapper.innerHTML = myHTML;
 
     function onStartButton(pump_port) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {
             alert("Water level is to low. Please refill the water tank before starting the pump")
         } else {
-            console.log(pump_port)
-            window.location = '/pump_action?action=ON&pump=' + pump_port;
+            window.location = '/pump_action?action=on&pump=' + pump_port;
         }
     }
 </script>

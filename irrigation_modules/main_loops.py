@@ -8,6 +8,7 @@ from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_han
 
 async def initialize_rtc(frequency_loop=3600):
     while True:
+        gc.collect()
         try:
             if wifi.is_connected():
                 try:
@@ -27,32 +28,29 @@ async def initialize_rtc(frequency_loop=3600):
 
 async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     try:
-        loop = asyncio.get_event_loop()
-        st_conf = libraries.get_smartthings_configuration()
-        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
-
         systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
         sys.print_exception(e)
+        manage_data.save_irrigation_state(**{"running": False})
+        libraries.save_last_error(e)
         gc.collect()
     else:
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
             report_time = -1*report_freq_ms
             while True:
+                gc.collect()
                 try:
                     moisture_status = {}
                     for key, values in systems_info["pump_info"].items():
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = moisture
                         if moisture > values["moisture_threshold"]:
-                            loop.create_task(libraries.start_irrigation(
-                                                    pump_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"),
-                                                    sensor_pin=conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"),
+                            libraries.start_irrigation(
+                                                    port=values["connected_to_port"],
                                                     moisture=moisture,
                                                     threshold=values["moisture_threshold"],
                                                     max_irrigation_time_ms=10000
                                             )
-                            )
 
                     if utime.ticks_diff(utime.ticks_ms(), report_time) > 0:
                         report_time = utime.ticks_add(utime.ticks_ms(), report_freq_ms)
@@ -60,11 +58,11 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                             "type": "moisture_status",
                             "body": moisture_status
                         }
-                        smartthings.notify(payload)
+                        libraries.notify_st(payload)
 
                 except BaseException as e:
-                    print("reading_moister Exception - key: {}, values: {}".format(key, values))
                     sys.print_exception(e)
+                    libraries.save_last_error(e)
                 finally:
                     gc.collect()
                     await asyncio.sleep(frequency_loop_ms/1000)

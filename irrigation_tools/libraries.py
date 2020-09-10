@@ -6,7 +6,6 @@ import gc
 import sys
 import webrepl
 from collections import OrderedDict
-import uasyncio as asyncio
 
 from irrigation_tools import manage_data, conf, water_level, smartthings_handler
 from irrigation_tools.wifi import is_connected, get_mac_address
@@ -15,49 +14,74 @@ micropython.alloc_emergency_exception_buf(100)
 
 
 def get_net_configuration():
-    ip = is_connected()
-    if ip:
-        data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
-    else:
-        data = {"connected": False, "ssid": None, "ip": None}
-    data["mac"] = get_mac_address()
-
-    gc.collect()
-    return data
+    try:
+        ip = is_connected()
+        if ip:
+            data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
+        else:
+            data = {"connected": False, "ssid": None, "ip": None}
+        data["mac"] = get_mac_address()
+    except Exception as e:
+        data = {"connected": False, "ssid": None, "ip": None, "mac": None}
+    finally:
+        gc.collect()
+        return data
 
 
 def get_irrigation_configuration():
-    conf = manage_data.read_irrigation_config()
-    if not conf:
+    try:
+        conf = manage_data.read_irrigation_config()
+        if not conf:
+            conf = {
+                "total_pumps": 0,
+                "pump_info": {},
+                "water_level": None
+            }
+    except Exception as e:
         conf = {
             "total_pumps": 0,
             "pump_info": {},
             "water_level": None
         }
-    gc.collect()
-    return conf
+    finally:
+        gc.collect()
+        return conf
 
 
 def get_web_repl_configuration():
-    conf = manage_data.read_webrepl_config()
-    if not conf:
+    try:
+        conf = manage_data.read_webrepl_config()
+        if not conf:
+            conf = {
+                "enabled": False
+            }
+    except Exception as e:
         conf = {
             "enabled": False
         }
-    gc.collect()
-    return conf
+    finally:
+        gc.collect()
+        return conf
 
 
 def get_smartthings_configuration():
-    conf = manage_data.read_smartthings_config()
-    if not conf or not conf["enabled"]:
+    try:
+        conf = manage_data.read_smartthings_config()
+        if not conf or not conf["enabled"]:
+            conf = {
+                "enabled": False,
+                "st_ip": None,
+                "st_port": None
+            }
+    except Exception as e:
         conf = {
             "enabled": False,
             "st_ip": None,
             "st_port": None
         }
-    gc.collect()
-    return conf
+    finally:
+        gc.collect()
+        return conf
 
 
 def get_irrigation_status():
@@ -75,17 +99,35 @@ def get_irrigation_status():
     return systems_info
 
 
-async def start_irrigation(pump_pin, sensor_pin, moisture, threshold, max_irrigation_time_ms=15000):
+def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
+    pump_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_pump"),
+    sensor_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
+
     started = start_pump(pump_pin)
-    t = utime.ticks_ms()
-    while started and (
-            (moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms)
-            or
-            (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
-        moisture = read_adc(sensor_pin)
-        await asyncio.sleep(1)
     if started:
-        stop_pump(pump_pin)
+        payload = {
+            "type": "pump_status",
+            "body": {
+                port: "on"
+            }
+        }
+        notify_st(payload, retry_num=1, retry_sec=1)
+
+        t = utime.ticks_ms()
+        while ((moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms)
+                or
+                (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
+            moisture = read_adc(sensor_pin)
+            utime.sleep_ms(100)
+        if started:
+            stop_pump(pump_pin)
+            payload = {
+                "type": "pump_status",
+                "body": {
+                    port: "off"
+                }
+            }
+            notify_st(payload, retry_num=1, retry_sec=1)
 
 
 def read_gpio(pin):
@@ -129,8 +171,14 @@ def initialize_irrigation_app():
         webrepl.start(password=conf.WEBREPL_PWD)
         manage_data.save_webrepl_config(**{"enabled": True})
 
+        manage_data.save_irrigation_state(**{"running": True})
+
     except Exception as e:
+        manage_data.save_irrigation_state(**{"running": False})
+        save_last_error(e)
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
+    finally:
+        gc.collect()
 
 
 def start_pump(pin):
@@ -156,7 +204,8 @@ def stop_pump(pin):
         machine.Pin(pin).off()
     except Exception as e:
         sys.print_exception(e)
-    gc.collect()
+    finally:
+        gc.collect()
 
 
 def stop_all_pumps():
@@ -167,7 +216,8 @@ def stop_all_pumps():
     except Exception as e:
         sys.print_exception(e)
         sys.exit()
-    gc.collect()
+    finally:
+        gc.collect()
 
 
 def test_irrigation_system():
@@ -187,6 +237,69 @@ def test_irrigation_system():
         sys.print_exception(e)
     finally:
         gc.collect()
+
+
+def notify_st(body, retry_sec=5, retry_num=1):
+    try:
+        st_conf = get_smartthings_configuration()
+        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"],
+                                                      st_port=st_conf["st_port"],
+                                                      retry_sec=retry_sec,
+                                                      retry_num=retry_num)
+        smartthings.notify(body)
+    except Exception as e:
+        sys.print_exception(e)
+    finally:
+        gc.collect()
+
+
+def save_last_error(error):
+    try:
+        body = {
+            "error": error,
+            "ts": datetime_to_iso(utime.localtime())
+        }
+        manage_data.save_last_error(**body)
+    except Exception as e:
+        sys.print_exception(e)
+    finally:
+        gc.collect()
+
+
+def get_irrigation_state():
+    try:
+        state = manage_data.read_irrigation_state()
+        if not state:
+            state = {
+                "running": None
+            }
+    except Exception as e:
+        sys.print_exception(e)
+        state = {
+            "running": None
+        }
+    finally:
+        gc.collect()
+        return state
+
+
+def get_last_error():
+    try:
+        last_error = manage_data.read_last_error()
+        if not last_error:
+            last_error = {
+                "error": None,
+                "ts": None
+            }
+    except Exception as e:
+        sys.print_exception(e)
+        last_error = {
+            "error": None,
+            "ts": None
+        }
+    finally:
+        gc.collect()
+        return last_error
 
 
 def datetime_to_iso(time):

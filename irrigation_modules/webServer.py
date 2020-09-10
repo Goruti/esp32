@@ -31,7 +31,7 @@ def index(request, response):
                             <head><title>Irrigation System Home Page</title></head>
                             <body>
                                <p>Server couldn't complete your request</p>
-                               <button onclick="window.location.href = '/' ;">Cancel</button>
+                               <button onclick="window.location.href = '/' ;">Refresh</button>
                             </body>
                        </html>
                        '''

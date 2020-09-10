@@ -91,12 +91,32 @@ def get_irrigation_status():
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(
                 conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
-            systems_info["pump_info"][key]["moisture"] = read_adc(
+            moisture = read_adc(
                 conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+            systems_info["pump_info"][key]["moisture"] = moisture
+            systems_info["pump_info"][key]["humidity"] = moisture_to_hum(values["connected_to_port"], moisture)
 
     systems_info["water_level"] = water_level.get_watter_level()
     gc.collect()
     return systems_info
+
+
+def moisture_to_hum(port, moisture):
+    try:
+        dry = conf.PORT_PIN_MAPPING.get(port).get("dry_value")
+        wet = conf.PORT_PIN_MAPPING.get(port).get("water_value")
+        if moisture >= dry:
+            hum = 0
+        elif moisture <= wet:
+            hum = 100
+        else:
+            hum = 100*((moisture-dry)/(wet-dry))
+
+    except Exception as e:
+        hum = -1
+    finally:
+        gc.collect()
+        return round(hum, 1)
 
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):

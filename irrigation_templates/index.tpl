@@ -127,12 +127,13 @@
         myHTML +=  `<th class="tg-18eh" rowspan="2">Plant #</th>`;
         myHTML +=  `<th class="tg-18eh" rowspan="2">Connected to Port</th>`;
         myHTML +=  `<th class="tg-18eh" rowspan="2">Pump Status</th>`;
-        myHTML +=  `<th class="tg-18eh" colspan="2">Moisture</th>`;
+        myHTML +=  `<th class="tg-18eh" colspan="3">Moisture</th>`;
         myHTML +=  `<th class="tg-18eh" colspan="2" rowspan="2">Action</th>`;
         myHTML +=  `</tr>`;
         myHTML +=  `<tr>`;
         myHTML +=  `<td class="tg-18eh">Threshold</td>`;
         myHTML +=  `<td class="tg-18eh">Value</td>`;
+        myHTML +=  `<td class="tg-18eh">Humidity</td>`;
         myHTML +=  `</tr>`;
         myHTML +=  `</thead>`;
         myHTML +=  `<tbody>`;
@@ -145,6 +146,7 @@
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["pump_status"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture_threshold"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture"] + `</td>`;
+            myHTML += `<td class="tg-xwyw">` + pump_info[i]["humidity"] + ` %</td>`;
 
             if ( pump_info[i]["pump_status"] === "On") {
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="margin-left:3em; opacity:0.6">Start</button></td>`;

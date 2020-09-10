@@ -111,7 +111,6 @@ def moisture_to_hum(port, moisture):
             hum = 100.0
         else:
             hum = 100*((moisture-dry)/(wet-dry))
-
     except Exception as e:
         hum = -1.0
     finally:

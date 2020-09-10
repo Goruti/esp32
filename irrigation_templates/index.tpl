@@ -51,6 +51,8 @@
         <div class="column">
             <h2>Last Error Message</h2>
             <div id="last_error"></div>
+            <p><u>Timestamp:</u> {{ data["last_error"]["ts"] }}</p>
+            <p><u>Error:</u> {{ data["last_error"]["error"] }}</p>
         </div>
     </div>
     </body>
@@ -61,7 +63,7 @@
     var myHTML = ``;
     if ("{{ data["irrigationState"]["running"] }}" === "True") {
         myHTML += `<h1 style="background: #e4e4e4;padding: 8px;">Welcome to your Automated Irrigation System`
-        myHTML += `div style="font-size:14px; text-align:right; color:green;">Running</div>`
+        myHTML += `<div style="font-size:14px; text-align:right; color:green;">Running</div>`
         myHTML += `</h1>`
     } else {
         myHTML += `<h1 style="background: #e4e4e4;padding: 8px;">Welcome to your Automated Irrigation System`
@@ -164,14 +166,6 @@
          myHTML += `<p><button onclick="window.location = '/irrigation_config';">Configure Irrigation System</button>`;
     }
     irrigation_wrapper.innerHTML = myHTML;
-
-
-
-
-    var webRepl_wrapper = document.getElementById("last_error");
-    var myHTML = ``;
-    var myHTML = `<p>{{ data["last_error"]}} </p>`
-    webRepl_wrapper.innerHTML = myHTML;
 
     function onStartButton(pump_port) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {

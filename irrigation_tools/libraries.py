@@ -331,7 +331,7 @@ def initialize_loggers(level):
     try:
         _logger = logging.getLogger("Irrigation")
         _logger.setLevel(level)
-        fmt = logging.Formatter("%(asctime)s,%(name)s,%(levelname)s,%(message)s")
+        fmt = logging.Formatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s")
 
         if conf.LOG_DIR not in os.listdir():
             os.mkdir(conf.LOG_DIR)

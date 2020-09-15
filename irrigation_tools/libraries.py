@@ -347,7 +347,7 @@ def read_last_n_lines(fname, N):
         while len(lines) <= N:
             try:
                 f.seek(-pos, 2)
-            except IOError:
+            except OSError:
                 f.seek(0)
                 break
             finally:

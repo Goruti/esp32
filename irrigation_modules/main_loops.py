@@ -1,9 +1,10 @@
 import utime
 import uasyncio as asyncio
 import gc
-import sys
-
+import logging
 from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
+
+_logger = logging.getLogger("Irrigation")
 
 
 async def initialize_rtc(frequency_loop=3600):
@@ -14,13 +15,13 @@ async def initialize_rtc(frequency_loop=3600):
                 try:
                     from ntptime import settime
                     settime()
-                    print("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
+                    _logger.info("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
                 except Exception as e:
-                    sys.print_exception(e)
+                    _logger.exc(e, "Fail to set time")
             else:
-                print("Device is Offline")
+                _logger.info("Device is Offline")
         except BaseException as e:
-            sys.print_exception(e)
+            _logger.exc(e, "Fail to Initialize RTC")
         finally:
             gc.collect()
             await asyncio.sleep(frequency_loop)
@@ -30,9 +31,9 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     try:
         systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail to Read Systems Information RTC")
         manage_data.save_irrigation_state(**{"running": False})
-        libraries.save_last_error(e)
+        #libraries.save_last_error(e)
         gc.collect()
     else:
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
@@ -61,8 +62,8 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                         libraries.notify_st(payload)
 
                 except BaseException as e:
-                    sys.print_exception(e)
-                    libraries.save_last_error(e)
+                    _logger.exc(e, "Fail to get current Moisture status")
+                    #libraries.save_last_error(e)
                 finally:
                     gc.collect()
                     await asyncio.sleep(frequency_loop_ms/1000)

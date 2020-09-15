@@ -1,5 +1,4 @@
 import uasyncio as asyncio
-import sys
 
 from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer

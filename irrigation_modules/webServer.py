@@ -8,7 +8,7 @@ import logging
 
 from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
 
-logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("Irrigation")
 webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
 
 
@@ -28,7 +28,7 @@ def index(request, response):
         data["last_error"] = libraries.get_last_error()
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail getting index")
         html_page = '''
                        <html>
                             <head><title>Irrigation System Home Page</title></head>
@@ -49,7 +49,7 @@ def index(request, response):
             else:
                 yield from picoweb.jsonify(response, data)
         except BaseException as e:
-            sys.print_exception(e)
+            _logger.exc(e, "Fail rendering the page")
 
 
 @webapp.route('/enable_ap', method='GET')
@@ -59,7 +59,7 @@ def wifi_config(request, response):
     try:
         ap_info = wifi.start_ap(conf.AP_SSID, conf.AP_PWD)
     except BaseException as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail Enabling AP")
         error_code = "500"
         html_page = '''
                        <html>
@@ -94,7 +94,7 @@ def wifi_config(request, response):
         yield from picoweb.start_response(response)
         yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
     except BaseException as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail Configuring Wifi")
 
 
 @webapp.route('/config_wifi_2', method='POST')
@@ -110,11 +110,11 @@ def save_wifi_config(request, response):
             net_config[key] = request.form[key]
 
     # Now try to connect to the WiFi network
-    print("trying to connect to wifi with {}".format(net_config))
+    _logger.debug("trying to connect to wifi with {}".format(net_config))
     try:
         wifi.wifi_connect(network_config=net_config)
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail connecting to wifi")
         html_page = '''
                 <html>
                     <head><title>Irrigation System Home Page</title></head>
@@ -179,7 +179,7 @@ def save_irrigation_config(request, response):
         gc.collect()
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail Saving Irrigation Configuration")
         html_page = '''
                 <html>
                     <head><title>Irrigation System Home Page</title></head>
@@ -254,12 +254,12 @@ def pump_action(request, response):
             yield from picoweb.jsonify(response, api_data)
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail to start/stop the pump")
         html_page = '''
                     <html>
                         <head><title>Irrigation System Home Page</title></head>
                        <body>
-                           <p style="color: red;">Could not start the pump. Check the logs on the device.</p><br>
+                           <p style="color: red;">Could not start/stop the pump. Check the logs on the device.</p><br>
                             <p>Error: "{}"</p><br>
                             <button onclick="window.location.href = '/';">Go Home Page</button>
                        </body>
@@ -336,7 +336,7 @@ def enable_smartthings(request, response):
             yield from picoweb.start_response(response, status="303", headers=headers)
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail to Configure SmartThings")
         html_page = '''
                         <html>
                             <head><title>Irrigation System Home Page</title></head>
@@ -377,7 +377,7 @@ def save_smartthings_config(request, response):
         libraries.notify_st(payload)
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail Saving ST configuration")
         html_page = '''
                     <html>
                         <head><title>Irrigation System Home Page</title></head>
@@ -401,7 +401,7 @@ def save_smartthings_config(request, response):
 def restart_system(request, response):
     gc.collect()
     try:
-        print("restarting the system")
+        _logger.info("restarting system")
         html_page = '''
            <html>
                <head><title>Irrigation System Home Page</title></head>
@@ -437,7 +437,7 @@ def restart_system(request, response):
         machine.reset()
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail restarting the system")
         html_page = '''
                     <html>
                         <head><title>Irrigation System Home Page</title></head>
@@ -458,7 +458,7 @@ def test_system(request, response):
     try:
         libraries.test_irrigation_system()
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail testing the system")
         html_page = '''
                     <html>
                         <head><title>Irrigation System Home Page</title></head>
@@ -478,7 +478,6 @@ def test_system(request, response):
 
 
 def require_auth(func):
-
     def auth(req, resp):
         auth = req.headers.get(b"Authorization")
         if not auth:

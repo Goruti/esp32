@@ -19,6 +19,7 @@ _logger = logging.getLogger("Irrigation")
 
 
 def get_net_configuration():
+    gc.collect()
     try:
         ip = is_connected()
         if ip:
@@ -34,6 +35,7 @@ def get_net_configuration():
 
 
 def get_irrigation_configuration():
+    gc.collect()
     try:
         conf = manage_data.read_irrigation_config()
         if not conf:
@@ -54,6 +56,7 @@ def get_irrigation_configuration():
 
 
 def get_web_repl_configuration():
+    gc.collect()
     try:
         conf = manage_data.read_webrepl_config()
         if not conf:
@@ -70,6 +73,7 @@ def get_web_repl_configuration():
 
 
 def get_smartthings_configuration():
+    gc.collect()
     try:
         conf = manage_data.read_smartthings_config()
         if not conf or not conf["enabled"]:
@@ -90,6 +94,7 @@ def get_smartthings_configuration():
 
 
 def get_irrigation_status():
+    gc.collect()
     systems_info = get_irrigation_configuration()
 
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
@@ -107,6 +112,7 @@ def get_irrigation_status():
 
 
 def moisture_to_hum(port, moisture):
+    gc.collect()
     try:
         dry = conf.PORT_PIN_MAPPING.get(port).get("dry_value")
         wet = conf.PORT_PIN_MAPPING.get(port).get("water_value")
@@ -124,6 +130,7 @@ def moisture_to_hum(port, moisture):
 
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
+    gc.collect()
     pump_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_pump"),
     sensor_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
 
@@ -160,6 +167,7 @@ def read_gpio(pin):
 
 
 def read_adc(pin):
+    gc.collect()
     adc = machine.ADC(machine.Pin(pin))  # create ADC object on ADC pin
     adc.atten(machine.ADC.ATTN_11DB)  # set 11dB input attenuation (voltage range roughly 0.0v - 3.3v)
     adc.width(machine.ADC.WIDTH_12BIT)
@@ -174,6 +182,7 @@ def read_adc(pin):
 
 
 def initialize_irrigation_app():
+    gc.collect()
     _logger.info("Initializing Ports")
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
@@ -206,6 +215,7 @@ def initialize_irrigation_app():
 
 
 def start_pump(pin):
+    gc.collect()
     started = False
     try:
         if water_level.get_watter_level() != "empty":
@@ -223,6 +233,7 @@ def start_pump(pin):
 
 
 def stop_pump(pin):
+    gc.collect()
     try:
         _logger.info("Stopping pump: {}".format(pin))
         machine.Pin(pin).off()
@@ -233,6 +244,7 @@ def stop_pump(pin):
 
 
 def stop_all_pumps():
+    gc.collect()
     try:
         _logger.info("Stopping all pumps")
         for key, value in conf.PORT_PIN_MAPPING.items():
@@ -246,6 +258,7 @@ def stop_all_pumps():
 
 
 def test_irrigation_system():
+    gc.collect()
     try:
         systems_info = get_irrigation_configuration()
 
@@ -265,6 +278,7 @@ def test_irrigation_system():
 
 
 def notify_st(body, retry_sec=5, retry_num=1):
+    gc.collect()
     try:
         st_conf = get_smartthings_configuration()
         smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"],
@@ -279,6 +293,7 @@ def notify_st(body, retry_sec=5, retry_num=1):
 
 
 def save_last_error(error):
+    gc.collect()
     try:
         body = {
             "error": error,
@@ -292,6 +307,7 @@ def save_last_error(error):
 
 
 def get_irrigation_state():
+    gc.collect()
     try:
         state = manage_data.read_irrigation_state()
         if not state:
@@ -340,6 +356,7 @@ def get_last_logs(lines=10):
 
 
 def read_last_n_lines(fname, N):
+    gc.collect()
     assert N >= 0
     pos = N + 1
     lines = []
@@ -353,6 +370,7 @@ def read_last_n_lines(fname, N):
             finally:
                 lines = list(f)
             pos *= 2
+    gc.collect()
     return lines[-N:]
 
 
@@ -369,6 +387,7 @@ def get_log_files_names():
 
 
 def initialize_root_logger(level):
+    gc.collect()
     try:
         logging.basicConfig(
             level=level,
@@ -392,4 +411,5 @@ def initialize_root_logger(level):
 
 
 def datetime_to_iso(time):
+    gc.collect()
     return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])

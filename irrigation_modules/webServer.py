@@ -4,8 +4,13 @@ import utime
 import machine
 import sys
 import ubinascii
+import logging
 
 from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
+
+logger = logging.getLogger("Irrigation")
+webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
+
 
 @webapp.route('/', method='GET')
 def index(request, response):
@@ -494,6 +499,3 @@ def require_auth(func):
 #ROUTES = [
 #    ('/', index),
 #]
-
-
-webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)

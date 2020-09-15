@@ -1,8 +1,10 @@
 import gc
 import utime
-from irrigation_tools import libraries, manage_data
+from irrigation_tools import libraries
 import urequests as requests
-import sys
+
+import logging
+_logger = logging.getLogger("Irrigation")
 
 
 class SmartThings:
@@ -20,23 +22,23 @@ class SmartThings:
     def notify(self, body):
         try:
             attempts = self.retry_num
-            #print("{} - Smartthings.notify, Sent body: {}".format(datetime_to_iso(utime.localtime()), body))
+            #_logger.debug("{} - Smartthings.notify, Sent body: {}".format(datetime_to_iso(utime.localtime()), body))
             if self.URL:
                 while attempts and self._send_values(body):
                     attempts -= 1
-                    #print("{} - Smartthings.notify, Re-try: {} - Body: {}".format(datetime_to_iso(utime.localtime()),
+                    #_logger.debug("{} - Smartthings.notify, Re-try: {} - Body: {}".format(datetime_to_iso(utime.localtime()),
                     #                                                              (self.retry_num - attempts), body))
 
                     utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
                 if not attempts:
-                    print("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
+                    _logger.debug("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
                         libraries.datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
             else:
-                print("SmartThings is not configured. This how message would looks like: {}".format(body))
+                _logger.info("SmartThings is not configured. This how message would looks like: {}".format(body))
 
         except Exception as e:
-            sys.print_exception(e)
+            _logger.exc(e, "Failed to notify ST")
 
         finally:
             gc.collect()
@@ -49,13 +51,12 @@ class SmartThings:
             gc.collect()
             r = self.requests.post(self.URL, json=body, headers=headers)
         except Exception as e:
-            print("{} - Smartthings.send_values' - 'Exception': {}, free_memory: {}".format(libraries.datetime_to_iso(utime.localtime()), e, gc.mem_free()))
-            sys.print_exception(e)
+            _logger.exc(e, "fail to send Value - free_memory: {}".format(gc.mem_free()))
         else:
             if r.status_code == 202 or r.status_code == 200:
                 failed = False
             else:
-                print("{} - 'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(
+                _logger.debug("{} - 'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(
                     libraries.datetime_to_iso(utime.localtime()), r.get("status_code"), r.get("reason")))
             r.close()
         finally:

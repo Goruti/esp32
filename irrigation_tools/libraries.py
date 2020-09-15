@@ -8,14 +8,14 @@ import webrepl
 import os
 import uio
 import logging
-#from logging.handlers import RotatingFileHandler
+from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
 
 from irrigation_tools import manage_data, conf, water_level, smartthings_handler
 from irrigation_tools.wifi import is_connected, get_mac_address
 
 micropython.alloc_emergency_exception_buf(100)
-logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("Irrigation")
 
 
 def get_net_configuration():
@@ -174,7 +174,7 @@ def read_adc(pin):
 
 
 def initialize_irrigation_app():
-    logger.info("Initializing Ports")
+    _logger.info("Initializing Ports")
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
@@ -200,7 +200,7 @@ def initialize_irrigation_app():
     except Exception as e:
         manage_data.save_irrigation_state(**{"running": False})
         #save_last_error(e)
-        logger.exc(e, "Cannot initialize Irrigation APP")
+        _logger.exc(e, "Cannot initialize Irrigation APP")
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
     finally:
         gc.collect()
@@ -210,14 +210,14 @@ def start_pump(pin):
     started = False
     try:
         if water_level.get_watter_level() != "empty":
-            logger.info("Starting pump: {}".format(pin))
+            _logger.info("Starting pump: {}".format(pin))
             machine.Pin(pin).on()
             started = True
         else:
-            logger.info("cannot start pump {} since tank is empty".format(pin))
+            _logger.info("cannot start pump {} since tank is empty".format(pin))
             gc.collect()
     except Exception as e:
-        logger.exc(e, "Failed Starting Pump")
+        _logger.exc(e, "Failed Starting Pump")
     finally:
         gc.collect()
         return started
@@ -225,21 +225,21 @@ def start_pump(pin):
 
 def stop_pump(pin):
     try:
-        logger.info("Stopping pump: {}".format(pin))
+        _logger.info("Stopping pump: {}".format(pin))
         machine.Pin(pin).off()
     except Exception as e:
-        logger.exc(e, "Failed Stopping Pump")
+        _logger.exc(e, "Failed Stopping Pump")
     finally:
         gc.collect()
 
 
 def stop_all_pumps():
     try:
-        logger.info("Stopping all pumps")
+        _logger.info("Stopping all pumps")
         for key, value in conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])
     except Exception as e:
-        logger.exc(e, "Failed Stopping ALL Pump. It will stop the whole application")
+        _logger.exc(e, "Failed Stopping ALL Pump. It will stop the whole application")
         manage_data.save_irrigation_state(**{"running": False})
         sys.exit()
     finally:
@@ -253,14 +253,14 @@ def test_irrigation_system():
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
             systems_info["pump_info"] = OrderedDict(sorted(systems_info["pump_info"].items(), key=lambda t: t[0]))
             for key, values in systems_info["pump_info"].items():
-                logger.exc("testing port {}".format(values["connected_to_port"]))
+                _logger.exc("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
-                logger.exc("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
+                _logger.exc("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
                 if start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
                     utime.sleep(4)
                     stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
     except BaseException as e:
-        logger.exc(e, "Failed Test Irrigation System")
+        _logger.exc(e, "Failed Test Irrigation System")
     finally:
         gc.collect()
 
@@ -274,7 +274,7 @@ def notify_st(body, retry_sec=5, retry_num=1):
                                                       retry_num=retry_num)
         smartthings.notify(body)
     except Exception as e:
-        logger.exc(e, "Failed Notify ST")
+        _logger.exc(e, "Failed Notify ST")
     finally:
         gc.collect()
 
@@ -287,7 +287,7 @@ def save_last_error(error):
         }
         manage_data.save_last_error(**body)
     except Exception as e:
-        logger.exc(e, "Failed Save Last Error")
+        _logger.exc(e, "Failed Save Last Error")
     finally:
         gc.collect()
 
@@ -300,7 +300,7 @@ def get_irrigation_state():
                 "running": None
             }
     except Exception as e:
-        logger.exc(e, "Failed Getting Irrigation State")
+        _logger.exc(e, "Failed Getting Irrigation State")
         state = {
             "running": None
         }
@@ -318,7 +318,7 @@ def get_last_error():
                 "ts": None
             }
     except Exception as e:
-        logger.exc(e, "Failed Getting last Error")
+        _logger.exc(e, "Failed Getting last Error")
         last_error = {
             "error": None,
             "ts": None
@@ -328,29 +328,29 @@ def get_last_error():
         return last_error
 
 
-#def initialize_loggers(level):
-#    try:
-#        logger = logging.getLogger("Irrigation")
-#        logger.setLevel(level)
-#        fmt = logging.Formatter("%(asctime)s,%(name)s,%(levelname)s,%(message)s")
-#
-#        if conf.LOG_DIR not in os.listdir():
-#            os.mkdir(conf.LOG_DIR)
-#        rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=2)
-#        rfh.setFormatter(fmt)
-#        logger.addHandler(rfh)
-#
-#        sh = logging.StreamHandler()
-#        sh.setFormatter(sh)
-#        logger.addHandler(sh)
-#    except Exception as e:
-#        buf = uio.StringIO()
-#        sys.print_exception(e, buf)
-#        raise RuntimeError("Cannot Initialize loggers.\nError: {}".format(buf.getvalue()))
-#    else:
-#        return logger
-#    finally:
-#        gc.collect()
+def initialize_loggers(level):
+    try:
+        _logger = logging.getLogger("Irrigation")
+        _logger.setLevel(level)
+        fmt = logging.Formatter("%(asctime)s,%(name)s,%(levelname)s,%(message)s")
+
+        if conf.LOG_DIR not in os.listdir():
+            os.mkdir(conf.LOG_DIR)
+        rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=2)
+        rfh.setFormatter(fmt)
+        _logger.addHandler(rfh)
+
+        sh = logging.StreamHandler()
+        sh.setFormatter(fmt)
+        _logger.addHandler(sh)
+    except Exception as e:
+        buf = uio.StringIO()
+        sys.print_exception(e, buf)
+        raise RuntimeError("Cannot Initialize loggers.\nError: {}".format(buf.getvalue()))
+    else:
+        return _logger
+    finally:
+        gc.collect()
 
 
 def datetime_to_iso(time):

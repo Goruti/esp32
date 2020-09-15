@@ -3,6 +3,9 @@ import machine
 import gc
 import utime
 import ubinascii
+import logging
+
+_logger = logging.getLogger("Irrigation")
 
 
 def is_connected():
@@ -40,7 +43,7 @@ def start_ap(essid_name="ESP32 AP", password="ESP32 P@assword"):
 
     ip = ap.ifconfig()[0]
     essid = ap.config('essid')
-    print("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid, ip))
+    _logger.info("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid, ip))
 
     return {"ssid": essid, "ip": ip}
 
@@ -53,7 +56,7 @@ def stop_ap():
     ap = network.WLAN(network.AP_IF)
     if ap.active():
         ap.active(False)
-    print("AP is OFF")
+    _logger.debug("AP is OFF")
 
 
 def get_available_networks():
@@ -62,7 +65,7 @@ def get_available_networks():
     if not wlan.active():
         wlan.active(True)
         utime.sleep(2)
-    print("Scanning wifi nets")
+    _logger.debug("Scanning wifi nets")
     nets = [e[0].decode("utf-8") for e in wlan.scan()]
     return nets
 
@@ -106,7 +109,7 @@ def wifi_connect(network_config, timeout_ms=10000):
                 error_msg = "Undefined Error"
             raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
 
-    print("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
+    _logger.info("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
 
 
 def wifi_disconnect():

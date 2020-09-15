@@ -2,6 +2,9 @@ import usocket as socket
 import uselect
 import uerrno
 import gc
+import logging
+
+_logger = logging.getLogger("Irrigation")
 
 
 class Response:
@@ -61,7 +64,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
         #s.setblocking(False)
     except Exception as e:
-        print("urequest - Could not create a socket object. Exception: {}".format(e))
+        _logger.exc(e, "urequest - Could not create a socket object")
         raise
 
     #  ATTEMPT TO CONNECT
@@ -69,11 +72,11 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         s.connect((host, port))
     except OSError as e:
         if e.args[0] not in [uerrno.EINPROGRESS, uerrno.ETIMEDOUT]:
-            print("urequest - Error 'OSError' while trying to connect. Exception: {}".format(e))
+            _logger.exc(e, "urequest - Error 'OSError' while trying to connect")
             s.close()
             raise
     except Exception as e:
-        print("urequest - Error while trying to connect. Exception: {}".format(e))
+        _logger.exc(e, "urequest - General Error while trying to connect")
         s.close()
         raise
 
@@ -102,11 +105,11 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
             s.write(data)
     except OSError as e:
         if e.args[0] not in [uerrno.EINPROGRESS, uerrno.ETIMEDOUT]:
-            print("urequest - ERROR 'OSError' while trying to write. Exception: {}".format(e))
+            _logger.exc(e, "urequest - ERROR 'OSError' while trying to write")
             s.close()
             raise
     except Exception as e:
-        print("urequest -ERROR while trying to write. Exception: {}".format(e))
+        _logger.exc(e, "urequest - General ERROR while trying to write.")
         s.close()
         raise
 
@@ -122,7 +125,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         if res:
             l = s.readline()
             if len(l) == 0:
-                print("Didn't receive 'l' data!")
+                _logger.info("Didn't receive 'l' data!")
                 #s.close()
                 raise RuntimeError("Didn't receive 'l' data!")
 
@@ -145,7 +148,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
                     raise NotImplementedError("Redirects not yet supported")
         else:
             #s.close()
-            print("Didn't receive data! [Timeout {}s]".format(socket_timeout/1000))
+            _logger.info("Didn't receive data! [Timeout {}s]".format(socket_timeout/1000))
             raise RuntimeError("Didn't receive data! [Timeout {}s]".format(socket_timeout/1000))
 
     #except socket.timeout:
@@ -153,7 +156,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
     #    s.close()
     #    raise
     except Exception as e:
-        print("urequest - ERROR waiting for a response. Exception: {}".format(e))
+        _logger.exc(e, "urequest - ERROR waiting for a response")
         s.close()
         raise
     else:

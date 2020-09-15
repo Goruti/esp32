@@ -290,7 +290,7 @@ class WebApp:
 
     def handle_static(self, req, resp):
         path = req.url_match.group(1)
-        print(path)
+        self.log.info(path)
         if ".." in path:
             yield from http_error(resp, "403")
             return
@@ -324,6 +324,6 @@ class WebApp:
                 app.init()
         loop = asyncio.get_event_loop()
         if debug > 0:
-            print("* Running on http://%s:%s/" % (host, port))
+            self.log.info("* Running on http://%s:%s/" % (host, port))
         self.serve(loop, host, port)
         loop.close()

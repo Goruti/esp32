@@ -2,10 +2,13 @@ import utime
 import micropython
 import gc
 import sys
+import logging
 import uasyncio as asyncio
 from irrigation_tools import smartthings_handler, libraries, conf
 
+_logger = logging.getLogger("Irrigation")
 
+lo
 class WaterLevel:
     def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
         self.last_time_ms = 0
@@ -29,7 +32,7 @@ def water_level_interruption_function(pin):
     value = pin.value()
     #utime.sleep(5)
     #if pin.value() != value:
-    print("Confirmed interruption - {}: {}".format(pin, value))
+    _logger.info("Confirmed interruption - {}: {}".format(pin, value))
     st_conf = libraries.get_smartthings_configuration()
     smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
     try:
@@ -48,14 +51,14 @@ def water_level_interruption_function(pin):
         smartthings.notify(payload)
 
     except Exception as e:
-        sys.print_exception(e)
+        _logger.exc(e, "Fail to confirm the interruption")
     finally:
         gc.collect()
 
 
 def water_level_interruption_handler(pin):
     #value = pin.value()
-    print("interruption has been triggered - {}: {}".format(pin, pin.value()))
+    _logger.info("interruption has been triggered - {}: {}".format(pin, pin.value()))
     #utime.sleep(5)
     #if pin.value() == value:
     micropython.schedule(water_level_interruption_function, pin)

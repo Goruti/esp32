@@ -477,6 +477,28 @@ def test_system(request, response):
         gc.collect()
 
 
+@webapp.route('/getLogs', method='GET')
+def test_system(request, response):
+    gc.collect()
+    try:
+        yield from webapp.sendfile(response, "{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME))
+    except Exception as e:
+        _logger.exc(e, "Fail Getting the logs")
+        html_page = '''
+                        <html>
+                            <head><title>Irrigation System Home Page</title></head>
+                           <body>
+                               <p style="color: red;">Could not get the Logs. Check the logs on the device.</p><br>
+                                <p>Error: "{}"</p><br>
+                                <button onclick="window.location.href = '/';">Go Home Page</button>
+                           </body>
+                       </html>'''.format(e)
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
+    finally:
+        gc.collect()
+
+
 def require_auth(func):
     def auth(req, resp):
         auth = req.headers.get(b"Authorization")

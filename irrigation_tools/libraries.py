@@ -342,7 +342,6 @@ def initialize_root_logger(level):
         rfh.setFormatter(fmt)
         _logger.addHandler(rfh)
 
-
     except Exception as e:
         buf = uio.StringIO()
         sys.print_exception(e, buf)

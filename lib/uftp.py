@@ -45,7 +45,7 @@ STA_addr = ("0.0.0.0", 0, 0xffffff00)
 _month_name = ("", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("uftp")
 
 
 class FTP_client:

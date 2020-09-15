@@ -327,27 +327,26 @@ def get_last_error():
         return last_error
 
 
-def initialize_loggers(level):
+def initialize_root_logger(level):
     try:
-        _logger = logging.getLogger("Irrigation")
-        _logger.setLevel(level)
-        fmt = logging.Formatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s")
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s, %(name)s, %(levelname)s, %(message)s"
+        )
 
+        _logger = logging.getLogger()
         if conf.LOG_DIR not in os.listdir():
             os.mkdir(conf.LOG_DIR)
         rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=2)
+        fmt = logging.Formatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s")
         rfh.setFormatter(fmt)
         _logger.addHandler(rfh)
 
-        sh = logging.StreamHandler()
-        sh.setFormatter(fmt)
-        _logger.addHandler(sh)
+
     except Exception as e:
         buf = uio.StringIO()
         sys.print_exception(e, buf)
         raise RuntimeError("Cannot Initialize loggers.\nError: {}".format(buf.getvalue()))
-    else:
-        return _logger
     finally:
         gc.collect()
 

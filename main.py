@@ -7,12 +7,13 @@ import sys
 import logging
 
 #  Initialize logger
-logger = libraries.initialize_loggers(logging.DEBUG)
+libraries.initialize_root_logger(logging.DEBUG)
+_logger = logging.getLogger("Irrigation")
 
 try:
     wifi_connect(manage_data.get_network_config())
 except Exception as e:
-    logger.info("Device is Offline. Start AP")
+    _logger.info("Device is Offline. Start AP")
     start_ap(conf.AP_SSID, conf.AP_PWD)
 else:
     stop_ap()
@@ -28,5 +29,5 @@ try:
     main_app()
 except Exception as e:
     sys.print_exception(e)
-    logger.exc(e, "failed starting main application")
+    _logger.exc(e, "failed starting main application")
 

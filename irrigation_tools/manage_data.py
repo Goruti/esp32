@@ -81,11 +81,7 @@ def _save_db_entry(key, value):
         },
         "irrigation_state": {
                         "running": True
-        }
-        "last_error": {
-                        "error": "traceback....",
-                        "ts": "2020-09-09T14:03:01"
-        }
+        },
         "WebRepl": {
                         "enabled": False,
                         "password": "asdas"
@@ -167,17 +163,3 @@ def read_irrigation_state():
     Load the irrigation status
     """
     return _get_db_entry('irrigation_state')
-
-
-def save_last_error(**kwargs):
-    """
-    Save the last error
-    """
-    _save_db_entry('last_error', kwargs)
-
-
-def read_last_error():
-    """
-    Load the last error
-    """
-    return _get_db_entry('last_error')

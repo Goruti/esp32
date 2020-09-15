@@ -33,7 +33,6 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     except BaseException as e:
         _logger.exc(e, "Fail to Read Systems Information RTC")
         manage_data.save_irrigation_state(**{"running": False})
-        #libraries.save_last_error(e)
         gc.collect()
     else:
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
@@ -63,7 +62,6 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
 
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")
-                    #libraries.save_last_error(e)
                 finally:
                     gc.collect()
                     await asyncio.sleep_ms(frequency_loop_ms)

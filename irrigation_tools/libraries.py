@@ -207,7 +207,6 @@ def initialize_irrigation_app():
 
     except Exception as e:
         manage_data.save_irrigation_state(**{"running": False})
-        #save_last_error(e)
         _logger.exc(e, "Cannot initialize Irrigation APP")
         raise RuntimeError("Cannot initialize Irrigation APP: error: {}".format(e))
     finally:
@@ -292,20 +291,6 @@ def notify_st(body, retry_sec=5, retry_num=1):
         gc.collect()
 
 
-def save_last_error(error):
-    gc.collect()
-    try:
-        body = {
-            "error": error,
-            "ts": datetime_to_iso(utime.localtime())
-        }
-        manage_data.save_last_error(**body)
-    except Exception as e:
-        _logger.exc(e, "Failed Save Last Error")
-    finally:
-        gc.collect()
-
-
 def get_irrigation_state():
     gc.collect()
     try:
@@ -322,56 +307,6 @@ def get_irrigation_state():
     finally:
         gc.collect()
         return state
-
-
-def get_last_error():
-    try:
-        last_error = manage_data.read_last_error()
-        if not last_error:
-            last_error = {
-                "error": None,
-                "ts": None
-            }
-    except Exception as e:
-        _logger.exc(e, "Failed Getting last Error")
-        last_error = {
-            "error": None,
-            "ts": None
-        }
-    finally:
-        gc.collect()
-        return last_error
-
-
-def get_last_logs(lines=10):
-    gc.collect()
-    data=''
-    try:
-        data = "".join(read_last_n_lines("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), lines))
-    except Exception as e:
-        _logger.exc(e, "cannot get last logs")
-    finally:
-        gc.collect()
-        return data
-
-
-def read_last_n_lines(fname, N):
-    gc.collect()
-    assert N >= 0
-    pos = N + 1
-    lines = []
-    with open(fname) as f:
-        while len(lines) <= N:
-            try:
-                f.seek(-pos, 2)
-            except OSError:
-                f.seek(0)
-                break
-            finally:
-                lines = list(f)
-            pos *= 2
-    gc.collect()
-    return lines[-N:]
 
 
 def get_log_files_names():

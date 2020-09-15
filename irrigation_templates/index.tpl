@@ -73,11 +73,11 @@
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
     if ("{{ data["WebRepl"]["enabled"] }}" === "True") {
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
-        myHTML += `<button onclick="window.location = '/configWebRepl?action=disable';" style="margin-left:1em">Disable </button>`
+        myHTML += `<button disabled onclick="window.location = '/config_web_repl?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
+        myHTML += `<button onclick="window.location = '/config_web_repl?action=disable';" style="margin-left:1em">Disable </button>`
     } else {
-        myHTML += `<button onclick="window.location = '/configWebRepl?action=enable';" style="">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/configWebRepl?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
+        myHTML += `<button onclick="window.location = '/config_web_repl?action=enable';" style="">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/config_web_repl?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 

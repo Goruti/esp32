@@ -327,6 +327,47 @@ def get_last_error():
         return last_error
 
 
+def get_last_logs(lines=10):
+    gc.collect()
+    data=''
+    try:
+        data = "".join(read_last_n_lines("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), lines))
+    except Exception as e:
+        _logger.exc(e, "cannot get last logs")
+    finally:
+        gc.collect()
+        return data
+
+
+def read_last_n_lines(fname, N):
+    assert N >= 0
+    pos = N + 1
+    lines = []
+    with open(fname) as f:
+        while len(lines) <= N:
+            try:
+                f.seek(-pos, 2)
+            except IOError:
+                f.seek(0)
+                break
+            finally:
+                lines = list(f)
+            pos *= 2
+    return lines[-N:]
+
+
+def get_log_files_names():
+    gc.collect()
+    files = []
+    try:
+        files = os.listdir(conf.LOG_DIR)
+    except Exception as e:
+        _logger.exc(e, "cannot get the log files name")
+    finally:
+        gc.collect()
+        return files
+
+
 def initialize_root_logger(level):
     try:
         logging.basicConfig(

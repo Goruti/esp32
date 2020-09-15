@@ -25,7 +25,9 @@ def index(request, response):
         data["irrigationState"] = libraries.get_irrigation_state()
         data["WebRepl"] = libraries.get_web_repl_configuration()
         data["smartThings"] = libraries.get_smartthings_configuration()
-        data["last_error"] = libraries.get_last_error()
+        #data["last_error"] = libraries.get_last_error()
+        data["log_files_name"] = libraries.get_log_files_names()
+        data["last_logs"] = libraries.get_last_logs(lines=10)
 
     except Exception as e:
         _logger.exc(e, "Fail getting index")
@@ -477,11 +479,13 @@ def test_system(request, response):
         gc.collect()
 
 
-@webapp.route('/getLogs', method='GET')
+@webapp.route('/get_log_file', method='GET')
 def test_system(request, response):
     gc.collect()
     try:
-        yield from webapp.sendfile(response, "{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME))
+        request.parse_qs()
+        file_name = request.form["file_name"]
+        yield from webapp.sendfile(response, "{}/{}".format(conf.LOG_DIR, file_name))
     except Exception as e:
         _logger.exc(e, "Fail Getting the logs")
         html_page = '''

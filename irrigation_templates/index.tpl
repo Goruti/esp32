@@ -49,10 +49,8 @@
             <div id="irrigation_configuration"></div>
         </div>
         <div class="column">
-            <h2>Last Error Message</h2>
-            <div id="last_error"></div>
-            <p><u>Timestamp:</u> {{ data["last_error"]["ts"] }}</p>
-            <p><u>Error:</u> {{ data["last_error"]["error"] }}</p>
+            <h2>Available logs</h2>
+            <div id="logs_files"></div>
         </div>
     </div>
     </body>
@@ -168,6 +166,16 @@
          myHTML += `<p><button onclick="window.location = '/irrigation_config';">Configure Irrigation System</button>`;
     }
     irrigation_wrapper.innerHTML = myHTML;
+
+    var webRepl_wrapper = document.getElementById("logs_files");
+    var myHTML = ``;
+    var logs_files = {{ data["log_files_name"] }}
+    logs_files.forEach(file_name => {
+        myHTML += `<p>` + file_name
+        myHTML += `<button onclick="window.location = '/get_log_file?file_name='` + file_name + `';" style="margin-left:3em">Download</button>`
+        myHTML += `</p>`
+    });
+    webRepl_wrapper.innerHTML = myHTML;
 
     function onStartButton(pump_port) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {

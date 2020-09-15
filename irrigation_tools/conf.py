@@ -23,5 +23,8 @@ TEMPLATES_DIR = "irrigation_templates"
 AP_SSID = "My Awesome Irrigation System"
 AP_PWD = "My@wesomeP@sword"
 WEBREPL_PWD = "S@mu3l"
+#Logs
+LOG_DIR = "log"
+LOG_FILENAME = "irrigation.log"
 
 

@@ -3,11 +3,9 @@ import picoweb
 import utime
 import machine
 import sys
+import ubinascii
 
 from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
-
-webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
-
 
 @webapp.route('/', method='GET')
 def index(request, response):
@@ -235,23 +233,20 @@ def pump_action(request, response):
         request.parse_qs()
         pump = request.form["pump"]
         action = request.form["action"]
-        data = {}
+        api_data = {"status": "off"}
         if action == "on":
-            libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
-            data = {"status": action}
+            started = libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            if started:
+                api_data = {"status": "on"}
         elif action == "off":
             libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
-            data = {"status": action}
 
         if b"text/html" in request.headers[b"Accept"]:
             headers = {"Location": "/"}
             gc.collect()
             yield from picoweb.start_response(response, status="303", headers=headers)
         else:
-            if data:
-                yield from picoweb.jsonify(response, data)
-
-
+            yield from picoweb.jsonify(response, api_data)
 
     except Exception as e:
         sys.print_exception(e)
@@ -475,3 +470,30 @@ def test_system(request, response):
         yield from picoweb.start_response(response, status="303", headers=headers)
     finally:
         gc.collect()
+
+
+def require_auth(func):
+
+    def auth(req, resp):
+        auth = req.headers.get(b"Authorization")
+        if not auth:
+            yield from resp.awrite(
+                'HTTP/1.0 401 NA\r\n'
+                'WWW-Authenticate: Basic realm="Picoweb Realm"\r\n'
+                '\r\n'
+            )
+            return
+
+        auth = auth.split(None, 1)[1]
+        auth = ubinascii.a2b_base64(auth).decode()
+        req.username, req.passwd = auth.split(":", 1)
+        yield from func(req, resp)
+
+    return auth
+
+#ROUTES = [
+#    ('/', index),
+#]
+
+
+webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)

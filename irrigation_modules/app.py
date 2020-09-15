@@ -3,9 +3,11 @@ import sys
 
 from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer
+import logging
 
 
 def main_app():
+    logger = logging.getLogger("Irrigation")
     try:
         libraries.initialize_irrigation_app()
 
@@ -21,11 +23,10 @@ def main_app():
         loop.create_task(main_loops.initialize_rtc(frequency_loop=86400))
         loop.create_task(main_loops.reading_moister(frequency_loop_ms=3600000, report_freq_ms=3600000))
         #loop.create_task(main_loops.reading_water_level(frequency_loop=300))
-        webServer.webapp.run(host="0.0.0.0", port=80)
+        webServer.webapp.run(host="0.0.0.0", port=80, log=logger)
 
     except BaseException as e:
-        sys.print_exception(e)
-        print("GOODBYE DUDE!!!")
+        logger.exc(e, "GOODBYE DUDE!!!")
 
     finally:
         if loop:

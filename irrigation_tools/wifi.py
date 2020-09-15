@@ -17,12 +17,14 @@ def is_connected():
     if wlan.active() and wlan.isconnected():
         details = wlan.ifconfig()
         ip_address = details[0] if details else None
+    gc.collect()
     return ip_address
 
 
 def get_mac_address():
     gc.collect()
-    mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+    mac = ubinascii.hexlify(network.WLAN().config('mac'), ':').decode()
+    gc.collect()
     return mac
 
 

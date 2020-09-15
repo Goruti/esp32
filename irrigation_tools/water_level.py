@@ -2,8 +2,7 @@ import utime
 import micropython
 import gc
 import sys
-import machine
-
+import uasyncio as asyncio
 from irrigation_tools import smartthings_handler, libraries, conf
 
 
@@ -25,6 +24,8 @@ class WaterLevel:
 
 
 def water_level_interruption_function(pin):
+    #loop = asyncio.get_event_loop()
+
     value = pin.value()
     #utime.sleep(5)
     #if pin.value() != value:

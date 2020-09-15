@@ -1,14 +1,18 @@
 from irrigation_tools.wifi import start_ap, stop_ap, wifi_connect
-from irrigation_tools import manage_data, conf
+from irrigation_tools import manage_data, conf, libraries
 from irrigation_modules.app import main_app
 import gc
 import os
 import sys
+import logging
+
+#  Initialize logger
+logger = libraries.initialize_loggers(logging.DEBUG)
 
 try:
     wifi_connect(manage_data.get_network_config())
 except Exception as e:
-    print("Device is Offline. Start AP")
+    logger.info("Device is Offline. Start AP")
     start_ap(conf.AP_SSID, conf.AP_PWD)
 else:
     stop_ap()
@@ -19,10 +23,10 @@ for file in os.listdir('irrigation_templates'):
         os.remove("irrigation_templates/{}".format(file))
 
 gc.collect()
-
 try:
     import uftp
     main_app()
 except Exception as e:
     sys.print_exception(e)
+    logger.exc(e, "failed starting main application")
 

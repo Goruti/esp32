@@ -52,6 +52,7 @@ def template_string(writer, s):
 
 
 def start_response(writer, content_type="text/html; charset=utf-8", status="200", headers=None):
+    gc.collect()
     yield from writer.awrite("HTTP/1.0 %s NA\r\n" % status)
     yield from writer.awrite("Content-Type: ")
     yield from writer.awrite(content_type)

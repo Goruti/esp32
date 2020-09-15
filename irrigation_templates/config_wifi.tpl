@@ -1,5 +1,4 @@
 {% args data %}
-
 <html>
     <head>
         <title>Irrigation System Home Page</title>
@@ -16,12 +15,10 @@
         </form>
     </body>
 </html>
-
 <script>
   var net_wrapper = document.getElementById("inject_networks");
   var nets = {{data}}
   var myHTML = '';
-
   nets.forEach(el => {
    myHTML += '<option value="' + el + '">' + el + '</option>';
   })

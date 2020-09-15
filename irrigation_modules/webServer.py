@@ -7,8 +7,9 @@ gc.collect()
 import ubinascii
 gc.collect()
 import logging
-
-from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
+gc.collect()
+from irrigation_tools import conf, wifi, manage_data, libraries
+gc.collect()
 
 _logger = logging.getLogger("Irrigation")
 
@@ -38,7 +39,7 @@ def wifi_config(request, response):
     if request.method == "GET":
         yield from wifi_config_get(request, response)
     elif request.method == "POST":
-        wifi_config_post(request, response)
+        yield from wifi_config_post(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -158,6 +159,11 @@ def index_get(request, response):
         except BaseException as e:
             _logger.exc(e, "Fail rendering the page")
 
+    finally:
+        gc.collect()
+        data= {}
+        html_page = ""
+
 
 def enable_ap_get(request, response):
     gc.collect()
@@ -243,9 +249,13 @@ def wifi_config_post(request, response):
 
 def irrigation_config_get(request, response):
     gc.collect()
-    html_page = open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r').read()
+
+    with open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r') as f:
+        html_page = f.read().strip().replace(" ", "").replace("\n", "")
+    gc.collect()
     yield from picoweb.start_response(response)
     yield from response.awrite(str(html_page))
+    html_page = ""
 
 
 def irrigation_config_post(request, response):
@@ -610,6 +620,7 @@ def require_auth(func):
         yield from func(req, resp)
 
     return auth
+
 
 ROUTES = [
     ('/', index),

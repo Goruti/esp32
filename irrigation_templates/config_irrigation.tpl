@@ -21,15 +21,11 @@
       </form>
     </body>
 </html>
-
 <script>
   function totalPumpsFunction() {
     var total_pump = document.getElementById("total_pumps").value
-
     var sys_wrapper = document.getElementById("inject_pumps_config");
-
     var myHTML = '<h2> Pumps Configuration </h2>'
-
     for (var i = 1; i <= total_pump; i++) {
       myHTML += '<h3>Pump #' + i + '</h3>'
       myHTML += 'Connected to Port:  <select input type="text" onchange="this.className=this.options[this.selectedIndex].className" name="connected_to_port_' + i + '" id="connected_to_port_' + i + '" required>';
@@ -44,8 +40,6 @@
     }
     myHTML += `<input type="submit" value="Save" onclick="validateForm()">`
     myHTML += `<input type="button" name="Cancel" value="Cancel" onClick="window.location='/';">`
-
     sys_wrapper.innerHTML = myHTML
   }
-
 </script>

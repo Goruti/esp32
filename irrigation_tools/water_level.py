@@ -8,7 +8,7 @@ from irrigation_tools import smartthings_handler, libraries, conf
 
 _logger = logging.getLogger("Irrigation")
 
-lo
+
 class WaterLevel:
     def __init__(self, pin, callback=None, debounce_ms=5000, falling=True):
         self.last_time_ms = 0

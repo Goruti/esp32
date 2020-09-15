@@ -171,9 +171,8 @@
     var myHTML = ``;
     var logs_files = {{ data["log_files_name"] }}
     logs_files.forEach(file_name => {
-        myHTML += `<p>` + file_name
-        myHTML += `<button onclick="window.location = '/get_log_file?file_name='` + file_name + `';" style="margin-left:3em">Download</button>`
-        myHTML += `</p>`
+        myHTML += `<p><button onclick="window.location = '/get_log_file?file_name=` + file_name + `;" style="margin-left:3em">Download</button>`
+        myHTML += `<spam style="margin-left: 1em;">` + file_name + `</spam></p>`
     });
     webRepl_wrapper.innerHTML = myHTML;
 

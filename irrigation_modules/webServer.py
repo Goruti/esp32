@@ -2,7 +2,6 @@ import gc
 import picoweb
 import utime
 import machine
-import sys
 import ubinascii
 import logging
 
@@ -14,7 +13,7 @@ _logger = logging.getLogger("Irrigation")
 def index(request, response):
     gc.collect()
     if request.method == "GET":
-        index_get(request, response)
+        yield from index_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -24,7 +23,7 @@ def index(request, response):
 def enable_ap(request, response):
     gc.collect()
     if request.method == "GET":
-        enable_ap_get(request, response)
+        yield from enable_ap_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -34,7 +33,7 @@ def enable_ap(request, response):
 def wifi_config(request, response):
     gc.collect()
     if request.method == "GET":
-        wifi_config_get(request, response)
+        yield from wifi_config_get(request, response)
     elif request.method == "POST":
         wifi_config_post(request, response)
     else:
@@ -46,9 +45,9 @@ def wifi_config(request, response):
 def irrigation_config(request, response):
     gc.collect()
     if request.method == "GET":
-        irrigation_config_get(request, response)
+        yield from irrigation_config_get(request, response)
     elif request.method == "POST":
-        irrigation_config_post(request, response)
+        yield from irrigation_config_post(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -58,7 +57,7 @@ def irrigation_config(request, response):
 def pump_action(request, response):
     gc.collect()
     if request.method == "GET":
-        pump_action_get(request, response)
+        yield from pump_action_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -68,7 +67,7 @@ def pump_action(request, response):
 def config_web_repl(request, response):
     gc.collect()
     if request.method == "GET":
-        config_web_repl_get(request, response)
+        yield from config_web_repl_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -78,9 +77,9 @@ def config_web_repl(request, response):
 def enable_smartthings(request, response):
     gc.collect()
     if request.method == "GET":
-        enable_smartthings_get(request, response)
+        yield from enable_smartthings_get(request, response)
     elif request.method == "POST":
-        enable_smartthings_post(request, response)
+        yield from enable_smartthings_post(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -90,7 +89,7 @@ def enable_smartthings(request, response):
 def restart_system(request, response):
     gc.collect()
     if request.method == "GET":
-        restart_system_get(request, response)
+        yield from restart_system_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -100,7 +99,7 @@ def restart_system(request, response):
 def test_system(request, response):
     gc.collect()
     if request.method == "GET":
-        test_system_get(request, response)
+        yield from test_system_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))
@@ -110,7 +109,7 @@ def test_system(request, response):
 def get_log_file(request, response):
     gc.collect()
     if request.method == "GET":
-        get_log_file_get(request, response)
+        yield from get_log_file_get(request, response)
     else:
         yield from picoweb.start_response(writer=response, status="405")
         yield from response.awrite(str("405 Method Not Allowed"))

@@ -1,6 +1,11 @@
+import gc
+gc.collect()
 import utime
+gc.collect()
 import sys
+gc.collect()
 import uio
+gc.collect()
 
 CRITICAL = 50
 ERROR    = 40
@@ -42,6 +47,7 @@ class Logger:
         return level >= self.level
 
     def log(self, level, msg, *args):
+        gc.collect()
         dest = self
         while dest.level == NOTSET and dest.parent:
             dest = dest.parent
@@ -53,6 +59,7 @@ class Logger:
             if dest.handlers:
                 for hdlr in dest.handlers:
                     hdlr.emit(record)
+        gc.collect()
 
     def debug(self, msg, *args):
         self.log(DEBUG, msg, *args)

@@ -3,13 +3,20 @@
 # SPDX-License-Identifier: MIT
 import gc
 import micropython
+gc.collect()
 import utime
+gc.collect()
 import ure as re
+gc.collect()
 import uerrno
+gc.collect()
 import uasyncio as asyncio
+gc.collect()
 import pkg_resources
+gc.collect()
 
 from .utils import parse_qs
+gc.collect()
 
 SEND_BUFSZ = 128
 

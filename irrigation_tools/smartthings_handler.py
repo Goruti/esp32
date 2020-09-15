@@ -1,9 +1,14 @@
 import gc
+gc.collect()
 import utime
+gc.collect()
 from irrigation_tools import libraries
+gc.collect()
 import urequests as requests
-
+gc.collect()
 import logging
+gc.collect()
+
 _logger = logging.getLogger("Irrigation")
 
 

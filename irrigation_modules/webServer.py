@@ -1,8 +1,11 @@
 import gc
 import picoweb
 import utime
+gc.collect()
 import machine
+gc.collect()
 import ubinascii
+gc.collect()
 import logging
 
 from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler

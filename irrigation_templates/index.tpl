@@ -37,9 +37,9 @@
         </div>
         <div class="column">
             <h3>Restart System</h3>
-            <button onclick="window.location = '/restartSystem';">Restart</button>
+            <button onclick="window.location = '/restart_system';">Restart</button>
             <h3>Test System</h3>
-            <button onclick="window.location = '/testSystem';">Test</button>
+            <button onclick="window.location = '/test_system';">Test</button>
         </div>
     </div>
     <hr>
@@ -84,13 +84,13 @@
     var webRepl_wrapper = document.getElementById("smartthings_config");
     var myHTML = ``;
     if ("{{ data["smartThings"]["enabled"] }}" === "True") {
-        myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
-        myHTML += `<button onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em">Disable </button>`
+        myHTML += `<button disabled onclick="window.location = '/enable_smartthings?action=enable';" style="font-weight: bold;border-width: thin;opacity:0.6">Enable </button>`
+        myHTML += `<button onclick="window.location = '/enable_smartthings?action=disable';" style="margin-left:1em">Disable </button>`
         myHTML += `<p><u>SmartThings IP</u>: <b>{{ data["smartThings"]["st_ip"] }}</b></p>`;
         myHTML += `<p><u>SmartThings Port</u>: <b>{{ data["smartThings"]["st_port"] }}</b></p>`;
     } else {
-        myHTML += `<button onclick="window.location = '/enableSmartThings?action=enable';" style="">Enable </button>`
-        myHTML += `<button disabled onclick="window.location = '/enableSmartThings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
+        myHTML += `<button onclick="window.location = '/enable_smartthings?action=enable';" style="">Enable </button>`
+        myHTML += `<button disabled onclick="window.location = '/enable_smartthings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
 

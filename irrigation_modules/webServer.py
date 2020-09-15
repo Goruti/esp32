@@ -9,14 +9,119 @@ import logging
 from irrigation_tools import conf, wifi, manage_data, libraries, smartthings_handler
 
 _logger = logging.getLogger("Irrigation")
-webapp = picoweb.WebApp(tmpl_dir=conf.TEMPLATES_DIR)
 
 
-@webapp.route('/', method='GET')
 def index(request, response):
-    """
-    Main Page
-    """
+    gc.collect()
+    if request.method == "GET":
+        index_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def enable_ap(request, response):
+    gc.collect()
+    if request.method == "GET":
+        enable_ap_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def wifi_config(request, response):
+    gc.collect()
+    if request.method == "GET":
+        wifi_config_get(request, response)
+    elif request.method == "POST":
+        wifi_config_post(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def irrigation_config(request, response):
+    gc.collect()
+    if request.method == "GET":
+        irrigation_config_get(request, response)
+    elif request.method == "POST":
+        irrigation_config_post(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def pump_action(request, response):
+    gc.collect()
+    if request.method == "GET":
+        pump_action_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def config_web_repl(request, response):
+    gc.collect()
+    if request.method == "GET":
+        config_web_repl_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def enable_smartthings(request, response):
+    gc.collect()
+    if request.method == "GET":
+        enable_smartthings_get(request, response)
+    elif request.method == "POST":
+        enable_smartthings_post(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def restart_system(request, response):
+    gc.collect()
+    if request.method == "GET":
+        restart_system_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def test_system(request, response):
+    gc.collect()
+    if request.method == "GET":
+        test_system_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+def get_log_file(request, response):
+    gc.collect()
+    if request.method == "GET":
+        get_log_file_get(request, response)
+    else:
+        yield from picoweb.start_response(writer=response, status="405")
+        yield from response.awrite(str("405 Method Not Allowed"))
+        gc.collect()
+
+
+################################################################################################################
+################################################################################################################
+
+
+def index_get(request, response):
     gc.collect()
     data = {}
     try:
@@ -52,8 +157,7 @@ def index(request, response):
             _logger.exc(e, "Fail rendering the page")
 
 
-@webapp.route('/enable_ap', method='GET')
-def wifi_config(request, response):
+def enable_ap_get(request, response):
     gc.collect()
     error_code = "200"
     try:
@@ -87,8 +191,7 @@ def wifi_config(request, response):
         yield from response.awrite(str(html_page))
 
 
-@webapp.route('/config_wifi', method='GET')
-def wifi_config(request, response):
+def wifi_config_get(request, response):
     gc.collect()
     try:
         yield from picoweb.start_response(response)
@@ -97,8 +200,7 @@ def wifi_config(request, response):
         _logger.exc(e, "Fail Configuring Wifi")
 
 
-@webapp.route('/config_wifi_2', method='POST')
-def save_wifi_config(request, response):
+def wifi_config_post(request, response):
     """
     Save Network Configuration
     """
@@ -137,19 +239,14 @@ def save_wifi_config(request, response):
         machine.reset()
 
 
-@webapp.route('/irrigation_config', method='GET')
-def irrigation_config(request, response):
+def irrigation_config_get(request, response):
     gc.collect()
     html_page = open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r').read()
     yield from picoweb.start_response(response)
     yield from response.awrite(str(html_page))
 
 
-@webapp.route('/irrigation_config_2', method='POST')
-def save_irrigation_config(request, response):
-    """
-    Save Irrigation Configuration
-    """
+def irrigation_config_post(request, response):
     gc.collect()
     yield from request.read_form_data()
     try:
@@ -231,8 +328,7 @@ def save_irrigation_config(request, response):
         machine.reset()
 
 
-@webapp.route('/pump_action', method='GET')
-def pump_action(request, response):
+def pump_action_get(request, response):
     gc.collect()
     try:
         request.parse_qs()
@@ -269,8 +365,7 @@ def pump_action(request, response):
         yield from response.awrite(str(html_page))
 
 
-@webapp.route('/configWebRepl', method='GET')
-def config_web_repl(request, response):
+def config_web_repl_get(request, response):
     import webrepl
     gc.collect()
     request.parse_qs()
@@ -287,8 +382,7 @@ def config_web_repl(request, response):
     yield from picoweb.start_response(response, status="303", headers=headers)
 
 
-@webapp.route('/enableSmartThings', method='GET')
-def enable_smartthings(request, response):
+def enable_smartthings_get(request, response):
     gc.collect()
     try:
         request.parse_qs()
@@ -301,7 +395,7 @@ def enable_smartthings(request, response):
                             </head>
                             <body>
                             <h2>SmartThings Configuration</h2>
-                                <form action="/configSmartthings" method="post">
+                                <form action="/enable_smartthings" method="post">
                                     <p>Configure SmartThings Connectivity</p>
                                     SmartTings IP: <input type="text" name="st_ip"><br><br>
                                     SmartTings Port:  <input type="text" name="st_port"><br><br>
@@ -343,7 +437,7 @@ def enable_smartthings(request, response):
                            <body>
                                <p style="color: red;">Smartthings Configuration Failed :(.</p><br>
                                 <p>Error: "{}"</p><br>
-                                <button onclick="window.location.href = '/configureSmartThings';">Try Again</button>
+                                <button onclick="window.location.href = '/enable_smartthings';">Try Again</button>
                         <button onclick="window.location.href = '/' ;">Cancel</button>
                            </body>
                        </html>'''.format(e)
@@ -352,8 +446,7 @@ def enable_smartthings(request, response):
         yield from response.awrite(str(html_page))
 
 
-@webapp.route('/configSmartthings', method='POST')
-def save_smartthings_config(request, response):
+def enable_smartthings_post(request, response):
     gc.collect()
     try:
         yield from request.read_form_data()
@@ -384,7 +477,7 @@ def save_smartthings_config(request, response):
                        <body>
                            <p style="color: red;">Smartthings Configuration Failed :(.</p><br>
                             <p>Error: "{}"</p><br>
-                            <button onclick="window.location.href = '/configureSmartThings';">Try Again</button>
+                            <button onclick="window.location.href = '/enable_smartthings';">Try Again</button>
                     <button onclick="window.location.href = '/' ;">Cancel</button>
                        </body>
                    </html>'''.format(e)
@@ -397,8 +490,7 @@ def save_smartthings_config(request, response):
         gc.collect()
 
 
-@webapp.route('/restartSystem', method='GET')
-def restart_system(request, response):
+def restart_system_get(request, response):
     gc.collect()
     try:
         _logger.info("restarting system")
@@ -452,8 +544,7 @@ def restart_system(request, response):
         gc.collect()
 
 
-@webapp.route('/testSystem', method='GET')
-def test_system(request, response):
+def test_system_get(request, response):
     gc.collect()
     try:
         libraries.test_irrigation_system()
@@ -477,8 +568,7 @@ def test_system(request, response):
         gc.collect()
 
 
-@webapp.route('/get_log_file', method='GET')
-def test_system(request, response):
+def get_log_file_get(request, response):
     gc.collect()
     try:
         request.parse_qs()
@@ -519,6 +609,17 @@ def require_auth(func):
 
     return auth
 
-#ROUTES = [
-#    ('/', index),
-#]
+ROUTES = [
+    ('/', index),
+    ('/enable_ap', enable_ap),
+    ('/config_wifi', wifi_config),
+    ('/irrigation_config', irrigation_config),
+    ('/pump_action', pump_action),
+    ('/config_web_repl', config_web_repl),
+    ('/enable_smartthings', enable_smartthings),
+    ('/restart_system', restart_system),
+    ('/test_system', test_system),
+    ('/get_log_file', get_log_file)
+]
+
+webapp = picoweb.WebApp(routes=ROUTES, tmpl_dir=conf.TEMPLATES_DIR)

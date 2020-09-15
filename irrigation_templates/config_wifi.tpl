@@ -6,7 +6,7 @@
     </head>
     <body>
     <h2>Network Configuration</h2>
-        <form action="/config_wifi_2" method="post">
+        <form action="/config_wifi" method="post">
             <p>Select a Wifi Network</p>
             SSID: <select input type="text" name="ssid" id="inject_networks">
             </select><br><br>

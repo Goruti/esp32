@@ -48,6 +48,7 @@ class Logger:
 
     def log(self, level, msg, *args):
         gc.collect()
+        msg = "mem_free: {}, {}".format(gc.mem_free(), msg)
         dest = self
         while dest.level == NOTSET and dest.parent:
             dest = dest.parent

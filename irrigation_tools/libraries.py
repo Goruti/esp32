@@ -344,7 +344,7 @@ def initialize_root_logger(level):
         _logger = logging.getLogger()
         if conf.LOG_DIR not in os.listdir():
             os.mkdir(conf.LOG_DIR)
-        rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=2)
+        rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
         fmt = logging.Formatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s")
         rfh.setFormatter(fmt)
         _logger.addHandler(rfh)

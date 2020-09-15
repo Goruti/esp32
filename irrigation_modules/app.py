@@ -1,3 +1,5 @@
+import gc
+gc.collect()
 import uasyncio as asyncio
 gc.collect()
 from irrigation_tools import libraries
@@ -7,9 +9,11 @@ gc.collect()
 import logging
 gc.collect()
 
+_logger = logging.getLogger("Irrigation")
+
 
 def main_app():
-    logger = logging.getLogger("Irrigation")
+
     try:
         libraries.initialize_irrigation_app()
 
@@ -28,7 +32,7 @@ def main_app():
         webServer.webapp.run(host="0.0.0.0", port=80)
 
     except BaseException as e:
-        logger.exc(e, "GOODBYE DUDE!!!")
+        _logger.exc(e, "GOODBYE DUDE!!!")
 
     finally:
         if loop:

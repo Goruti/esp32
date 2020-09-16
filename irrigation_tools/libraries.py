@@ -11,7 +11,7 @@ from collections import OrderedDict
 from irrigation_tools import manage_data, conf, water_level, smartthings_handler
 from irrigation_tools.wifi import is_connected, get_mac_address
 
-_looger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("Irrigation")
 
 
 def get_net_configuration():

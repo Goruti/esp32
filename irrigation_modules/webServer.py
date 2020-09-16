@@ -6,7 +6,7 @@ import ubinascii
 import logging
 from irrigation_tools import conf, wifi, manage_data, libraries
 
-_looger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("Irrigation")
 
 
 def index(request, response):

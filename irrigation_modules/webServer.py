@@ -12,10 +12,8 @@ import logging
 gc.collect()
 from irrigation_tools import conf, wifi, manage_data, libraries
 gc.collect()
-from micropython import const
-gc.collect()
 
-_looger = const(logging.getLogger("Irrigation"))
+_looger = logging.getLogger("Irrigation")
 
 
 def index(request, response):

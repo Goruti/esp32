@@ -3,9 +3,9 @@ import network
 import machine
 import utime
 import ubinascii
-import logging
+#import logging
 
-_logger = logging.getLogger("Irrigation")
+#_logger = logging.getLogger("Irrigation")
 
 
 def is_connected():
@@ -24,6 +24,13 @@ def is_connected():
     return ip_address
 
 
+def get_ip():
+    ip = is_connected()
+    if not ip:
+        ip = start_ap()["ip"]
+    return ip
+
+
 def get_mac_address():
     gc.collect()
     mac = ubinascii.hexlify(network.WLAN().config('mac'), ':').decode()
@@ -36,16 +43,17 @@ def start_ap(essid_name="ESP32 AP", password="ESP32 P@assword"):
     Set up a WiFi Access Point so that you can initially connect to the device and configure it.
     """
     gc.collect()
+    ap_info = {"ssid": None, "ip": None}
     ap = network.WLAN(network.AP_IF)
     if not ap.active():
         ap.active(True)
         ap.config(essid=essid_name, authmode=network.AUTH_WPA_WPA2_PSK, password=password)
 
-    ip = ap.ifconfig()[0]
-    essid = ap.config('essid')
-    _logger.info("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid, ip))
+    ap_info["ip"] = ap.ifconfig()[0]
+    ap_info["essid"] = ap.config('essid')
+    #_logger.info("AP is ON. Please connect to '{}' network. AP_GW: {}".format(essid, ip))
 
-    return {"ssid": essid, "ip": ip}
+    return ap_info
 
 
 def stop_ap():
@@ -56,7 +64,7 @@ def stop_ap():
     ap = network.WLAN(network.AP_IF)
     if ap.active():
         ap.active(False)
-    _logger.debug("AP is OFF")
+    #_logger.debug("AP is OFF")
 
 
 def get_available_networks():
@@ -65,7 +73,7 @@ def get_available_networks():
     if not wlan.active():
         wlan.active(True)
         utime.sleep(2)
-    _logger.debug("Scanning wifi nets")
+    #_logger.debug("Scanning wifi nets")
     nets = [e[0].decode("utf-8") for e in wlan.scan()]
     return nets
 
@@ -109,7 +117,7 @@ def wifi_connect(network_config, timeout_ms=10000):
                 error_msg = "Undefined Error"
             raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
 
-    _logger.info("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
+    #_logger.info("Connected to {} with IP address: {}".format(wlan.config("essid"), wlan.ifconfig()[0]))
 
 
 def wifi_disconnect():

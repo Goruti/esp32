@@ -50,6 +50,7 @@ def water_level_interruption_function(pin):
 
     except Exception as e:
         _logger.exc(e, "Fail to confirm the interruption")
+        pass
     finally:
         gc.collect()
 

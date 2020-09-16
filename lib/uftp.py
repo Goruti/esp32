@@ -22,8 +22,7 @@ import network
 import uos
 import gc
 from time import sleep_ms, localtime
-from micropython import alloc_emergency_exception_buf, const
-import logging
+from micropython import alloc_emergency_exception_buf
 
 # constant definitions
 _CHUNK_SIZE = const(1024)
@@ -45,8 +44,6 @@ STA_addr = ("0.0.0.0", 0, 0xffffff00)
 _month_name = ("", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
-_logger = logging.getLogger("uftp")
-
 
 class FTP_client:
 
@@ -55,11 +52,11 @@ class FTP_client:
         self.command_client, self.remote_addr = ftpsocket.accept()
         self.remote_addr = self.remote_addr[0]
         self.command_client.settimeout(_COMMAND_TIMEOUT)
-        _logger.debug("FTP Command connection from:", self.remote_addr)
+        log_msg(1, "FTP Command connection from:", self.remote_addr)
         self.command_client.setsockopt(socket.SOL_SOCKET,
                                        _SO_REGISTER_HANDLER,
                                        self.exec_ftp_command)
-        self.command_client.sendall("220 Hello, this is the ESP32.\r\n")
+        self.command_client.sendall("220 Hello, this is the ESP8266.\r\n")
         self.cwd = '/'
         self.fromname = None
 #        self.logged_in = False
@@ -121,8 +118,7 @@ class FTP_client:
                 chunk = file.read(_CHUNK_SIZE)
             data_client.close()
 
-    @staticmethod
-    def save_file_data(path, data_client, mode):
+    def save_file_data(self, path, data_client, mode):
         with open(path, mode) as file:
             chunk = data_client.recv(_CHUNK_SIZE)
             while len(chunk) > 0:
@@ -146,8 +142,7 @@ class FTP_client:
                     cwd = cwd + '/' + token
         return cwd
 
-    @staticmethod
-    def split_path(path):  # instead of path.rpartition('/')
+    def split_path(self, path):  # instead of path.rpartition('/')
         tail = path.split('/')[-1]
         head = path[:-(len(tail) + 1)]
         return ('/' if head == '' else head, tail)
@@ -183,10 +178,10 @@ class FTP_client:
             data_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             data_client.settimeout(_DATA_TIMEOUT)
             data_client.connect((self.act_data_addr, self.DATA_PORT))
-            _logger.debug("FTP Data connection with:", self.act_data_addr)
+            log_msg(1, "FTP Data connection with:", self.act_data_addr)
         else:  # passive mode
             data_client, data_addr = datasocket.accept()
-            _logger.debug("FTP Data connection with:", data_addr[0])
+            log_msg(1, "FTP Data connection with:", data_addr[0])
         return data_client
 
     def exec_ftp_command(self, cl):
@@ -204,7 +199,7 @@ class FTP_client:
                 # This part is NOT CLEAN; there is still a chance that a
                 # closing data connection will be signalled as closing
                 # command connection
-                _logger.debug("*** No data, assume QUIT")
+                log_msg(1, "*** No data, assume QUIT")
                 close_client(cl)
                 return
 
@@ -222,7 +217,7 @@ class FTP_client:
             command = data.split()[0].upper()
             payload = data[len(command):].lstrip()  # partition is missing
             path = self.get_absolute_path(self.cwd, payload)
-            _logger.debug("Command={}, Payload={}".format(command, payload))
+            log_msg(1, "Command={}, Payload={}".format(command, payload))
 
             if command == "USER":
                 # self.logged_in = True
@@ -378,12 +373,20 @@ class FTP_client:
                     cl.sendall('550 Fail\r\n')
             else:
                 cl.sendall("502 Unsupported command.\r\n")
-                # _logger.debug("Unsupported command {} with payload {}".format(command,payload))
+                # log_msg(2,
+                #  "Unsupported command {} with payload {}".format(command,
+                #  payload))
         # handle unexpected errors
-        except Exception as e:
-            _logger.exc(e, "Exception in exec_ftp_command")
+        except Exception as err:
+            log_msg(1, "Exception in exec_ftp_command: {}".format(err))
         # tidy up before leaving
         client_busy = False
+
+
+def log_msg(level, *args):
+    global verbose_l
+    if verbose_l >= level:
+        print(*args)
 
 
 # close client and remove it from the list
@@ -400,8 +403,8 @@ def accept_ftp_connect(ftpsocket):
     # Accept new calls for the server
     try:
         client_list.append(FTP_client(ftpsocket))
-    except Exception as e:
-        _logger.exc(e, "Attempt to connect failed")
+    except:
+        log_msg(1, "Attempt to connect failed")
         # try at least to reject
         try:
             temp_client, temp_addr = ftpsocket.accept()
@@ -470,14 +473,14 @@ def start(port=21, verbose=0, splash=True):
         # save IP address string and numerical values of IP adress and netmask
         AP_addr = (ifconfig[0], num_ip(ifconfig[0]), num_ip(ifconfig[1]))
         if splash:
-            _logger.info("FTP server started on AP {}:{}".format(ifconfig[0], port))
+            print("FTP server started on {}:{}".format(ifconfig[0], port))
     wlan = network.WLAN(network.STA_IF)
     if wlan.active():
         ifconfig = wlan.ifconfig()
         # save IP address string and numerical values of IP adress and netmask
         STA_addr = (ifconfig[0], num_ip(ifconfig[0]), num_ip(ifconfig[1]))
         if splash:
-            _logger.info("FTP server started on STA {}:{}".format(ifconfig[0], port))
+            print("FTP server started on {}:{}".format(ifconfig[0], port))
 
 
 def restart(port=21, verbose=0, splash=True):

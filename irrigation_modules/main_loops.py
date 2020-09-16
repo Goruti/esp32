@@ -4,7 +4,7 @@ import uasyncio as asyncio
 import logging
 from irrigation_tools import wifi, libraries, conf, manage_data
 
-_logger = logging.getLogger("Irrigation")
+_logger= logging.getLogger("Irrigation")
 
 
 async def initialize_rtc(frequency_loop=3600):
@@ -18,10 +18,13 @@ async def initialize_rtc(frequency_loop=3600):
                     _logger.debug("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
                 except Exception as e:
                     _logger.exc(e, "Fail to set time")
+                    pass
             else:
                 _logger.info("Device is Offline")
+                pass
         except BaseException as e:
             _logger.exc(e, "Fail to Initialize RTC")
+            pass
         finally:
             gc.collect()
             await asyncio.sleep(frequency_loop)
@@ -62,6 +65,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
 
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")
+                    pass
                 finally:
                     gc.collect()
                     await asyncio.sleep_ms(frequency_loop_ms)

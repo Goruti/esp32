@@ -153,6 +153,7 @@ def index_get(request, response):
                 yield from picoweb.jsonify(response, data)
         except BaseException as e:
             _logger.exc(e, "Fail rendering the page")
+            pass
 
     finally:
         gc.collect()
@@ -199,6 +200,7 @@ def wifi_config_get(request, response):
         yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
     except BaseException as e:
         _logger.exc(e, "Fail Configuring Wifi")
+        pass
 
 
 def wifi_config_post(request, response):
@@ -244,7 +246,7 @@ def irrigation_config_get(request, response):
     gc.collect()
     try:
         with open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r') as f:
-            html_page = f.read().strip().replace(" ", "").replace("\n", "")
+            html_page = f.read()
     except Exception as e:
         _logger.exc(e, "cannot get irrigation Configuration")
         html_page = '''
@@ -316,7 +318,7 @@ def irrigation_config_post(request, response):
                         <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
                     </body>
                 </html>
-                '''.format(wifi.is_connected())
+                '''.format(wifi.get_ip())
         #html_page = '''
         #   <html>
         #       <p>Configuration was saved successfully.</p>
@@ -518,7 +520,7 @@ def restart_system_get(request, response):
                    <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
                </body>
            </html>
-       '''.format(wifi.is_connected())
+       '''.format(wifi.get_ip())
 
         #html_page = '''
         #   <html>

@@ -1,6 +1,4 @@
 import os
-from . import Handler
-
 
 def try_remove(fn: str) -> None:
     """Try to remove a file if it existst."""
@@ -15,7 +13,7 @@ def get_filesize(fn: str) -> int:
     return os.stat(fn)[6]
 
 
-class RotatingFileHandler(Handler):
+class RotatingFileHandler():
     """A rotating file handler like RotatingFileHandler.
 
     Compatible with CPythons `logging.handlers.RotatingFileHandler` class.
@@ -34,7 +32,7 @@ class RotatingFileHandler(Handler):
 
     def emit(self, record):
         """Write to file."""
-        msg = self.formatter.format(record)
+        msg = record
         s_len = len(msg)
 
         if self.maxBytes and self.backupCount and self._counter + s_len > self.maxBytes:

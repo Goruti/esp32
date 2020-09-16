@@ -1,7 +1,15 @@
 dir=~/git/esp32
+delimiter=esp32/
+
 
 function usage() {
   echo $"Usage: $0 -{first_load|load_all_files|}"
+}
+
+function check_loaded_files() {
+    echo "Loaded Files"
+    cmd="ampy -p /dev/tty.usbserial-0001 -d 1.5 ls"
+    eval "$cmd"
 }
 
 function first_load() {
@@ -14,12 +22,13 @@ function first_load() {
     fi
   done
   echo "loading is done"
-  chek_loaded_files
+  check_loaded_files
 }
 
 function load_all_files() {
    for f in $(find $dir -name '*.py'); do
-    string=$f$dir/
+    string=$f$delimiter
+
     myarray=()
     while [[ $string ]]; do
       myarray+=( "${string%%"$delimiter"*}" )
@@ -30,13 +39,7 @@ function load_all_files() {
       eval "$cmd"
   done
   echo "loading is done"
-  chek_loaded_files
-}
-
-function chek_loaded_files() {
-    echo "Loaded Files"
-    cmd="ampy -p /dev/tty.usbserial-0001 -d 1.5 ls"
-    eval "$cmd"
+  check_loaded_files
 }
 
 while [ "$1" != "" ]; do

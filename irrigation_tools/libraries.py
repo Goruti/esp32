@@ -222,6 +222,7 @@ def start_pump(pin):
             gc.collect()
     except Exception as e:
         _logger.exc(e, "Failed Starting Pump")
+        pass
     finally:
         gc.collect()
         return started
@@ -234,6 +235,7 @@ def stop_pump(pin):
         machine.Pin(pin).off()
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
+        pass
     finally:
         gc.collect()
 
@@ -268,6 +270,7 @@ def test_irrigation_system():
                     stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
     except BaseException as e:
         _logger.exc(e, "Failed Test Irrigation System")
+        pass
     finally:
         gc.collect()
 
@@ -283,6 +286,7 @@ def notify_st(body, retry_sec=5, retry_num=1):
         smartthings.notify(body)
     except Exception as e:
         _logger.exc(e, "Failed Notify ST")
+        pass
     finally:
         gc.collect()
 
@@ -312,6 +316,7 @@ def get_log_files_names():
         files = os.listdir(conf.LOG_DIR)
     except Exception as e:
         _logger.exc(e, "cannot get the log files name")
+        pass
     finally:
         gc.collect()
         return files
@@ -320,18 +325,13 @@ def get_log_files_names():
 def initialize_root_logger(level):
     gc.collect()
     try:
-        logging.basicConfig(
-            level=level,
-            format="%(asctime)s, %(name)s, %(levelname)s, %(message)s"
-        )
+        logging.basicConfig(level=level)
 
-        _logger = logging.getLogger()
-        if conf.LOG_DIR not in os.listdir():
-            os.mkdir(conf.LOG_DIR)
-        rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
-        fmt = logging.Formatter("%(asctime)s, %(name)s, %(levelname)s, %(message)s")
-        rfh.setFormatter(fmt)
-        _logger.addHandler(rfh)
+        #_logger = logging.getLogger()
+        #if conf.LOG_DIR not in os.listdir():
+        #    os.mkdir(conf.LOG_DIR)
+        #rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
+        #_logger.addHandler(rfh)
 
     except Exception as e:
         buf = uio.StringIO()
@@ -343,4 +343,4 @@ def initialize_root_logger(level):
 
 def datetime_to_iso(time):
     gc.collect()
-    return "{}-{}-{}T{}:{}:{}".format(time[0], time[1], time[2], time[3], time[4], time[5])
+    return "{}-{}-{}T{}:{}:{}".format(*time)

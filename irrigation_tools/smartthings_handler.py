@@ -2,9 +2,9 @@ import gc
 import utime
 from irrigation_tools import libraries
 import urequests as requests
-import logging
+#import logging
 
-_logger = logging.getLogger("Irrigation")
+#_logger = logging.getLogger("Irrigation")
 
 
 class SmartThings:
@@ -32,13 +32,14 @@ class SmartThings:
                     utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
                 if not attempts:
-                    _logger.debug("{} - Smartthings.notify - Tried: {} times and it couldn't send readings. free_memory: {}".format(
-                        libraries.datetime_to_iso(utime.localtime()), self.retry_num, gc.mem_free()))
+                    #_logger.er.debug("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
+                    pass
             else:
-                _logger.info("SmartThings is not configured. This how message would looks like: {}".format(body))
-
+                #_logger.er.info("SmartThings is not configured. This how message would looks like: {}".format(body))
+                pass
         except Exception as e:
-            _logger.exc(e, "Failed to notify ST")
+            #_logger.er.exc(e, "Failed to notify ST")
+            pass
         finally:
             gc.collect()
 
@@ -50,13 +51,14 @@ class SmartThings:
             gc.collect()
             r = self.requests.post(self.URL, json=body, headers=headers)
         except Exception as e:
-            _logger.exc(e, "fail to send Value - free_memory: {}".format(gc.mem_free()))
+            #_logger.er.exc(e, "fail to send Value - free_memory: {}".format(gc.mem_free()))
+            pass
         else:
             if r.status_code == 202 or r.status_code == 200:
                 failed = False
             else:
-                _logger.debug("{} - 'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(
-                    libraries.datetime_to_iso(utime.localtime()), r.get("status_code"), r.get("reason")))
+                #_logger.er.debug("'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(r.get("status_code"), r.get("reason")))
+                pass
             r.close()
         finally:
             gc.collect()

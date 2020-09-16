@@ -1,27 +1,15 @@
 import gc
-gc.collect()
 import machine
-gc.collect()
 import utime
-gc.collect()
 import sys
-gc.collect()
 import webrepl
-gc.collect()
 import os
-gc.collect()
 import uio
-gc.collect()
 import logging
-gc.collect()
 from logging.handlers import RotatingFileHandler
-gc.collect()
 from collections import OrderedDict
-gc.collect()
 from irrigation_tools import manage_data, conf, water_level, smartthings_handler
-gc.collect()
 from irrigation_tools.wifi import is_connected, get_mac_address
-gc.collect()
 
 _looger = logging.getLogger("Irrigation")
 

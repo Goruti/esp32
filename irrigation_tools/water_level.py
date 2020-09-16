@@ -1,13 +1,8 @@
 import gc
-gc.collect()
 import utime
-gc.collect()
 import micropython
-gc.collect()
 import logging
-gc.collect()
 from irrigation_tools import smartthings_handler, libraries, conf
-gc.collect()
 
 _logger = logging.getLogger("Irrigation")
 

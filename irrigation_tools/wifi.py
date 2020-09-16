@@ -1,15 +1,9 @@
-import network
-gc.collect()
-import machine
-gc.collect()
 import gc
-gc.collect()
+import network
+import machine
 import utime
-gc.collect()
 import ubinascii
-gc.collect()
 import logging
-gc.collect()
 
 _logger = logging.getLogger("Irrigation")
 

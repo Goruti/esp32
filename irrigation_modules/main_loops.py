@@ -1,13 +1,8 @@
 import gc
-gc.collect()
 import utime
-gc.collect()
 import uasyncio as asyncio
-gc.collect()
 import logging
-gc.collect()
 from irrigation_tools import wifi, libraries, conf, manage_data
-gc.collect()
 
 _logger = logging.getLogger("Irrigation")
 

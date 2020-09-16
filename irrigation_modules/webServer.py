@@ -1,17 +1,10 @@
 import gc
-gc.collect()
 import picoweb
-gc.collect()
 import utime
-gc.collect()
 import machine
-gc.collect()
 import ubinascii
-gc.collect()
 import logging
-gc.collect()
 from irrigation_tools import conf, wifi, manage_data, libraries
-gc.collect()
 
 _looger = logging.getLogger("Irrigation")
 

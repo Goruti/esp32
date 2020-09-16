@@ -1,22 +1,14 @@
 # Picoweb web pico-framework for Pycopy, https://github.com/pfalcon/pycopy
 # Copyright (c) 2014-2020 Paul Sokolovsky
 # SPDX-License-Identifier: MIT
-import gc
 import micropython
-gc.collect()
 import utime
-gc.collect()
 import ure as re
-gc.collect()
 import uerrno
-gc.collect()
 import uasyncio as asyncio
-gc.collect()
 import pkg_resources
-gc.collect()
 
 from .utils import parse_qs
-gc.collect()
 
 SEND_BUFSZ = 128
 
@@ -52,7 +44,6 @@ def template_string(writer, s):
 
 
 def start_response(writer, content_type="text/html; charset=utf-8", status="200", headers=None):
-    gc.collect()
     yield from writer.awrite("HTTP/1.0 %s NA\r\n" % status)
     yield from writer.awrite("Content-Type: ")
     yield from writer.awrite(content_type)
@@ -268,14 +259,12 @@ class WebApp:
         self.url_map.append((url, func, kwargs))
 
     def _load_template(self, tmpl_name):
-        gc.collect()
         if self.template_loader is None:
             import utemplate.source
             self.template_loader = utemplate.source.Loader(self.pkg, self.tmpl_dir)
         return self.template_loader.load(tmpl_name)
 
     def render_template(self, writer, tmpl_name, args=()):
-        gc.collect()
         tmpl = self._load_template(tmpl_name)
         for s in tmpl(*args):
             yield from writer.awrite(str(s))
@@ -286,7 +275,6 @@ class WebApp:
         return ''.join(tmpl(*args))
 
     def sendfile(self, writer, fname, content_type=None, headers=None):
-        gc.collect()
         if not content_type:
             content_type = get_mime_type(fname)
         try:
@@ -327,7 +315,6 @@ class WebApp:
             if debug > 0:
                 log.setLevel(logging.DEBUG)
         self.log = log
-        gc.collect()
         self.debug = int(debug)
         self.init()
         if not lazy_init:

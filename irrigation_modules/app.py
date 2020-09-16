@@ -1,13 +1,7 @@
-import gc
-gc.collect()
 import uasyncio as asyncio
-gc.collect()
 from irrigation_tools import libraries
-gc.collect()
 from irrigation_modules import main_loops, webServer
-gc.collect()
 import logging
-gc.collect()
 
 _logger = logging.getLogger("Irrigation")
 

@@ -1,5 +1,7 @@
 import gc
+gc.collect()
 import picoweb
+gc.collect()
 import utime
 gc.collect()
 import machine
@@ -10,8 +12,10 @@ import logging
 gc.collect()
 from irrigation_tools import conf, wifi, manage_data, libraries
 gc.collect()
+from micropython import const
+gc.collect()
 
-_logger = logging.getLogger("Irrigation")
+_looger = const(logging.getLogger("Irrigation"))
 
 
 def index(request, response):
@@ -161,8 +165,6 @@ def index_get(request, response):
 
     finally:
         gc.collect()
-        data= {}
-        html_page = ""
 
 
 def enable_ap_get(request, response):
@@ -249,13 +251,24 @@ def wifi_config_post(request, response):
 
 def irrigation_config_get(request, response):
     gc.collect()
-
-    with open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r') as f:
-        html_page = f.read().strip().replace(" ", "").replace("\n", "")
-    gc.collect()
-    yield from picoweb.start_response(response)
-    yield from response.awrite(str(html_page))
-    html_page = ""
+    try:
+        with open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r') as f:
+            html_page = f.read().strip().replace(" ", "").replace("\n", "")
+    except Exception as e:
+        _logger.exc(e, "cannot get irrigation Configuration")
+        html_page = '''
+                    <html>
+                        <head><title>Irrigation System Home Page</title></head>
+                       <body>
+                           <p style="color: red;">Error loading the page.</p><br>
+                            <p>Error: "{}"</p><br>
+                            <button onclick="window.location.href = '/' ;">Home</button>
+                       </body>
+                   </html>'''.format(e)
+    finally:
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
+        gc.collect()
 
 
 def irrigation_config_post(request, response):

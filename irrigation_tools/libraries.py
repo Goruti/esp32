@@ -2,8 +2,6 @@ import gc
 gc.collect()
 import machine
 gc.collect()
-import micropython
-gc.collect()
 import utime
 gc.collect()
 import sys
@@ -20,14 +18,13 @@ from logging.handlers import RotatingFileHandler
 gc.collect()
 from collections import OrderedDict
 gc.collect()
-
+from micropython import const
 from irrigation_tools import manage_data, conf, water_level, smartthings_handler
 gc.collect()
 from irrigation_tools.wifi import is_connected, get_mac_address
 gc.collect()
 
-micropython.alloc_emergency_exception_buf(100)
-_logger = logging.getLogger("Irrigation")
+_looger = const(logging.getLogger("Irrigation"))
 
 
 def get_net_configuration():

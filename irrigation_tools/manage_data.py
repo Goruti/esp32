@@ -1,7 +1,9 @@
 import ujson as json
 import btree
+import os
 
 from ucontextlib import contextmanager
+from irrigation_tools import conf
 
 
 @contextmanager
@@ -10,9 +12,9 @@ def _get_db():
     Context manager to return an instance of a database
     """
     try:
-        db_file = open('/irrigation.db', 'r+b')
+        db_file = open("{}/{}".format(conf.DB_DIR, conf.DB_FILENAME), 'r+b')
     except OSError:
-        db_file = open('/irrigation.db', 'w+b')
+        db_file = open("{}/{}".format(conf.DB_DIR, conf.DB_FILENAME), 'w+b')
     db = btree.open(db_file)
     yield db
     db.close()
@@ -164,3 +166,18 @@ def read_irrigation_state():
     Load the irrigation status
     """
     return _get_db_entry('irrigation_state')
+
+
+def create_dir(directory):
+    folds = directory.split("/")
+    root = ""
+    try:
+        for fld in folds:
+            if fld.strip() != "":
+                if fld not in os.listdir(root):
+                    root = "{}/{}".format(root, fld)
+                    os.mkdir(root)
+                else:
+                    root = "{}/{}".format(root, fld)
+    except Exception as e:
+        raise e

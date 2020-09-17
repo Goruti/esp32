@@ -181,6 +181,7 @@ def initialize_irrigation_app():
     gc.collect()
     _logger.info("Initializing Ports")
     try:
+        manage_data.create_dir(conf.DB_DIR)
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
         # pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)

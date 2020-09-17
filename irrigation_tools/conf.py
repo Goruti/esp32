@@ -23,6 +23,9 @@ TEMPLATES_DIR = "irrigation_templates"
 AP_SSID = "My Awesome Irrigation System"
 AP_PWD = "My@wesomeP@sword"
 WEBREPL_PWD = "S@mu3l"
+#DB Location
+DB_DIR = ""
+DB_FILENAME = "irrigation.db"
 #Logs
 LOG_DIR = "log"
 LOG_FILENAME = "irrigation.log"

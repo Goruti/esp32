@@ -4,7 +4,7 @@ import btree
 import uos
 
 from ucontextlib import contextmanager
-from irrigation_tools import conf
+from irrigation_tools.conf import DB_DIR, DB_FILENAME
 
 
 @contextmanager
@@ -13,9 +13,9 @@ def _get_db():
     Context manager to return an instance of a database
     """
     try:
-        db_file = open("{}/{}".format(conf.DB_DIR, conf.DB_FILENAME), 'r+b')
+        db_file = open("{}/{}".format(DB_DIR, DB_FILENAME), 'r+b')
     except OSError:
-        db_file = open("{}/{}".format(conf.DB_DIR, conf.DB_FILENAME), 'w+b')
+        db_file = open("{}/{}".format(DB_DIR, DB_FILENAME), 'w+b')
     db = btree.open(db_file)
     yield db
     db.close()

@@ -3,14 +3,14 @@ from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer
 import logging
 
-_logger= logging.getLogger("Irrigation")
+_logger = logging.getLogger("Irrigation")
 
 
 def main_app():
 
-    try:
-        libraries.initialize_irrigation_app()
+    libraries.initialize_irrigation_app()
 
+    try:
         """
         Set up the tasks and start the event loop
         """

@@ -2,13 +2,13 @@ import gc
 import machine
 import utime
 import sys
-import webrepl
-import os
+import uos
 import uio
 import logging
 from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
-from irrigation_tools import manage_data, conf, water_level, smartthings_handler
+from irrigation_tools import manage_data, water_level, smartthings_handler
+from irrigation_tools import conf as mod_conf
 from irrigation_tools.wifi import is_connected, get_mac_address
 
 _logger = logging.getLogger("Irrigation")
@@ -96,8 +96,8 @@ def get_irrigation_status():
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "On" if read_gpio(
-                conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
-            moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "Off"
+            moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
             systems_info["pump_info"][key]["moisture"] = moisture
             systems_info["pump_info"][key]["humidity"] = moisture_to_hum(values["connected_to_port"], moisture)
             systems_info["pump_info"][key]["threshold_pct"] = moisture_to_hum(values["connected_to_port"], values["moisture_threshold"])
@@ -110,8 +110,8 @@ def get_irrigation_status():
 def moisture_to_hum(port, moisture):
     gc.collect()
     try:
-        dry = conf.PORT_PIN_MAPPING.get(port).get("dry_value")
-        wet = conf.PORT_PIN_MAPPING.get(port).get("water_value")
+        dry = mod_conf.PORT_PIN_MAPPING.get(port).get("dry_value")
+        wet = mod_conf.PORT_PIN_MAPPING.get(port).get("water_value")
         if moisture >= dry:
             hum = 0.0
         elif moisture <= wet:
@@ -127,8 +127,8 @@ def moisture_to_hum(port, moisture):
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
     gc.collect()
-    pump_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_pump"),
-    sensor_pin = conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
+    pump_pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump"),
+    sensor_pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
 
     started = start_pump(pump_pin)
     if started:
@@ -181,15 +181,14 @@ def initialize_irrigation_app():
     gc.collect()
     _logger.info("Initializing Ports")
     try:
-        manage_data.create_dir(conf.DB_DIR)
         #  Initialize Water Sensor as IN_PUT and set low water interruption
-        pir = machine.Pin(conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
+        pir = machine.Pin(mod_conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
         # pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)
         # high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
         low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler,
                                                  falling=False)
 
-        for key, value in conf.PORT_PIN_MAPPING.items():
+        for key, value in mod_conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
@@ -198,7 +197,8 @@ def initialize_irrigation_app():
         # manage_data.save_webrepl_config(**{"enabled": False})
 
         #  TODO (Comment the following line)
-        webrepl.start(password=conf.WEBREPL_PWD)
+        import webrepl
+        webrepl.start(password=mod_conf.WEBREPL_PWD)
         manage_data.save_webrepl_config(**{"enabled": True})
         manage_data.save_irrigation_state(**{"running": True})
 
@@ -245,7 +245,7 @@ def stop_all_pumps():
     gc.collect()
     try:
         _logger.info("Stopping all pumps")
-        for key, value in conf.PORT_PIN_MAPPING.items():
+        for key, value in mod_conf.PORT_PIN_MAPPING.items():
             stop_pump(value["pin_pump"])
     except Exception as e:
         _logger.exc(e, "Failed Stopping ALL Pump. It will stop the whole application")
@@ -264,11 +264,11 @@ def test_irrigation_system():
             systems_info["pump_info"] = OrderedDict(sorted(systems_info["pump_info"].items(), key=lambda t: t[0]))
             for key, values in systems_info["pump_info"].items():
                 _logger.exc("testing port {}".format(values["connected_to_port"]))
-                moisture = read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                 _logger.exc("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
-                if start_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
+                if start_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
                     utime.sleep(4)
-                    stop_pump(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+                    stop_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
     except BaseException as e:
         _logger.exc(e, "Failed Test Irrigation System")
         pass
@@ -314,7 +314,7 @@ def get_log_files_names():
     gc.collect()
     files = []
     try:
-        files = os.listdir(conf.LOG_DIR)
+        files = uos.listdir(mod_conf.LOG_DIR)
     except Exception as e:
         _logger.exc(e, "cannot get the log files name")
         pass
@@ -329,15 +329,34 @@ def initialize_root_logger(level):
         logging.basicConfig(level=level)
 
         #_logger = logging.getLogger()
-        #if conf.LOG_DIR not in os.listdir():
-        #    os.mkdir(conf.LOG_DIR)
-        #rfh = RotatingFileHandler("{}/{}".format(conf.LOG_DIR, conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
+        #if mod_conf.LOG_DIR not in uos.listdir():
+        #    uos.mkdir(mod_conf.LOG_DIR)
+        #rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
         #_logger.addHandler(rfh)
 
     except Exception as e:
         buf = uio.StringIO()
         sys.print_exception(e, buf)
         raise RuntimeError("Cannot Initialize loggers.\nError: {}".format(buf.getvalue()))
+    finally:
+        gc.collect()
+
+
+def mount_sd_card():
+    try:
+        sd = machine.SDCard(slot=2, freq=80000000)
+    except Exception as e:
+        raise
+    finally:
+        gc.collect()
+
+    try:
+        uos.mount(sd, mod_conf.SD_MOUNTING)
+    except Exception as e:
+        sd.deinit()
+        buf = uio.StringIO()
+        sys.print_exception(e, buf)
+        raise RuntimeError("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
     finally:
         gc.collect()
 

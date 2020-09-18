@@ -1,6 +1,7 @@
+import gc
 import ujson as json
 import btree
-import os
+import uos
 
 from ucontextlib import contextmanager
 from irrigation_tools import conf
@@ -19,6 +20,19 @@ def _get_db():
     yield db
     db.close()
     db_file.close()
+
+
+@contextmanager
+def open_log_file(fn):
+    try:
+        file = open(fn, 'r')
+    except OSError:
+        file = open(fn, 'w')
+
+    try:
+        yield file
+    finally:
+        file.close()
 
 
 def _get_db_entry(key, default=None, as_json=True):
@@ -174,10 +188,12 @@ def create_dir(directory):
     try:
         for fld in folds:
             if fld.strip() != "":
-                if fld not in os.listdir(root):
+                if fld not in uos.listdir(root):
                     root = "{}/{}".format(root, fld)
-                    os.mkdir(root)
+                    uos.mkdir(root)
                 else:
                     root = "{}/{}".format(root, fld)
     except Exception as e:
         raise e
+    finally:
+        gc.collect()

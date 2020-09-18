@@ -499,6 +499,7 @@ def enable_smartthings_post(request, response):
                     <button onclick="window.location.href = '/' ;">Cancel</button>
                        </body>
                    </html>'''.format(e)
+        gc.collect()
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
     else:
@@ -557,9 +558,9 @@ def restart_system_get(request, response):
                             <button onclick="window.location.href = '/';">Go Home Page</button>
                        </body>
                    </html>'''.format(e)
+        gc.collect()
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
-        gc.collect()
 
 
 def test_system_get(request, response):

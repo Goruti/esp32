@@ -1,6 +1,7 @@
 import os
 from irrigation_tools.manage_data import open_log_file
 
+
 def try_remove(fn: str) -> None:
     """Try to remove a file if it existst."""
     try:
@@ -56,7 +57,7 @@ class RotatingFileHandler():
                 pass
             self._counter = 0
 
-        with open_log_file(self.filename, "a") as f:
+        with open_log_file(self.filename) as f:
             f.write(msg + "\n")
 
         self._counter += s_len

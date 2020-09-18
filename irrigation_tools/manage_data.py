@@ -27,7 +27,7 @@ def open_log_file(fn):
     try:
         file = open(fn, 'r')
     except OSError:
-        file = open(fn, 'w')
+        file = open(fn, 'a')
 
     try:
         yield file

@@ -328,11 +328,9 @@ def initialize_root_logger(level):
     try:
         logging.basicConfig(level=level)
 
-        #_logger = logging.getLogger()
-        #if mod_conf.LOG_DIR not in uos.listdir():
-        #    uos.mkdir(mod_conf.LOG_DIR)
-        #rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
-        #_logger.addHandler(rfh)
+        _logger = logging.getLogger()
+        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
+        _logger.addHandler(rfh)
 
     except Exception as e:
         buf = uio.StringIO()

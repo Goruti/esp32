@@ -31,6 +31,7 @@ async def initialize_rtc(frequency_loop=3600):
 
 
 async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
+    _logger.debug("Start Reading Moister Loop")
     try:
         systems_info = libraries.get_irrigation_configuration()
     except BaseException as e:
@@ -43,8 +44,11 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
             while True:
                 gc.collect()
                 try:
+                    _logger.debug("reading_moister - inside while true")
                     moisture_status = {}
                     for key, values in systems_info["pump_info"].items():
+                        _logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
+
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = moisture
                         if moisture > values["moisture_threshold"]:
@@ -65,32 +69,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
 
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")
-                    pass
                 finally:
+                    _logger.debug("moisture_status: {}".format(moisture_status))
                     gc.collect()
                     await asyncio.sleep_ms(frequency_loop_ms)
-
-
-#async def reading_water_level(frequency_loop=3600):
-#    previous_water_level = "empty"
-#    st_conf = libraries.get_smartthings_configuration()
-#    smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
-#    while True:
-#        try:
-#            water_level = "empty" if libraries.read_gpio(conf.WATER_LEVEL_SENSOR_PIN) else "good"
-#            if water_level != previous_water_level:
-#                payload = {
-#                    "type": "water_level_status",
-#                    "body": {
-#                        "status": water_level
-#                    }
-#                }
-#                # smartthings.notify(payload})
-#                print(payload)
-#                previous_water_level = water_level
-#
-#        except BaseException as e:
-#            sys.print_exception(e)
-#        finally:
-#            gc.collect()
-#            await asyncio.sleep(frequency_loop)

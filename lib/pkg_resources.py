@@ -15,7 +15,7 @@ def resource_stream(package, resource):
                 p = __import__(package)
                 d = p.__path__
             else:
-                d = "."
+                d = ""
 #            if d[0] != "/":
 #                import uos
 #                d = uos.getcwd() + "/" + d

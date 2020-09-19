@@ -2,10 +2,17 @@ import gc
 import picoweb
 import utime
 import machine
-import ubinascii
 import logging
-from irrigation_tools import conf, wifi, manage_data, libraries
+from irrigation_tools.conf import AP_SSID, AP_PWD, TEMPLATES_DIR, LOG_DIR, PORT_PIN_MAPPING, WEBREPL_PWD
+from irrigation_tools.wifi import is_connected, wifi_disconnect, start_ap, get_ip, get_available_networks,\
+    wifi_connect
+from irrigation_tools.libraries import get_net_configuration, get_irrigation_state, get_irrigation_status,\
+    test_irrigation_system, get_web_repl_configuration, get_log_files_names, get_smartthings_configuration,\
+    start_pump, stop_pump, notify_st
+from irrigation_tools.manage_data import save_network, save_webrepl_config, save_smartthings_config,\
+    save_irrigation_config, read_irrigation_config
 
+gc.collect()
 _logger = logging.getLogger("Irrigation")
 
 
@@ -123,12 +130,12 @@ def index_get(request, response):
     gc.collect()
     data = {}
     try:
-        data["net_config"] = libraries.get_net_configuration()
-        data["irrigation_config"] = libraries.get_irrigation_status()
-        data["irrigationState"] = libraries.get_irrigation_state()
-        data["WebRepl"] = libraries.get_web_repl_configuration()
-        data["smartThings"] = libraries.get_smartthings_configuration()
-        data["log_files_name"] = libraries.get_log_files_names()
+        data["net_config"] = get_net_configuration()
+        data["irrigation_config"] = get_irrigation_status()
+        data["irrigationState"] = get_irrigation_state()
+        data["WebRepl"] = get_web_repl_configuration()
+        data["smartThings"] = get_smartthings_configuration()
+        data["log_files_name"] = get_log_files_names()
 
     except Exception as e:
         _logger.exc(e, "Fail getting index")
@@ -163,7 +170,7 @@ def enable_ap_get(request, response):
     gc.collect()
     error_code = "200"
     try:
-        ap_info = wifi.start_ap(conf.AP_SSID, conf.AP_PWD)
+        ap_info = start_ap(AP_SSID, AP_PWD)
     except BaseException as e:
         _logger.exc(e, "Fail Enabling AP")
         error_code = "500"
@@ -197,7 +204,7 @@ def wifi_config_get(request, response):
     gc.collect()
     try:
         yield from picoweb.start_response(response)
-        yield from webapp.render_template(response, "config_wifi.tpl", (wifi.get_available_networks(),))
+        yield from webapp.render_template(response, "config_wifi.tpl", (get_available_networks(),))
     except BaseException as e:
         _logger.exc(e, "Fail Configuring Wifi")
         pass
@@ -217,7 +224,7 @@ def wifi_config_post(request, response):
     # Now try to connect to the WiFi network
     _logger.debug("trying to connect to wifi with {}".format(net_config))
     try:
-        wifi.wifi_connect(network_config=net_config)
+        wifi_connect(network_config=net_config)
     except Exception as e:
         _logger.exc(e, "Fail connecting to wifi")
         html_page = '''
@@ -230,23 +237,27 @@ def wifi_config_post(request, response):
                     </body>
                 </html>
                 '''.format(net_config["ssid"])
-    else:
-        manage_data.save_network(**net_config)
-        data = [net_config['ssid'], wifi.is_connected()]
-
-    finally:
         gc.collect()
+        yield from picoweb.start_response(response)
+        yield from response.awrite(str(html_page))
+    else:
+        save_network(**net_config)
+        data = [net_config['ssid'], is_connected()]
         yield from picoweb.start_response(response)
         yield from webapp.render_template(response, "config_wifi_confirmation.tpl", (data,))
         utime.sleep(2)
         machine.reset()
+    finally:
+        gc.collect()
 
 
 def irrigation_config_get(request, response):
     gc.collect()
     try:
-        with open("{}/config_irrigation.tpl".format(conf.TEMPLATES_DIR), 'r') as f:
-            html_page = f.read()
+        yield from webapp.sendfile(response, "{}/config_irrigation.html".format(TEMPLATES_DIR))
+        # with open("{}/config_irrigation.html".format(TEMPLATES_DIR), 'r') as f:
+        #    html_page = f.read()
+
     except Exception as e:
         _logger.exc(e, "cannot get irrigation Configuration")
         html_page = '''
@@ -258,9 +269,9 @@ def irrigation_config_get(request, response):
                             <button onclick="window.location.href = '/' ;">Home</button>
                        </body>
                    </html>'''.format(e)
-    finally:
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
+    finally:
         gc.collect()
 
 
@@ -279,7 +290,7 @@ def irrigation_config_post(request, response):
             }
         config["pump_info"] = pump_info
 
-        net_conf = libraries.get_net_configuration()
+        net_conf = get_net_configuration()
         payload = {
             "type": "system_configuration",
             "body": {
@@ -288,9 +299,9 @@ def irrigation_config_post(request, response):
                 "system": config
             }
         }
-        libraries.notify_st(payload)
+        notify_st(payload)
 
-        manage_data.save_irrigation_config(**config)
+        save_irrigation_config(**config)
         gc.collect()
 
     except Exception as e:
@@ -318,30 +329,11 @@ def irrigation_config_post(request, response):
                         <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
                     </body>
                 </html>
-                '''.format(wifi.get_ip())
-        #html_page = '''
-        #   <html>
-        #       <p>Configuration was saved successfully.</p>
-        #       <p>Your System is being restarted. You will be redirected to the home page in <span id="counter">10</span> second(s).</p>
-        #        <script type="text/javascript">
-        #        function countdown() {
-        #            var i = document.getElementById('counter');
-        #            if (parseInt(i.innerHTML)<=0) {
-        #                window.location.href = '/';
-        #            }
-        #            if (parseInt(i.innerHTML)!=0) {
-        #                i.innerHTML = parseInt(i.innerHTML)-1;
-        #            }
-        #        }
-        #        setInterval(function(){ countdown(); },1000);
-        #        </script>
-        #   </html>
-        #'''
-
+                '''.format(get_ip())
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
         utime.sleep(1)
-        wifi.wifi_disconnect()
+        wifi_disconnect()
         gc.collect()
         machine.reset()
 
@@ -354,11 +346,11 @@ def pump_action_get(request, response):
         action = request.form["action"]
         api_data = {"status": "off"}
         if action == "on":
-            started = libraries.start_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            started = start_pump(PORT_PIN_MAPPING.get(pump).get("pin_pump"))
             if started:
                 api_data = {"status": "on"}
         elif action == "off":
-            libraries.stop_pump(conf.PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            stop_pump(PORT_PIN_MAPPING.get(pump).get("pin_pump"))
 
         if b"text/html" in request.headers[b"Accept"]:
             headers = {"Location": "/"}
@@ -390,11 +382,11 @@ def config_web_repl_get(request, response):
     action = request.form["action"]
 
     if action == "enable":
-        webrepl.start(password=conf.WEBREPL_PWD)
-        manage_data.save_webrepl_config(**{"enabled": True})
+        webrepl.start(password=WEBREPL_PWD)
+        save_webrepl_config(**{"enabled": True})
     else:
         webrepl.stop()
-        manage_data.save_webrepl_config(**{"enabled": False})
+        save_webrepl_config(**{"enabled": False})
 
     headers = {"Location": "/"}
     yield from picoweb.start_response(response, status="303", headers=headers)
@@ -434,14 +426,14 @@ def enable_smartthings_get(request, response):
                     "status": "disable"
                 }
             }
-            libraries.notify_st(payload)
+            notify_st(payload)
 
             st_conf = {
                 "enabled": False,
                 "st_ip": None,
                 "st_port": None
             }
-            manage_data.save_smartthings_config(**st_conf)
+            save_smartthings_config(**st_conf)
 
             headers = {"Location": "/"}
             gc.collect()
@@ -473,19 +465,19 @@ def enable_smartthings_post(request, response):
             if key in request.form:
                 st_config[key] = request.form[key]
         st_config["enabled"] = True
-        manage_data.save_smartthings_config(**st_config)
+        save_smartthings_config(**st_config)
 
-        net_conf = libraries.get_net_configuration()
+        net_conf = get_net_configuration()
         payload = {
             "type": "system_configuration",
             "body": {
                 "status": "enabled",
                 "ssid": net_conf["ssid"],
                 "ip": net_conf["ip"],
-                "system": manage_data.read_irrigation_config()
+                "system": read_irrigation_config()
             }
         }
-        libraries.notify_st(payload)
+        notify_st(payload)
 
     except Exception as e:
         _logger.exc(e, "Fail Saving ST configuration")
@@ -521,29 +513,11 @@ def restart_system_get(request, response):
                    <a href="http://{}/" title="Main Page">Visit Irrigation System main page</a>
                </body>
            </html>
-       '''.format(wifi.get_ip())
-
-        #html_page = '''
-        #   <html>
-        #       <p>Your System is restarting. You will be redirected to the home page in <span id="counter">20</span> second(s).</p>
-        #        <script type="text/javascript">
-        #        function countdown() {
-        #            var i = document.getElementById('counter');
-        #            if (parseInt(i.innerHTML)<=0) {
-        #                window.location.href = '/';
-        #            }
-        #            if (parseInt(i.innerHTML)!=0) {
-        #                i.innerHTML = parseInt(i.innerHTML)-1;
-        #            }
-        #        }
-        #        setInterval(function(){ countdown(); },1000);
-        #        </script>
-        #   </html>
-        #'''
+       '''.format(get_ip())
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
         utime.sleep(1)
-        wifi.wifi_disconnect()
+        wifi_disconnect()
         gc.collect()
         machine.reset()
 
@@ -566,7 +540,7 @@ def restart_system_get(request, response):
 def test_system_get(request, response):
     gc.collect()
     try:
-        libraries.test_irrigation_system()
+        test_irrigation_system()
     except Exception as e:
         _logger.exc(e, "Fail testing the system")
         html_page = '''
@@ -592,7 +566,8 @@ def get_log_file_get(request, response):
     try:
         request.parse_qs()
         file_name = request.form["file_name"]
-        yield from webapp.sendfile(response, "{}/{}".format(conf.LOG_DIR, file_name))
+        _logger.debug("File to fetch {}/{}".format(LOG_DIR, file_name))
+        yield from webapp.sendfile(response, "{}/{}".format(LOG_DIR, file_name))
     except Exception as e:
         _logger.exc(e, "Fail Getting the logs")
         html_page = '''
@@ -610,25 +585,6 @@ def get_log_file_get(request, response):
         gc.collect()
 
 
-def require_auth(func):
-    def auth(req, resp):
-        auth = req.headers.get(b"Authorization")
-        if not auth:
-            yield from resp.awrite(
-                'HTTP/1.0 401 NA\r\n'
-                'WWW-Authenticate: Basic realm="Picoweb Realm"\r\n'
-                '\r\n'
-            )
-            return
-
-        auth = auth.split(None, 1)[1]
-        auth = ubinascii.a2b_base64(auth).decode()
-        req.username, req.passwd = auth.split(":", 1)
-        yield from func(req, resp)
-
-    return auth
-
-
 ROUTES = [
     ('/', index),
     ('/enable_ap', enable_ap),
@@ -642,4 +598,4 @@ ROUTES = [
     ('/get_log_file', get_log_file)
 ]
 
-webapp = picoweb.WebApp(routes=ROUTES, tmpl_dir=conf.TEMPLATES_DIR)
+webapp = picoweb.WebApp(routes=ROUTES, tmpl_dir=TEMPLATES_DIR)

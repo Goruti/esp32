@@ -14,6 +14,7 @@ create_dir(DB_DIR)
 create_dir(LOG_DIR)
 initialize_root_logger(logging.DEBUG)
 _logger = logging.getLogger("Irrigation")
+_logger.info("############# STARTING IRRIGATION SYSTEM #############")
 
 try:
     wifi_connect(get_network_config())

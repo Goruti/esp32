@@ -21,7 +21,7 @@ def main_app():
 
         loop = asyncio.get_event_loop()
         loop.create_task(main_loops.initialize_rtc(frequency_loop=86400))
-        loop.create_task(main_loops.reading_moister(frequency_loop_ms=3600000, report_freq_ms=3600000))
+        loop.create_task(main_loops.reading_moister(frequency_loop_ms=300000, report_freq_ms=3600000))
         #loop.create_task(main_loops.reading_water_level(frequency_loop=300))
         webServer.webapp.run(host="0.0.0.0", port=80)
 

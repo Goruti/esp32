@@ -263,9 +263,10 @@ def test_irrigation_system():
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
             systems_info["pump_info"] = OrderedDict(sorted(systems_info["pump_info"].items(), key=lambda t: t[0]))
             for key, values in systems_info["pump_info"].items():
-                _logger.exc("testing port {}".format(values["connected_to_port"]))
+                _logger.info("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
-                _logger.exc("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
+                _logger.info("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
+                _logger.info("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
                 if start_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
                     utime.sleep(4)
                     stop_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
@@ -329,7 +330,7 @@ def initialize_root_logger(level):
         logging.basicConfig(level=level)
 
         _logger = logging.getLogger()
-        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=5*1024, backupCount=0)
+        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=10)
         _logger.addHandler(rfh)
 
     except Exception as e:
@@ -349,7 +350,7 @@ def mount_sd_card():
         gc.collect()
 
     try:
-        uos.mount(sd, mod_conf.SD_MOUNTING)
+        uos.mount(sd, "/{}".format(mod_conf.SD_MOUNTING))
     except Exception as e:
         sd.deinit()
         buf = uio.StringIO()

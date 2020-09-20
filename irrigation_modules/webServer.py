@@ -246,6 +246,7 @@ def wifi_config_post(request, response):
         yield from picoweb.start_response(response)
         yield from webapp.render_template(response, "config_wifi_confirmation.tpl", (data,))
         utime.sleep(2)
+        _logger.debug("restarting ESP-32")
         machine.reset()
     finally:
         gc.collect()

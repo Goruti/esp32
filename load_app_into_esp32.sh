@@ -26,7 +26,7 @@ function first_load() {
 }
 
 function load_all_files() {
-   for f in $(find $dir -name '*.py'); do
+   for f in $(find $dir -name '*.py' -o -name '*.tpl' -o -name '*.html'); do
     string=$f$delimiter
 
     myarray=()

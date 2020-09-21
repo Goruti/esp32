@@ -341,7 +341,7 @@ def mount_sd_card():
     if mod_conf.SD_MOUNTING and str(mod_conf.SD_MOUNTING) != "":
         try:
             sd = machine.SDCard(slot=2, freq=80000000)
-        except Exception as e:
+        except Exception:
             raise
         finally:
             gc.collect()

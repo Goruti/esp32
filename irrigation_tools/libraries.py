@@ -182,10 +182,11 @@ def initialize_irrigation_app():
     _logger.info("Initializing Ports")
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
-        pir = machine.Pin(mod_conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
-        #pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_RISING)
+        #pir = machine.Pin(mod_conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
+        #pir.irq(handler=water_level.water_level_interruption_handler, trigger=machine.Pin.IRQ_RISING)
+
         # high_wl = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
-        water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
+        #water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
 
         for key, value in mod_conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS

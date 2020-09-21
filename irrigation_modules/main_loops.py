@@ -2,7 +2,9 @@ import gc
 import utime
 import uasyncio as asyncio
 import logging
-from irrigation_tools import wifi, libraries, conf, manage_data
+from machine import Pin
+from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
+from irrigation_tools.water_level import get_watter_level
 
 _logger= logging.getLogger("Irrigation")
 
@@ -70,3 +72,42 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     _logger.debug("moisture_status: {}".format(moisture_status))
                     gc.collect()
                     await asyncio.sleep_ms(frequency_loop_ms)
+
+
+async def wait_pin_change(pin, bounces=50):
+    # wait for pin to change value
+    # it needs to be stable for a continuous 50ms
+
+    cur_value = pin.value()
+    active = 0
+    while active < bounces:
+        if pin.value() != cur_value:
+            active += 1
+        else:
+            active = 0
+        await asyncio.sleep_ms(1)
+
+
+async def reading_water_level():
+    pin = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
+    st_conf = libraries.get_smartthings_configuration()
+    smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
+    while True:
+        try:
+            await wait_pin_change(pin)
+
+            w_level = get_watter_level(pin.value())
+            if w_level == "empty":
+                libraries.stop_all_pumps()
+            payload = {
+                "type": "water_level_status",
+                "body": {
+                    "status": w_level
+                }
+            }
+            smartthings.notify(payload)
+
+        except BaseException as e:
+            _logger.exc(e, "failed to read water level")
+        finally:
+            gc.collect()

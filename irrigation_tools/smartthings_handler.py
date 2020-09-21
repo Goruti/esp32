@@ -32,7 +32,7 @@ class SmartThings:
                 if not attempts:
                     _logger.debug("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
             else:
-                _logger.info("SmartThings is not configured. This how message would looks like: {}".format(body))
+                _logger.error("SmartThings is not configured. Body: {}".format(body))
         except Exception as e:
             _logger.exc(e, "Failed to notify ST")
         finally:

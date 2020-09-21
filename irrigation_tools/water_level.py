@@ -3,6 +3,7 @@ import utime
 from micropython import schedule
 import uasyncio as asyncio
 import logging
+from machine import Pin
 from irrigation_tools import smartthings_handler, libraries
 from irrigation_tools.conf import WATER_LEVEL_SENSOR_PIN
 
@@ -14,7 +15,7 @@ class WaterLevel:
         self.last_time_ms = 0
         self.callback = callback
         self.debounce_ms = debounce_ms
-        pin.irq(handler=self._irq_cb, trigger=pin.IRQ_FALLING if falling else pin.IRQ_RISING)
+        pin.irq(handler=self._irq_cb, trigger=Pin.IRQ_FALLING if falling else Pin.IRQ_RISING)
 
     def _irq_cb(self, pin):
         t = utime.ticks_ms()

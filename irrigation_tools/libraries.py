@@ -7,7 +7,7 @@ import uio
 import logging
 from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
-from irrigation_tools import manage_data, water_level, smartthings_handler, libraries
+from irrigation_tools import manage_data, smartthings_handler, libraries
 from irrigation_tools import conf as mod_conf
 from irrigation_tools.wifi import is_connected, get_mac_address
 

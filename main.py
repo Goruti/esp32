@@ -6,10 +6,11 @@ import logging
 from irrigation_tools.wifi import start_ap, stop_ap, wifi_connect
 from irrigation_tools.manage_data import create_dir, get_network_config
 from irrigation_tools.conf import DB_DIR, AP_SSID, AP_PWD, LOG_DIR
-from irrigation_tools.libraries import initialize_root_logger
+from irrigation_tools.libraries import initialize_root_logger, mount_sd_card
 from irrigation_modules.app import main_app
 
 #  Initialize logger
+mount_sd_card()
 create_dir(DB_DIR)
 create_dir(LOG_DIR)
 initialize_root_logger(logging.DEBUG)

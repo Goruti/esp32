@@ -127,34 +127,17 @@ def moisture_to_hum(port, moisture):
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
     gc.collect()
-    pump_pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump"),
     sensor_pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
-
-    started = start_pump(pump_pin)
+    started = start_pump(port)
     if started:
-        payload = {
-            "type": "pump_status",
-            "body": {
-                port: "on"
-            }
-        }
-        notify_st(payload, retry_num=1, retry_sec=1)
-
         t = utime.ticks_ms()
         while ((moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms)
                 or
                 (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
             moisture = read_adc(sensor_pin)
             utime.sleep_ms(100)
-        if started:
-            stop_pump(pump_pin)
-            payload = {
-                "type": "pump_status",
-                "body": {
-                    port: "off"
-                }
-            }
-            notify_st(payload, retry_num=1, retry_sec=1)
+
+        stop_pump(port)
 
 
 def read_gpio(pin):
@@ -174,20 +157,12 @@ def read_adc(pin):
 
     gc.collect()
     return int(read / 8)
-    #return adc.read()
 
 
 def initialize_irrigation_app():
     gc.collect()
     _logger.info("Initializing Ports")
     try:
-        #  Initialize Water Sensor as IN_PUT and set low water interruption
-        #pir = machine.Pin(mod_conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
-        #pir.irq(handler=water_level.water_level_interruption_handler, trigger=machine.Pin.IRQ_RISING)
-
-        # high_wl = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
-        #water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
-
         for key, value in mod_conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
@@ -210,16 +185,20 @@ def initialize_irrigation_app():
         gc.collect()
 
 
-def start_pump(pin):
+def start_pump(port, notify=True):
     gc.collect()
     started = False
+    pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
         if libraries.get_watter_level() != "empty":
-            _logger.info("Starting pump: {}".format(pin))
+            _logger.info("Starting Port {} in Pin: {}".format(port, pin))
             machine.Pin(pin).on()
             started = True
+            if notify:
+                payload = {"type": "pump_status", "body": {port: "on"}}
+                notify_st(payload, retry_num=1, retry_sec=1)
         else:
-            _logger.info("cannot start pump {} since tank is empty".format(pin))
+            _logger.info("cannot start pump {} since tank is empty".format(port))
             gc.collect()
     except Exception as e:
         _logger.exc(e, "Failed Starting Pump")
@@ -228,11 +207,15 @@ def start_pump(pin):
         return started
 
 
-def stop_pump(pin):
+def stop_pump(port, notify=True):
     gc.collect()
+    pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
-        _logger.info("Stopping pump: {}".format(pin))
+        _logger.info("Stopping Port {} in Pin {}".format(port, pin))
         machine.Pin(pin).off()
+        if notify:
+            payload = {"type": "pump_status", "body": {port: "off"}}
+            notify_st(payload, retry_num=1, retry_sec=1)
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:
@@ -244,11 +227,9 @@ def stop_all_pumps():
     try:
         _logger.info("Stopping all pumps")
         for key, value in mod_conf.PORT_PIN_MAPPING.items():
-            stop_pump(value["pin_pump"])
+            stop_pump(key)
     except Exception as e:
         _logger.exc(e, "Failed Stopping ALL Pump. It will stop the whole application")
-        manage_data.save_irrigation_state(**{"running": False})
-        sys.exit()
     finally:
         gc.collect()
 
@@ -264,10 +245,9 @@ def test_irrigation_system():
                 _logger.info("testing port {}".format(values["connected_to_port"]))
                 moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                 _logger.info("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
-                _logger.info("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
-                if start_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")):
+                if start_pump(values["connected_to_port"], notify=False):
                     utime.sleep(4)
-                    stop_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
+                    stop_pump(values["connected_to_port"], notify=False)
     except BaseException as e:
         _logger.exc(e, "Failed Test Irrigation System")
     finally:
@@ -325,7 +305,7 @@ def initialize_root_logger(level):
         logging.basicConfig(level=level)
 
         _logger = logging.getLogger()
-        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=10)
+        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=3)
         _logger.addHandler(rfh)
 
     except Exception as e:

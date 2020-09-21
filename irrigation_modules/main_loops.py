@@ -76,7 +76,6 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
 async def wait_pin_change(pin, bounces=5):
     # wait for pin to change value
     # it needs to be stable for a continuous 5sec
-
     cur_value = pin.value()
     active = 0
     while active < bounces:

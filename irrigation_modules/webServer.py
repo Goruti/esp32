@@ -341,15 +341,15 @@ def pump_action_get(request, response):
     gc.collect()
     try:
         request.parse_qs()
-        pump = request.form["pump"]
+        port = request.form["pump"]
         action = request.form["action"]
         api_data = {"status": "off"}
         if action == "on":
-            started = start_pump(PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            started = start_pump(port)
             if started:
                 api_data = {"status": "on"}
         elif action == "off":
-            stop_pump(PORT_PIN_MAPPING.get(pump).get("pin_pump"))
+            stop_pump(port)
 
         if b"text/html" in request.headers[b"Accept"]:
             headers = {"Location": "/"}

@@ -1,12 +1,12 @@
 import gc
 import utime
-import micropython
+from micropython import schedule
 import uasyncio as asyncio
 import logging
 from irrigation_tools import smartthings_handler, libraries
 from irrigation_tools.conf import WATER_LEVEL_SENSOR_PIN
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("water level")
 
 
 class WaterLevel:
@@ -38,9 +38,6 @@ async def confirm_int(pin):
         try:
             if current_state == "empty":
                 libraries.stop_all_pumps()
-            # irrigation_config = manage_data.get_irrigation_config()
-            # irrigation_config.update({"water_level": "empty"})
-            # manage_data.save_irrigation_config(**irrigation_config)
 
             payload = {
                 "type": "water_level_status",
@@ -66,7 +63,7 @@ def water_level_interruption_function(pin):
 
 def water_level_interruption_handler(pin):
     _logger.info("interruption has been triggered - {}: {}".format(pin, get_watter_level(pin.value())))
-    micropython.schedule(water_level_interruption_function, pin)
+    schedule(water_level_interruption_function, pin)
 
 
 def get_watter_level(value=None):

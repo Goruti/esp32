@@ -3,7 +3,7 @@ from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer
 import logging
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("app")
 
 
 def main_app():

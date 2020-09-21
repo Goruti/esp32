@@ -11,7 +11,7 @@ from irrigation_tools import manage_data, water_level, smartthings_handler
 from irrigation_tools import conf as mod_conf
 from irrigation_tools.wifi import is_connected, get_mac_address
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("libraries")
 
 
 def get_net_configuration():
@@ -183,10 +183,9 @@ def initialize_irrigation_app():
     try:
         #  Initialize Water Sensor as IN_PUT and set low water interruption
         pir = machine.Pin(mod_conf.WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
-        # pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_FALLING | pir.IRQ_RISING)
-        # high_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
-        low_water_level = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler,
-                                                 falling=False)
+        pir.irq(handler=water_level.water_level_interruption_handler, trigger=pir.IRQ_RISING)
+        # high_wl = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=True)
+        # low_wl = water_level.WaterLevel(pin=pir, callback=water_level.water_level_interruption_handler, falling=False)
 
         for key, value in mod_conf.PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS

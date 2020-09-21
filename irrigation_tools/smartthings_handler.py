@@ -22,13 +22,11 @@ class SmartThings:
     def notify(self, body):
         try:
             attempts = self.retry_num
-            #_logger.debug("{} - Smartthings.notify, Sent body: {}".format(datetime_to_iso(utime.localtime()), body))
+            _logger.debug("Smartthings.notify, Sent body: {}".format(body))
             if self.URL:
                 while attempts and self._send_values(body):
                     attempts -= 1
-                    #_logger.debug("{} - Smartthings.notify, Re-try: {} - Body: {}".format(datetime_to_iso(utime.localtime()),
-                    #                                                              (self.retry_num - attempts), body))
-
+                    _logger.debug("Smartthings.notify, Re-try: {} - Body: {}".format((self.retry_num - attempts), body))
                     utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
                 if not attempts:

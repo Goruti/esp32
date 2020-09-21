@@ -223,7 +223,6 @@ def start_pump(pin):
             gc.collect()
     except Exception as e:
         _logger.exc(e, "Failed Starting Pump")
-        pass
     finally:
         gc.collect()
         return started
@@ -236,7 +235,6 @@ def stop_pump(pin):
         machine.Pin(pin).off()
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
-        pass
     finally:
         gc.collect()
 
@@ -272,7 +270,6 @@ def test_irrigation_system():
                     stop_pump(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump"))
     except BaseException as e:
         _logger.exc(e, "Failed Test Irrigation System")
-        pass
     finally:
         gc.collect()
 
@@ -288,7 +285,6 @@ def notify_st(body, retry_sec=5, retry_num=1):
         smartthings.notify(body)
     except Exception as e:
         _logger.exc(e, "Failed Notify ST")
-        pass
     finally:
         gc.collect()
 
@@ -318,7 +314,6 @@ def get_log_files_names():
         files = uos.listdir(mod_conf.LOG_DIR)
     except Exception as e:
         _logger.exc(e, "cannot get the log files name")
-        pass
     finally:
         gc.collect()
         return files
@@ -342,22 +337,24 @@ def initialize_root_logger(level):
 
 
 def mount_sd_card():
-    try:
-        sd = machine.SDCard(slot=2, freq=80000000)
-    except Exception as e:
-        raise
-    finally:
-        gc.collect()
+    gc.collect()
+    if mod_conf.SD_MOUNTING and str(mod_conf.SD_MOUNTING) != "":
+        try:
+            sd = machine.SDCard(slot=2, freq=80000000)
+        except Exception as e:
+            raise
+        finally:
+            gc.collect()
 
-    try:
-        uos.mount(sd, "/{}".format(mod_conf.SD_MOUNTING))
-    except Exception as e:
-        sd.deinit()
-        buf = uio.StringIO()
-        sys.print_exception(e, buf)
-        raise RuntimeError("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
-    finally:
-        gc.collect()
+        try:
+            uos.mount(sd, "/{}".format(mod_conf.SD_MOUNTING))
+        except Exception as e:
+            sd.deinit()
+            buf = uio.StringIO()
+            sys.print_exception(e, buf)
+            raise RuntimeError("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
+        finally:
+            gc.collect()
 
 
 def datetime_to_iso(time):

@@ -160,7 +160,6 @@ def index_get(request, response):
                 yield from picoweb.jsonify(response, data)
         except BaseException as e:
             _logger.exc(e, "Fail rendering the page")
-            pass
 
     finally:
         gc.collect()
@@ -207,7 +206,6 @@ def wifi_config_get(request, response):
         yield from webapp.render_template(response, "config_wifi.tpl", (get_available_networks(),))
     except BaseException as e:
         _logger.exc(e, "Fail Configuring Wifi")
-        pass
 
 
 def wifi_config_post(request, response):

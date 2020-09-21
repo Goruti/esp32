@@ -18,13 +18,10 @@ async def initialize_rtc(frequency_loop=3600):
                     _logger.debug("DateTime(UTC): {}".format(libraries.datetime_to_iso(utime.localtime())))
                 except Exception as e:
                     _logger.exc(e, "Fail to set time")
-                    pass
             else:
                 _logger.info("Device is Offline")
-                pass
         except BaseException as e:
             _logger.exc(e, "Fail to Initialize RTC")
-            pass
         finally:
             gc.collect()
             await asyncio.sleep(frequency_loop)

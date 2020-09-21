@@ -24,10 +24,10 @@ AP_PWD = "My@wesomeP@sword"
 WEBREPL_PWD = "S@mu3l"
 SD_MOUNTING = "sd"
 #DB Location
-DB_DIR = "{}/db".format(SD_MOUNTING)
+DB_DIR = "{}/db".format(SD_MOUNTING) if SD_MOUNTING and str(SD_MOUNTING) != "" else "/db"
 DB_FILENAME = "irrigation.db"
 #Logs
-LOG_DIR = "{}/logs".format(SD_MOUNTING)
+LOG_DIR = "{}/logs".format(SD_MOUNTING) if SD_MOUNTING and str(SD_MOUNTING) != "" else "/logs"
 LOG_FILENAME = "irrigation.log"
 
 

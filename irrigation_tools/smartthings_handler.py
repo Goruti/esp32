@@ -4,7 +4,7 @@ from irrigation_tools import libraries
 import urequests as requests
 import logging
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("SmartThings")
 
 
 class SmartThings:

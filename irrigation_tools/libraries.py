@@ -7,7 +7,7 @@ import uio
 import logging
 from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
-from irrigation_tools import manage_data, water_level, smartthings_handler
+from irrigation_tools import manage_data, water_level, smartthings_handler, libraries
 from irrigation_tools import conf as mod_conf
 from irrigation_tools.wifi import is_connected, get_mac_address
 
@@ -102,7 +102,7 @@ def get_irrigation_status():
             systems_info["pump_info"][key]["humidity"] = moisture_to_hum(values["connected_to_port"], moisture)
             systems_info["pump_info"][key]["threshold_pct"] = moisture_to_hum(values["connected_to_port"], values["moisture_threshold"])
 
-    systems_info["water_level"] = water_level.get_watter_level()
+    systems_info["water_level"] = libraries.get_watter_level()
     gc.collect()
     return systems_info
 
@@ -214,7 +214,7 @@ def start_pump(pin):
     gc.collect()
     started = False
     try:
-        if water_level.get_watter_level() != "empty":
+        if libraries.get_watter_level() != "empty":
             _logger.info("Starting pump: {}".format(pin))
             machine.Pin(pin).on()
             started = True
@@ -355,6 +355,12 @@ def mount_sd_card():
             raise RuntimeError("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
         finally:
             gc.collect()
+
+
+def get_watter_level(value=None):
+    if not value:
+        value = read_gpio(mod_conf.WATER_LEVEL_SENSOR_PIN)
+    return "empty" if value else "good"
 
 
 def datetime_to_iso(time):

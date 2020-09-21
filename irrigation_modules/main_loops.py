@@ -4,7 +4,6 @@ import uasyncio as asyncio
 import logging
 from machine import Pin
 from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
-from irrigation_tools.water_level import get_watter_level
 
 _logger= logging.getLogger("Irrigation")
 
@@ -74,9 +73,9 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     await asyncio.sleep_ms(frequency_loop_ms)
 
 
-async def wait_pin_change(pin, bounces=50):
+async def wait_pin_change(pin, bounces=5):
     # wait for pin to change value
-    # it needs to be stable for a continuous 50ms
+    # it needs to be stable for a continuous 5sec
 
     cur_value = pin.value()
     active = 0
@@ -85,7 +84,7 @@ async def wait_pin_change(pin, bounces=50):
             active += 1
         else:
             active = 0
-        await asyncio.sleep_ms(1)
+        await asyncio.sleep(1)
 
 
 async def reading_water_level():
@@ -95,8 +94,7 @@ async def reading_water_level():
     while True:
         try:
             await wait_pin_change(pin)
-
-            w_level = get_watter_level(pin.value())
+            w_level = libraries.get_watter_level(pin.value())
             if w_level == "empty":
                 libraries.stop_all_pumps()
             payload = {

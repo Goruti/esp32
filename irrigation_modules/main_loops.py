@@ -5,7 +5,7 @@ import logging
 from machine import Pin
 from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
 
-_logger= logging.getLogger("Irrigation")
+_logger= logging.getLogger("main loops")
 
 
 async def initialize_rtc(frequency_loop=3600):

@@ -13,7 +13,7 @@ from irrigation_tools.manage_data import save_network, save_webrepl_config, save
     save_irrigation_config, read_irrigation_config
 
 gc.collect()
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("webServer")
 
 
 def index(request, response):

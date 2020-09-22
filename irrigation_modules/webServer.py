@@ -128,18 +128,19 @@ def get_log_file(request, response):
 
 def index_get(request, response):
     gc.collect()
-    data = {}
-    try:
-        data["net_config"] = get_net_configuration()
-        data["irrigation_config"] = get_irrigation_status()
-        data["irrigationState"] = get_irrigation_state()
-        data["WebRepl"] = get_web_repl_configuration()
-        data["smartThings"] = get_smartthings_configuration()
-        data["log_files_name"] = get_log_files_names()
-
-    except Exception as e:
-        _logger.exc(e, "Fail getting index")
-        html_page = '''
+    if b"text/html" in request.headers[b"Accept"]:
+        try:
+            data = {
+                "net_config": get_net_configuration(),
+                "irrigation_config": get_irrigation_status(),
+                "irrigationState": get_irrigation_state(),
+                "WebRepl": get_web_repl_configuration(),
+                "smartThings": get_smartthings_configuration(),
+                "log_files_name": get_log_files_names()
+            }
+        except Exception as e:
+            _logger.exc(e, "Fail getting index")
+            html_page = '''
                        <html>
                             <head><title>Irrigation System Home Page</title></head>
                             <body>
@@ -148,21 +149,25 @@ def index_get(request, response):
                             </body>
                        </html>
                        '''
-        gc.collect()
-        yield from picoweb.start_response(writer=response, status="500")
-        yield from response.awrite(str(html_page))
+            gc.collect()
+            yield from picoweb.start_response(writer=response, status="500")
+            yield from response.awrite(str(html_page))
+        else:
+            yield from picoweb.start_response(response)
+            yield from webapp.render_template(response, "index.tpl", (data,))
     else:
         try:
-            if b"text/html" in request.headers[b"Accept"]:
-                yield from picoweb.start_response(response)
-                yield from webapp.render_template(response, "index.tpl", (data,))
-            else:
-                yield from picoweb.jsonify(response, data)
-        except BaseException as e:
-            _logger.exc(e, "Fail rendering the page")
+            data = {
+                "type": "refresh",
+                "body": get_irrigation_status()
+            }
+            yield from picoweb.jsonify(response, data)
+        except Exception as e:
+            _logger.exc(e, "Fail getting index")
+            yield from picoweb.start_response(writer=response, status="500")
+            yield from response.awrite("Server couldn't complete your request")
 
-    finally:
-        gc.collect()
+    gc.collect()
 
 
 def enable_ap_get(request, response):

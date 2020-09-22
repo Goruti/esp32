@@ -48,7 +48,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                         _logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
 
                         moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
-                        moisture_status[values["connected_to_port"]] = moisture
+                        moisture_status[values["connected_to_port"]] = libraries.moisture_to_hum(values["connected_to_port"], moisture)
                         if moisture > values["moisture_threshold"]:
                             libraries.start_irrigation(
                                                     port=values["connected_to_port"],

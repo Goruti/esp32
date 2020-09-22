@@ -212,10 +212,11 @@ def stop_pump(port, notify=True):
     pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
         _logger.info("Stopping Port {} in Pin {}".format(port, pin))
-        machine.Pin(pin).off()
-        if notify:
-            payload = {"type": "pump_status", "body": {port: "off"}}
-            notify_st(payload, retry_num=1, retry_sec=1)
+        if machine.Pin(pin).value():
+            machine.Pin(pin).off()
+            if notify:
+                payload = {"type": "pump_status", "body": {port: "off"}}
+                notify_st(payload, retry_num=1, retry_sec=1)
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:

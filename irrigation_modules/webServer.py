@@ -343,11 +343,11 @@ def pump_action_get(request, response):
         request.parse_qs()
         port = request.form["pump"]
         action = request.form["action"]
-        api_data = {"status": "off"}
+        api_data = {port: "off"}
         if action == "on":
             started = start_pump(port)
             if started:
-                api_data = {"status": "on"}
+                api_data = {port: "on"}
         elif action == "off":
             stop_pump(port)
 

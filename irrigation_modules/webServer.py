@@ -349,7 +349,7 @@ def pump_action_get(request, response):
         port = request.form["pump"]
         action = request.form["action"]
         api_data = {
-            "type": "pumps_status",
+            "type": "pump_status",
             "body": {
                 port: "off"
             }

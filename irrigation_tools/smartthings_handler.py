@@ -1,6 +1,6 @@
 import gc
 import utime
-from irrigation_tools import libraries
+from irrigation_tools.wifi import is_connected
 import urequests as requests
 import logging
 
@@ -20,23 +20,26 @@ class SmartThings:
         self.requests = requests
 
     def notify(self, body):
-        try:
-            attempts = self.retry_num
-            _logger.debug("Smartthings.notify, Sent body: {}".format(body))
-            if self.URL:
-                while attempts and self._send_values(body):
-                    attempts -= 1
-                    _logger.debug("Smartthings.notify, Re-try: {} - Body: {}".format((self.retry_num - attempts), body))
-                    utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
+        if is_connected:
+            try:
+                attempts = self.retry_num
+                _logger.debug("Smartthings.notify, Sent body: {}".format(body))
+                if self.URL:
+                    while attempts and self._send_values(body):
+                        attempts -= 1
+                        _logger.debug("Smartthings.notify, Re-try: {} - Body: {}".format((self.retry_num - attempts), body))
+                        utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
-                if not attempts:
-                    _logger.debug("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
-            else:
-                _logger.error("SmartThings is not configured. Body: {}".format(body))
-        except Exception as e:
-            _logger.exc(e, "Failed to notify ST")
-        finally:
-            gc.collect()
+                    if not attempts:
+                        _logger.debug("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
+                else:
+                    _logger.error("SmartThings is not configured. Body: {}".format(body))
+            except Exception as e:
+                _logger.exc(e, "Failed to notify ST")
+            finally:
+                gc.collect()
+        else:
+            _logger.debug("Discarding message since device is not connected")
 
     def _send_values(self, body):
         failed = True

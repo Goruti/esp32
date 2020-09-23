@@ -552,20 +552,31 @@ def test_system_get(request, response):
         test_irrigation_system()
     except Exception as e:
         _logger.exc(e, "Fail testing the system")
-        html_page = '''
-                    <html>
-                        <head><title>Irrigation System Home Page</title></head>
-                       <body>
-                           <p style="color: red;">Could not test the system. Check the logs on the device.</p><br>
-                            <p>Error: "{}"</p><br>
-                            <button onclick="window.location.href = '/';">Go Home Page</button>
-                       </body>
-                   </html>'''.format(e)
-        yield from picoweb.start_response(response)
-        yield from response.awrite(str(html_page))
+        if b"text/html" in request.headers[b"Accept"]:
+            html_page = '''
+                        <html>
+                            <head><title>Irrigation System Home Page</title></head>
+                           <body>
+                               <p style="color: red;">Could not test the system. Check the logs on the device.</p><br>
+                                <p>Error: "{}"</p><br>
+                                <button onclick="window.location.href = '/';">Go Home Page</button>
+                           </body>
+                       </html>'''.format(e)
+            yield from picoweb.start_response(response)
+            yield from response.awrite(str(html_page))
+        else:
+            yield from picoweb.start_response(writer=response, status="500")
+            yield from response.awrite("Server couldn't complete your request")
     else:
-        headers = {"Location": "/"}
-        yield from picoweb.start_response(response, status="303", headers=headers)
+        if b"text/html" in request.headers[b"Accept"]:
+            headers = {"Location": "/"}
+            yield from picoweb.start_response(response, status="303", headers=headers)
+        else:
+            data = {
+                "type": "system_test",
+                "body": "done"
+            }
+            yield from picoweb.jsonify(response, data)
     finally:
         gc.collect()
 

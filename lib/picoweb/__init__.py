@@ -7,6 +7,7 @@ import ure as re
 import uerrno
 import uasyncio as asyncio
 import pkg_resources
+import gc
 
 from .utils import parse_qs
 
@@ -231,8 +232,14 @@ class WebApp:
         # handle_exc(). If exception is thrown, it will be propagated, and
         # your webapp will terminate.
         # This method is a coroutine.
-        yield from start_response(resp, status="500")
-        yield from resp.awrite("500 Internal Error\r\n")
+        try:
+            yield from start_response(resp, status="500")
+            yield from resp.awrite("500 Internal Error\r\n")
+        except:
+            pass
+        finally:
+            gc.collect()
+
 
     def mount(self, url, app):
         "Mount a sub-app at the url of current app."

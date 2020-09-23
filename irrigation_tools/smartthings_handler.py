@@ -11,7 +11,7 @@ class SmartThings:
     def __init__(self, retry_num=5, retry_sec=1, st_ip=None, st_port=None):
 
         if st_ip and st_port:
-            self.URL = self.URL = "http://{}:{}".format(st_ip, st_port)
+            self.URL = "http://{}:{}".format(st_ip, st_port)
         else:
             self.URL = None
 

@@ -198,7 +198,7 @@ def start_pump(port, notify=True):
                 payload = {"type": "pump_status", "body": {port: "on"}}
                 notify_st(payload, retry_num=1, retry_sec=1)
         else:
-            _logger.info("cannot start pump {} since tank is empty".format(port))
+            _logger.info("cannot start 'pump {}' since tank is empty".format(port))
     except Exception as e:
         _logger.exc(e, "Failed Starting Pump")
     finally:

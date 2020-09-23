@@ -229,7 +229,7 @@ def stop_all_pumps():
         for key, value in mod_conf.PORT_PIN_MAPPING.items():
             stop_pump(key)
     except Exception as e:
-        _logger.exc(e, "Failed Stopping ALL Pump. It will stop the whole application")
+        _logger.exc(e, "Failed Stopping ALL Pump")
     finally:
         gc.collect()
 
@@ -254,7 +254,7 @@ def test_irrigation_system():
         gc.collect()
 
 
-def notify_st(body, retry_sec=5, retry_num=1):
+def notify_st(body, retry_sec=1, retry_num=1):
     gc.collect()
     try:
         st_conf = get_smartthings_configuration()

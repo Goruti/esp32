@@ -63,7 +63,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                             "type": "moisture_status",
                             "body": moisture_status
                         }
-                        libraries.notify_st(payload)
+                        libraries.notify_st(payload, retry_sec=1, retry_num=5)
 
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")

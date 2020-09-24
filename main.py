@@ -13,7 +13,7 @@ from irrigation_modules.app import main_app
 mount_sd_card()
 create_dir(DB_DIR)
 create_dir(LOG_DIR)
-initialize_root_logger(logging.DEBUG)
+initialize_root_logger(logging.INFO)
 _logger = logging.getLogger("Irrigation")
 _logger.info("############# STARTING IRRIGATION SYSTEM #############")
 

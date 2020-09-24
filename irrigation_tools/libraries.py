@@ -305,7 +305,7 @@ def initialize_root_logger(level):
         logging.basicConfig(level=level)
 
         _logger = logging.getLogger()
-        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=3)
+        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=10)
         _logger.addHandler(rfh)
 
     except Exception as e:

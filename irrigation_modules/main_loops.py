@@ -42,7 +42,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
             while True:
                 gc.collect()
                 try:
-                    _logger.debug("reading_moister - inside while true")
+                    _logger.debug("reading_moister - Start a new reading")
                     moisture_status = {}
                     for key, values in systems_info["pump_info"].items():
                         _logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
@@ -68,7 +68,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")
                 finally:
-                    _logger.debug("moisture_status: {}".format(moisture_status))
+                    _logger.info("moisture_status: {}".format(moisture_status))
                     gc.collect()
                     await asyncio.sleep_ms(frequency_loop_ms)
 

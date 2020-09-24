@@ -27,11 +27,11 @@ class SmartThings:
                 if self.URL:
                     while attempts and self._send_values(body):
                         attempts -= 1
-                        _logger.debug("Smartthings.notify, Re-try: {} - Body: {}".format((self.retry_num - attempts), body))
+                        _logger.error("Smartthings.notify, Re-try: {} - Body: {}".format((self.retry_num - attempts), body))
                         utime.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
                     if not attempts:
-                        _logger.debug("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
+                        _logger.error("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
                 else:
                     _logger.error("SmartThings is not configured")
             except Exception as e:

@@ -8,7 +8,7 @@ from irrigation_tools.wifi import is_connected, wifi_disconnect, start_ap, get_i
     wifi_connect
 from irrigation_tools.libraries import get_net_configuration, get_irrigation_state, get_irrigation_status,\
     test_irrigation_system, get_web_repl_configuration, get_log_files_names, get_smartthings_configuration,\
-    start_pump, stop_pump, notify_st
+    start_pump, stop_pump, get_st_handler
 from irrigation_tools.manage_data import save_network, save_webrepl_config, save_smartthings_config,\
     save_irrigation_config, read_irrigation_config
 
@@ -292,18 +292,20 @@ def irrigation_config_post(request, response):
                 "moisture_threshold": int(request.form["moisture_threshold_{}".format(pump)]),
                 "connected_to_port": request.form["connected_to_port_{}".format(pump)],
             }
-        config["pump_info"] = pump_info
+        config.update({"pump_info": pump_info})
 
-        net_conf = get_net_configuration()
-        payload = {
-            "type": "system_configuration",
-            "body": {
-                "ssid": net_conf["ssid"],
-                "ip": net_conf["ip"],
-                "system": config
+        st = get_st_handler(retry_sec=1, retry_num=5)
+        if st:
+            net_conf = get_net_configuration()
+            payload = {
+                "type": "system_configuration",
+                "body": {
+                    "ssid": net_conf["ssid"],
+                    "ip": net_conf["ip"],
+                    "system": config
+                }
             }
-        }
-        notify_st(payload)
+        st.notify(payload)
 
         save_irrigation_config(**config)
         gc.collect()
@@ -404,6 +406,7 @@ def config_web_repl_get(request, response):
 def enable_smartthings_get(request, response):
     gc.collect()
     try:
+        st = get_st_handler(retry_sec=1, retry_num=5)
         request.parse_qs()
         action = request.form["action"]
         if action == "enable":
@@ -429,13 +432,14 @@ def enable_smartthings_get(request, response):
             yield from response.awrite(str(html_page))
 
         else:
-            payload = {
-                "type": "system_configuration",
-                "body": {
-                    "status": "disable"
+            if st:
+                payload = {
+                    "type": "system_configuration",
+                    "body": {
+                        "status": "disable"
+                    }
                 }
-            }
-            notify_st(payload)
+                st.notify(payload)
 
             st_conf = {
                 "enabled": False,
@@ -486,7 +490,9 @@ def enable_smartthings_post(request, response):
                 "system": read_irrigation_config()
             }
         }
-        notify_st(payload)
+        st = get_st_handler(retry_num=5, retry_sec=1)
+        if st:
+            st.notify(payload)
 
     except Exception as e:
         _logger.exc(e, "Fail Saving ST configuration")

@@ -3,7 +3,7 @@ import network
 import machine
 import utime
 import ubinascii
-
+gc.collect()
 
 def is_connected():
     gc.collect()

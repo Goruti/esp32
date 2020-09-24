@@ -3,7 +3,7 @@ import utime
 from irrigation_tools.wifi import is_connected
 import urequests as requests
 import logging
-
+gc.collect()
 _logger = logging.getLogger("SmartThings")
 
 

@@ -5,7 +5,7 @@ import uos
 
 from ucontextlib import contextmanager
 from irrigation_tools.conf import DB_DIR, DB_FILENAME
-
+gc.collect()
 
 @contextmanager
 def _get_db():

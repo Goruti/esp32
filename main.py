@@ -8,6 +8,7 @@ from irrigation_tools.manage_data import create_dir, get_network_config
 from irrigation_tools.conf import DB_DIR, AP_SSID, AP_PWD, LOG_DIR
 from irrigation_tools.libraries import initialize_root_logger, mount_sd_card
 from irrigation_modules.app import main_app
+gc.collect()
 
 #  Initialize logger
 mount_sd_card()

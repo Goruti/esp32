@@ -3,7 +3,11 @@ import utime
 import uasyncio as asyncio
 import logging
 from machine import Pin
-from irrigation_tools import wifi, libraries, conf, manage_data, smartthings_handler
+from irrigation_tools import libraries
+from irrigation_tools.wifi import is_connected
+from irrigation_tools.conf import PORT_PIN_MAPPING, WATER_LEVEL_SENSOR_PIN
+from irrigation_tools.manage_data import save_irrigation_state
+gc.collect()
 
 _logger= logging.getLogger("main loops")
 
@@ -12,7 +16,7 @@ async def initialize_rtc(frequency_loop=3600):
     while True:
         gc.collect()
         try:
-            if wifi.is_connected():
+            if is_connected():
                 try:
                     from ntptime import settime
                     settime()
@@ -32,9 +36,10 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     _logger.debug("Start Reading Moister Loop")
     try:
         systems_info = libraries.get_irrigation_configuration()
+        st = libraries.get_st_handler(retry_num=5, retry_sec=1)
     except BaseException as e:
         _logger.exc(e, "Fail to Read Systems Information RTC")
-        manage_data.save_irrigation_state(**{"running": False})
+        save_irrigation_state(**{"running": False})
         gc.collect()
     else:
         if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
@@ -47,7 +52,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     for key, values in systems_info["pump_info"].items():
                         _logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
 
-                        moisture = libraries.read_adc(conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                        moisture = libraries.read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = libraries.moisture_to_hum(values["connected_to_port"], moisture)
                         if moisture > values["moisture_threshold"]:
                             libraries.start_irrigation(
@@ -57,13 +62,13 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                                                     max_irrigation_time_ms=10000
                                             )
 
-                    if utime.ticks_diff(utime.ticks_ms(), report_time) > 0:
+                    if st and utime.ticks_diff(utime.ticks_ms(), report_time) > 0:
                         report_time = utime.ticks_add(utime.ticks_ms(), report_freq_ms)
                         payload = {
                             "type": "moisture_status",
                             "body": moisture_status
                         }
-                        libraries.notify_st(payload, retry_sec=1, retry_num=5)
+                        st.notify(payload)
 
                 except BaseException as e:
                     _logger.exc(e, "Fail to get current Moisture status")
@@ -87,22 +92,22 @@ async def wait_pin_change(pin, bounces=5):
 
 
 async def reading_water_level():
-    pin = Pin(conf.WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-    st_conf = libraries.get_smartthings_configuration()
-    smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"], st_port=st_conf["st_port"])
+    pin = Pin(WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
+    st = libraries.get_st_handler(retry_num=5, retry_sec=1)
     while True:
         try:
             await wait_pin_change(pin)
             w_level = libraries.get_watter_level(pin.value())
             if w_level == "empty":
                 libraries.stop_all_pumps()
-            payload = {
-                "type": "water_level_status",
-                "body": {
-                    "status": w_level
+            if st:
+                payload = {
+                    "type": "water_level_status",
+                    "body": {
+                        "status": w_level
+                    }
                 }
-            }
-            smartthings.notify(payload)
+                st.notify(payload)
 
         except BaseException as e:
             _logger.exc(e, "failed to read water level")

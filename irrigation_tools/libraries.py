@@ -7,86 +7,13 @@ import uio
 import logging
 from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
-from irrigation_tools import manage_data, smartthings_handler, libraries
-from irrigation_tools import conf as mod_conf
+from irrigation_tools import manage_data, smartthings_handler
+from irrigation_tools.conf import PORT_PIN_MAPPING, WEBREPL_PWD, LOG_DIR, LOG_FILENAME, SD_MOUNTING,\
+                                    WATER_LEVEL_SENSOR_PIN
 from irrigation_tools.wifi import is_connected, get_mac_address
+gc.collect()
 
 _logger = logging.getLogger("libraries")
-
-
-def get_net_configuration():
-    gc.collect()
-    try:
-        ip = is_connected()
-        if ip:
-            data = {"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip}
-        else:
-            data = {"connected": False, "ssid": None, "ip": None}
-        data["mac"] = get_mac_address()
-    except Exception as e:
-        data = {"connected": False, "ssid": None, "ip": None, "mac": None}
-    finally:
-        gc.collect()
-        return data
-
-
-def get_irrigation_configuration():
-    gc.collect()
-    try:
-        conf = manage_data.read_irrigation_config()
-        if not conf:
-            conf = {
-                "total_pumps": 0,
-                "pump_info": {},
-                "water_level": None
-            }
-    except Exception as e:
-        conf = {
-            "total_pumps": 0,
-            "pump_info": {},
-            "water_level": None
-        }
-    finally:
-        gc.collect()
-        return conf
-
-
-def get_web_repl_configuration():
-    gc.collect()
-    try:
-        conf = manage_data.read_webrepl_config()
-        if not conf:
-            conf = {
-                "enabled": False
-            }
-    except Exception as e:
-        conf = {
-            "enabled": False
-        }
-    finally:
-        gc.collect()
-        return conf
-
-
-def get_smartthings_configuration():
-    gc.collect()
-    try:
-        conf = manage_data.read_smartthings_config()
-        if not conf or not conf["enabled"]:
-            conf = {
-                "enabled": False,
-                "st_ip": None,
-                "st_port": None
-            }
-    except Exception as e:
-        conf = {
-            "enabled": False,
-            "st_ip": None,
-            "st_port": None
-        }
-    finally:
-        gc.collect()
-        return conf
 
 
 def get_irrigation_status():
@@ -96,13 +23,13 @@ def get_irrigation_status():
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "on" if read_gpio(
-                mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "off"
-            moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "off"
+            moisture = read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
             systems_info["pump_info"][key]["moisture"] = moisture
             systems_info["pump_info"][key]["humidity"] = moisture_to_hum(values["connected_to_port"], moisture)
             systems_info["pump_info"][key]["threshold_pct"] = moisture_to_hum(values["connected_to_port"], values["moisture_threshold"])
 
-    systems_info["water_level"] = libraries.get_watter_level()
+    systems_info["water_level"] = get_watter_level()
     gc.collect()
     return systems_info
 
@@ -110,8 +37,8 @@ def get_irrigation_status():
 def moisture_to_hum(port, moisture):
     gc.collect()
     try:
-        dry = mod_conf.PORT_PIN_MAPPING.get(port).get("dry_value")
-        wet = mod_conf.PORT_PIN_MAPPING.get(port).get("water_value")
+        dry = PORT_PIN_MAPPING.get(port).get("dry_value")
+        wet = PORT_PIN_MAPPING.get(port).get("water_value")
         if moisture >= dry:
             hum = 0.0
         elif moisture <= wet:
@@ -127,7 +54,7 @@ def moisture_to_hum(port, moisture):
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
     gc.collect()
-    sensor_pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_sensor"),
+    sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor"),
     started = start_pump(port)
     if started:
         t = utime.ticks_ms()
@@ -163,7 +90,7 @@ def initialize_irrigation_app():
     gc.collect()
     _logger.info("Initializing Ports")
     try:
-        for key, value in mod_conf.PORT_PIN_MAPPING.items():
+        for key, value in PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
@@ -173,7 +100,7 @@ def initialize_irrigation_app():
 
         #  TODO (Comment the following line)
         import webrepl
-        webrepl.start(password=mod_conf.WEBREPL_PWD)
+        webrepl.start(password=WEBREPL_PWD)
         manage_data.save_webrepl_config(**{"enabled": True})
         manage_data.save_irrigation_state(**{"running": True})
 
@@ -188,15 +115,17 @@ def initialize_irrigation_app():
 def start_pump(port, notify=True):
     gc.collect()
     started = False
-    pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump")
+    pin = PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
-        if libraries.get_watter_level() != "empty":
+        if get_watter_level() != "empty":
             _logger.info("Starting Port {} in Pin: {}".format(port, pin))
             machine.Pin(pin).on()
             started = True
             if notify:
-                payload = {"type": "pump_status", "body": {port: "on"}}
-                notify_st(payload, retry_num=1, retry_sec=1)
+                st = get_st_handler(retry_num=1, retry_sec=1)
+                if st:
+                    payload = {"type": "pump_status", "body": {port: "on"}}
+                    st.notify(payload)
         else:
             _logger.info("cannot start 'pump {}' since tank is empty".format(port))
     except Exception as e:
@@ -208,14 +137,16 @@ def start_pump(port, notify=True):
 
 def stop_pump(port, notify=True):
     gc.collect()
-    pin = mod_conf.PORT_PIN_MAPPING.get(port).get("pin_pump")
+    pin = PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
         _logger.info("Stopping Port {} in Pin {}".format(port, pin))
         if machine.Pin(pin).value():
             machine.Pin(pin).off()
             if notify:
-                payload = {"type": "pump_status", "body": {port: "off"}}
-                notify_st(payload, retry_num=1, retry_sec=1)
+                st = get_st_handler(retry_num=1, retry_sec=1)
+                if st:
+                    payload = {"type": "pump_status", "body": {port: "off"}}
+                    st.notify(payload)
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:
@@ -226,7 +157,7 @@ def stop_all_pumps():
     gc.collect()
     try:
         _logger.info("Stopping all pumps")
-        for key, value in mod_conf.PORT_PIN_MAPPING.items():
+        for key, value in PORT_PIN_MAPPING.items():
             stop_pump(key)
     except Exception as e:
         _logger.exc(e, "Failed Stopping ALL Pump")
@@ -243,7 +174,7 @@ def test_irrigation_system():
             systems_info["pump_info"] = OrderedDict(sorted(systems_info["pump_info"].items(), key=lambda t: t[0]))
             for key, values in systems_info["pump_info"].items():
                 _logger.info("testing port {}".format(values["connected_to_port"]))
-                moisture = read_adc(mod_conf.PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
+                moisture = read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                 _logger.info("moisture_port_{}: {}".format(values["connected_to_port"], moisture))
                 if start_pump(values["connected_to_port"], notify=False):
                     utime.sleep(4)
@@ -254,34 +185,93 @@ def test_irrigation_system():
         gc.collect()
 
 
-def notify_st(body, retry_sec=1, retry_num=1):
+def get_st_handler(retry_sec=1, retry_num=1):
     gc.collect()
+    smartthings = None
     try:
         st_conf = get_smartthings_configuration()
-        smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"],
-                                                      st_port=st_conf["st_port"],
-                                                      retry_sec=retry_sec,
-                                                      retry_num=retry_num)
-        smartthings.notify(body)
+        if st_conf.get("enabled", {}):
+            smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"],
+                                                          st_port=st_conf["st_port"],
+                                                          retry_sec=retry_sec,
+                                                          retry_num=retry_num)
     except Exception as e:
-        _logger.exc(e, "Failed Notify ST")
+        _logger.exc(e, "Failed to get ST handler")
     finally:
         gc.collect()
+        return smartthings
+
+
+def get_net_configuration():
+    gc.collect()
+    data = {"connected": False, "ssid": None, "ip": None, "mac": None}
+    try:
+        ip = is_connected()
+        if ip:
+            data.update({"connected": True, "ssid": manage_data.get_network_config().get('ssid', {}), "ip": ip})
+        data.update({"mac": get_mac_address()})
+    except Exception as e:
+        _logger.exc(e, "Failed to get Network Configuration")
+    finally:
+        gc.collect()
+        return data
+
+
+def get_irrigation_configuration():
+    gc.collect()
+    conf = {
+        "total_pumps": 0,
+        "pump_info": {},
+        "water_level": None
+    }
+    try:
+        conf.update(manage_data.read_irrigation_config())
+    except Exception as e:
+        _logger.exc(e, "Failed to get Irrigation configuration")
+    finally:
+        gc.collect()
+        return conf
+
+
+def get_web_repl_configuration():
+    gc.collect()
+    conf = {
+        "enabled": False
+    }
+    try:
+        conf.update(manage_data.read_webrepl_config())
+    except Exception as e:
+        _logger.exc(e, "Failed to get webrepl configuration")
+    finally:
+        gc.collect()
+        return conf
+
+
+def get_smartthings_configuration():
+    gc.collect()
+    conf = {
+        "enabled": False,
+        "st_ip": None,
+        "st_port": None
+    }
+    try:
+        conf.update(manage_data.read_smartthings_config())
+    except Exception as e:
+        _logger.exc(e, "Failed to get ST configuration")
+    finally:
+        gc.collect()
+        return conf
 
 
 def get_irrigation_state():
     gc.collect()
+    state = {
+        "running": None
+    }
     try:
-        state = manage_data.read_irrigation_state()
-        if not state:
-            state = {
-                "running": None
-            }
+        state.update(manage_data.read_irrigation_state())
     except Exception as e:
         _logger.exc(e, "Failed Getting Irrigation State")
-        state = {
-            "running": None
-        }
     finally:
         gc.collect()
         return state
@@ -291,7 +281,7 @@ def get_log_files_names():
     gc.collect()
     files = []
     try:
-        files = uos.listdir(mod_conf.LOG_DIR)
+        files = uos.listdir(LOG_DIR)
     except Exception as e:
         _logger.exc(e, "cannot get the log files name")
     finally:
@@ -305,7 +295,7 @@ def initialize_root_logger(level):
         logging.basicConfig(level=level)
 
         _logger = logging.getLogger()
-        rfh = RotatingFileHandler("{}/{}".format(mod_conf.LOG_DIR, mod_conf.LOG_FILENAME), maxBytes=10*1024, backupCount=10)
+        rfh = RotatingFileHandler("{}/{}".format(LOG_DIR, LOG_FILENAME), maxBytes=10*1024, backupCount=10)
         _logger.addHandler(rfh)
 
     except Exception as e:
@@ -318,7 +308,7 @@ def initialize_root_logger(level):
 
 def mount_sd_card():
     gc.collect()
-    if mod_conf.SD_MOUNTING and str(mod_conf.SD_MOUNTING) != "":
+    if SD_MOUNTING and str(SD_MOUNTING) != "":
         try:
             sd = machine.SDCard(slot=2, freq=80000000)
         except Exception:
@@ -327,7 +317,7 @@ def mount_sd_card():
             gc.collect()
 
         try:
-            uos.mount(sd, "/{}".format(mod_conf.SD_MOUNTING))
+            uos.mount(sd, "/{}".format(SD_MOUNTING))
         except Exception as e:
             sd.deinit()
             buf = uio.StringIO()
@@ -339,7 +329,7 @@ def mount_sd_card():
 
 def get_watter_level(value=None):
     if not value:
-        value = read_gpio(mod_conf.WATER_LEVEL_SENSOR_PIN)
+        value = read_gpio(WATER_LEVEL_SENSOR_PIN)
     return "empty" if value else "good"
 
 

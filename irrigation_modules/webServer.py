@@ -259,9 +259,6 @@ def irrigation_config_get(request, response):
     gc.collect()
     try:
         yield from webapp.sendfile(response, "{}/config_irrigation.html".format(TEMPLATES_DIR))
-        # with open("{}/config_irrigation.html".format(TEMPLATES_DIR), 'r') as f:
-        #    html_page = f.read()
-
     except Exception as e:
         _logger.exc(e, "cannot get irrigation Configuration")
         html_page = '''

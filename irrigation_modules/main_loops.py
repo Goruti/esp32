@@ -9,7 +9,7 @@ from irrigation_tools.conf import PORT_PIN_MAPPING, WATER_LEVEL_SENSOR_PIN
 from irrigation_tools.manage_data import save_irrigation_state
 gc.collect()
 
-_logger= logging.getLogger("main loops")
+_logger = logging.getLogger("main loops")
 
 
 async def initialize_rtc(frequency_loop=3600):

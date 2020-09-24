@@ -5,6 +5,7 @@ import utime
 import ubinascii
 gc.collect()
 
+
 def is_connected():
     gc.collect()
     ip = None

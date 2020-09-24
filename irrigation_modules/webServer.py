@@ -3,7 +3,7 @@ import picoweb
 import utime
 import machine
 import logging
-from irrigation_tools.conf import AP_SSID, AP_PWD, TEMPLATES_DIR, LOG_DIR, PORT_PIN_MAPPING, WEBREPL_PWD
+from irrigation_tools.conf import AP_SSID, AP_PWD, TEMPLATES_DIR, LOG_DIR, WEBREPL_PWD
 from irrigation_tools.wifi import is_connected, wifi_disconnect, start_ap, get_ip, get_available_networks,\
     wifi_connect
 from irrigation_tools.libraries import get_net_configuration, get_irrigation_state, get_irrigation_status,\

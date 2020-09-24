@@ -23,7 +23,7 @@ def get_irrigation_status():
     if systems_info and "pump_info" in systems_info.keys() and len(systems_info["pump_info"]) > 0:
         for key, values in systems_info["pump_info"].items():
             systems_info["pump_info"][key]["pump_status"] = "on" if read_gpio(
-                PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_pump")) else "off"
+                PORT_PIN_MAPPING.get(values["connected_to_port"], {}).get("pin_pump")) else "off"
             moisture = read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
             systems_info["pump_info"][key]["moisture"] = moisture
             systems_info["pump_info"][key]["humidity"] = moisture_to_hum(values["connected_to_port"], moisture)
@@ -190,9 +190,9 @@ def get_st_handler(retry_sec=1, retry_num=1):
     smartthings = None
     try:
         st_conf = get_smartthings_configuration()
-        if st_conf.get("enabled", {}):
-            smartthings = smartthings_handler.SmartThings(st_ip=st_conf["st_ip"],
-                                                          st_port=st_conf["st_port"],
+        if st_conf.get("enabled"):
+            smartthings = smartthings_handler.SmartThings(st_ip=st_conf.get("st_ip"),
+                                                          st_port=st_conf.get("st_port"),
                                                           retry_sec=retry_sec,
                                                           retry_num=retry_num)
     except Exception as e:

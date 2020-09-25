@@ -39,8 +39,8 @@ gc.collect()
 try:
     import uftp
     if SD_mounted:
-        create_dir(DB_DIR)
         _logger.info("############# STARTING IRRIGATION SYSTEM #############")
+        create_dir(DB_DIR)
         main_app()
 except Exception as e:
     sys.print_exception(e)

@@ -122,7 +122,7 @@ def exception(msg, *args):
 
 def basicConfig(level=INFO, filename=None, stream=None, format=None):
     root.setLevel(level)
-    assert filename is None  # filename is not supported
+    assert filename is None  # filename is not supported, you need to add it manually afterward using RotatingFileHandler
     assert format is None  # format is not supported
     h = StreamHandler(stream)
     root.handlers.clear()

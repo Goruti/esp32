@@ -12,6 +12,7 @@ from .utils import parse_qs
 
 SEND_BUFSZ = 128
 
+
 def get_mime_type(fname):
     # Provide minimal detection of important file
     # types to keep browsers happy
@@ -22,6 +23,7 @@ def get_mime_type(fname):
     if fname.endswith(".png") or fname.endswith(".jpg"):
         return "image"
     return "text/plain"
+
 
 def sendstream(writer, f):
     buf = bytearray(SEND_BUFSZ)
@@ -36,10 +38,6 @@ def jsonify(writer, dict):
     import ujson
     yield from start_response(writer, "application/json")
     yield from writer.awrite(ujson.dumps(dict))
-
-
-def template_string(writer, s):
-    yield from writer.awrite(s)
 
 
 def start_response(writer, content_type="text/html; charset=utf-8", status="200", headers=None):
@@ -104,7 +102,8 @@ class WebApp:
         self.template_loader = None
         self.headers_mode = "parse"
 
-    def parse_headers(self, reader):
+    @staticmethod
+    def parse_headers(reader):
         headers = {}
         while True:
             l = yield from reader.readline()
@@ -237,7 +236,6 @@ class WebApp:
             pass
         finally:
             gc.collect()
-
 
     def mount(self, url, app):
         "Mount a sub-app at the url of current app."

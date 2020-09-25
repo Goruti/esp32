@@ -289,14 +289,14 @@ def get_log_files_names():
         return files
 
 
-def initialize_root_logger(level):
+def initialize_root_logger(level, logfile=None):
     gc.collect()
     try:
         logging.basicConfig(level=level)
-
         _logger = logging.getLogger()
-        rfh = RotatingFileHandler("{}/{}".format(LOG_DIR, LOG_FILENAME), maxBytes=10*1024, backupCount=10)
-        _logger.addHandler(rfh)
+        if logfile:
+            rfh = RotatingFileHandler(logfile, maxBytes=10*1024, backupCount=10)
+            _logger.addHandler(rfh)
 
     except Exception as e:
         buf = uio.StringIO()
@@ -308,13 +308,16 @@ def initialize_root_logger(level):
 
 def mount_sd_card():
     gc.collect()
+    mounted = False
+
     if SD_MOUNTING and str(SD_MOUNTING) != "":
         try:
             sd = machine.SDCard(slot=2, freq=80000000)
-        except Exception:
-            raise
-        finally:
-            gc.collect()
+        except Exception as e:
+            buf = uio.StringIO()
+            sys.print_exception(e, buf)
+            print("Cannot Crete SDCard Object.\nError: {}".format(buf.getvalue()))
+            return mounted
 
         try:
             uos.mount(sd, "/{}".format(SD_MOUNTING))
@@ -322,9 +325,12 @@ def mount_sd_card():
             sd.deinit()
             buf = uio.StringIO()
             sys.print_exception(e, buf)
-            raise RuntimeError("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
-        finally:
-            gc.collect()
+            print("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
+        else:
+            mounted = True
+
+    gc.collect()
+    return mounted
 
 
 def get_watter_level(value=None):

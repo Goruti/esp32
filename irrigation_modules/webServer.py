@@ -211,15 +211,17 @@ def wifi_config_get(request, response):
         yield from webapp.render_template(response, "config_wifi.tpl", (get_available_networks(),))
     except BaseException as e:
         _logger.exc(e, "Fail Configuring Wifi")
+    finally:
+        gc.collect()
 
 
 def wifi_config_post(request, response):
     """
     Save Network Configuration
     """
+    gc.collect()
     net_config = {}
     yield from request.read_form_data()
-    gc.collect()
     for key in ['ssid', 'password']:
         if key in request.form:
             net_config[key] = request.form[key]
@@ -244,6 +246,7 @@ def wifi_config_post(request, response):
         yield from picoweb.start_response(response)
         yield from response.awrite(str(html_page))
     else:
+        gc.collect()
         save_network(**net_config)
         data = [net_config['ssid'], is_connected()]
         yield from picoweb.start_response(response)

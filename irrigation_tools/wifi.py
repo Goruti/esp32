@@ -3,7 +3,10 @@ import network
 import machine
 import utime
 import ubinascii
+import logging
 gc.collect()
+
+_logger = logging.getLogger("wifi")
 
 
 def is_connected():
@@ -14,23 +17,27 @@ def is_connected():
         if wlan.active() and wlan.isconnected():
             details = wlan.ifconfig()
             ip = details[0] if details else None
+    except RuntimeError as e:
+        _logger.exc(e, "Failed in is_connected")
+    finally:
         gc.collect()
-    except RuntimeError:
-        ip = None
-    return ip
+        return ip
 
 
 def get_ip():
     gc.collect()
+    ip = None
     try:
         ip = is_connected()
         if not ip:
             ap = network.WLAN(network.AP_IF)
             if ap.active():
                 ip = ap.ifconfig()[0]
-    except RuntimeError:
-        ip = None
-    return ip
+    except RuntimeError as e:
+        _logger.exc(e, "Failed in get_ip")
+    finally:
+        gc.collect()
+        return ip
 
 
 def get_mac_address():

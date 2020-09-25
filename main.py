@@ -21,6 +21,7 @@ _logger.info("############# STARTING IRRIGATION SYSTEM #############")
 try:
     wifi_connect(get_network_config())
 except Exception as e:
+    _logger.exc(e, "Failed to connecto to Wifi")
     _logger.info("Device is Offline. Start AP")
     start_ap(AP_SSID, AP_PWD)
 else:

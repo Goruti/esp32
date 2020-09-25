@@ -134,7 +134,7 @@ class WebApp:
             request_line = request_line.decode()
             method, path, proto = request_line.split()
             if self.debug >= 0:
-                self.log.info('%s "%s %s"' % (method, path, req.headers))
+                self.log.info('{} {}'.format(method, path))
             path = path.split("?", 1)
             qs = ""
             if len(path) > 1:
@@ -210,6 +210,7 @@ class WebApp:
                 req.path = path
                 req.qs = qs
                 req.reader = reader
+                self.log.info('Request Headers: {}'.format(req.headers))
                 close = yield from handler(req, writer)
             else:
                 yield from start_response(writer, status="404")

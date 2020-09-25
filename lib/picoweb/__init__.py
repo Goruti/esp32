@@ -2,7 +2,6 @@
 # Copyright (c) 2014-2020 Paul Sokolovsky
 # SPDX-License-Identifier: MIT
 import micropython
-import utime
 import ure as re
 import uerrno
 import uasyncio as asyncio
@@ -12,7 +11,6 @@ import gc
 from .utils import parse_qs
 
 SEND_BUFSZ = 128
-
 
 def get_mime_type(fname):
     # Provide minimal detection of important file
@@ -210,7 +208,6 @@ class WebApp:
                 req.path = path
                 req.qs = qs
                 req.reader = reader
-                self.log.info('Request Headers: {}'.format(req.headers))
                 close = yield from handler(req, writer)
             else:
                 yield from start_response(writer, status="404")
@@ -218,13 +215,13 @@ class WebApp:
             #print(req, "After response write")
         except Exception as e:
             if self.debug >= 0:
-                self.log.exc(e, "%.3f %s %s %r" % (utime.time(), req, writer, e))
+                self.log.exc(e, "%s %s" % (req, writer))
             yield from self.handle_exc(req, writer, e)
 
         if close is not False:
             yield from writer.aclose()
         if __debug__ and self.debug > 1:
-            self.log.debug("%.3f %s Finished processing request", utime.time(), req)
+            self.log.debug("%s Finished processing request", req)
 
     def handle_exc(self, req, resp, e):
         # Can be overriden by subclasses. req may be not (fully) initialized.
@@ -324,6 +321,7 @@ class WebApp:
             if debug > 0:
                 log.setLevel(logging.DEBUG)
         self.log = log
+        gc.collect()
         self.debug = int(debug)
         self.init()
         if not lazy_init:

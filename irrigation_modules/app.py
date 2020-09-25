@@ -1,7 +1,9 @@
 import gc
+import uos
 import uasyncio as asyncio
 from irrigation_tools import libraries
 from irrigation_modules import main_loops, webServer
+from irrigation_tools.conf import SD_MOUNTING
 import logging
 gc.collect()
 
@@ -22,3 +24,5 @@ def main_app():
     finally:
         if loop:
             loop.close()
+        if SD_MOUNTING and str(SD_MOUNTING) != "" and SD_MOUNTING in uos.listdir():
+            uos.umount(SD_MOUNTING)

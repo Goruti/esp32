@@ -20,7 +20,7 @@ class SmartThings:
         self.requests = requests
 
     def notify(self, body):
-        if is_connected:
+        if is_connected():
             try:
                 attempts = self.retry_num
                 _logger.debug("Smartthings.notify, Sent body: {}".format(body))

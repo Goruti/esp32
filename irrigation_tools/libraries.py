@@ -95,14 +95,15 @@ def initialize_irrigation_app():
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
         #  TODO (uncomment the following line)
-        # webrepl.stop()
-        # manage_data.save_webrepl_config(**{"enabled": False})
+        import webrepl
+        webrepl.stop()
+        manage_data.save_webrepl_config(**{"enabled": False})
 
         #  TODO (Comment the following line)
-        import webrepl
-        webrepl.start(password=WEBREPL_PWD)
-        manage_data.save_webrepl_config(**{"enabled": True})
-        manage_data.save_irrigation_state(**{"running": True})
+        #import webrepl
+        #webrepl.start(password=WEBREPL_PWD)
+        #manage_data.save_webrepl_config(**{"enabled": True})
+        #manage_data.save_irrigation_state(**{"running": True})
 
     except Exception as e:
         manage_data.save_irrigation_state(**{"running": False})

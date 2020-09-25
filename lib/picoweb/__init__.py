@@ -134,7 +134,7 @@ class WebApp:
             request_line = request_line.decode()
             method, path, proto = request_line.split()
             if self.debug >= 0:
-                self.log.info('%.3f %s %s "%s %s"' % (utime.time(), req, writer, method, path))
+                self.log.info('%s "%s %s"' % (method, path, req.headers))
             path = path.split("?", 1)
             qs = ""
             if len(path) > 1:

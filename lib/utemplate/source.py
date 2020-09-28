@@ -166,7 +166,7 @@ class Loader(compiled.Loader):
 
     def input_open(self, template):
         path = self.pkg_path + self.dir + "/" + template
-        return open(path, "r")
+        return open(path)
 
     def compiled_path(self, template):
         return self.dir + "/" + template.replace(".", "_") + ".py"

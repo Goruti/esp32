@@ -624,4 +624,4 @@ ROUTES = [
     ('/get_log_file', get_log_file)
 ]
 
-webapp = picoweb.WebApp(ROUTES, True, TEMPLATES_DIR)
+webapp = picoweb.WebApp(routes=ROUTES, tmpl_dir=TEMPLATES_DIR)

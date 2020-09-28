@@ -169,32 +169,32 @@
 
     var webRepl_wrapper = document.getElementById("logs_files");
     var myHTML = ``;
-    myHTML += `<table class="tg">`
-    myHTML += `<thead>`
-    myHTML += `<tr>`
-    myHTML += `<th class="tg-18eh">Filename</th>`
-    myHTML += `<th class="tg-18eh">From</th>`
-    myHTML += `<th class="tg-18eh">To</th>`
-    myHTML += `<th class="tg-18eh">Action</th>`
-    myHTML += `</tr>`
-    myHTML += `</thead>`
-    myHTML += `<tbody>`
-    var logs_files = {{ data["log_files"] }}
-    logs_files.forEach(file => {
-        myHTML += `<tr>`
-        myHTML += `<td class="tg-xwyw">` + file["file_name"] + `</td>`
-        myHTML += `<td class="tg-xwyw">` + file["ts_from"] + `</td>`
-        myHTML += `<td class="tg-xwyw">` + file["ts_to"] + `</td>`
-        myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/get_log_file?file_name=` + file["file_name"] + `';">View</button></td>`
-        myHTML += `</tr>`
+    myHTML += `<table class="tg">`;
+    myHTML += `<thead>`;
+    myHTML += `<tr>`;
+    myHTML += `<th class="tg-18eh">Filename</th>`;
+    myHTML += `<th class="tg-18eh">From</th>`;
+    myHTML += `<th class="tg-18eh">To</th>`;
+    myHTML += `<th class="tg-18eh">Action</th>`;
+    myHTML += `</tr>`;
+    myHTML += `</thead>`;
+    myHTML += `<tbody>`;
+    var log_files = {{ data["log_files"] }};
+    log_files.forEach(file => {
+        myHTML += `<tr>`;
+        myHTML += `<td class="tg-xwyw">` + file["file_name"] + `</td>`;
+        myHTML += `<td class="tg-xwyw">` + file["ts_from"] + `</td>`;
+        myHTML += `<td class="tg-xwyw">` + file["ts_to"] + `</td>`;
+        myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/get_log_file?file_name=` + file["file_name"] + `';">View</button></td>`;
+        myHTML += `</tr>`;
     });
-    myHTML += `</tbody>`
-    myHTML += `</table>`
+    myHTML += `</tbody>`;
+    myHTML += `</table>`;
     webRepl_wrapper.innerHTML = myHTML;
 
     function onStartButton(pump_port) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {
-            alert("Water level is to low. Please refill the water tank before starting the pump")
+            alert("Water level is to low. Please refill the water tank before starting the pump");
         } else {
             window.location = '/pump_action?action=on&pump=' + pump_port;
         }

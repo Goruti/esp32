@@ -169,11 +169,27 @@
 
     var webRepl_wrapper = document.getElementById("logs_files");
     var myHTML = ``;
-    var logs_files = {{ data["log_files_name"] }}
-    logs_files.forEach(file_name => {
-        myHTML += `<p><button onclick="window.location = '/get_log_file?file_name=` + file_name + `';">View</button>`
-        myHTML += `<spam style="margin-left: 1em;">` + file_name + `</spam></p>`
+    myHTML += `<table class="tg">`
+    myHTML += `<thead>`
+    myHTML += `<tr>`
+    myHTML += `<th class="tg-18eh">Filename</th>`
+    myHTML += `<th class="tg-18eh">From</th>`
+    myHTML += `<th class="tg-18eh">To</th>`
+    myHTML += `<th class="tg-18eh">Action</th>`
+    myHTML += `</tr>`
+    myHTML += `</thead>`
+    myHTML += `<tbody>`
+    var logs_files = {{ data["log_files"] }}
+    logs_files.forEach(file => {
+        myHTML += `<tr>`
+        myHTML += `<td class="tg-xwyw">` + file["file_name"] + `</td>`
+        myHTML += `<td class="tg-xwyw">` + file["ts_from"] + `</td>`
+        myHTML += `<td class="tg-xwyw">` + file["ts_to"] + `</td>`
+        myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/get_log_file?file_name=` + file["file_name"] + `';">View</button></td>`
+        myHTML += `</tr>`
     });
+    myHTML += `</tbody>`
+    myHTML += `</table>`
     webRepl_wrapper.innerHTML = myHTML;
 
     function onStartButton(pump_port) {

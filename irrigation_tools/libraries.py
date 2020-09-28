@@ -290,6 +290,34 @@ def get_log_files_names():
         return files
 
 
+def get_logs_files_info():
+    gc.collect()
+    files_info = []
+    try:
+        files = get_log_files_names()
+    except Exception as e:
+        _logger.exc(e, "Cannot get the logs files")
+
+    if files:
+        for file in files:
+            try:
+                with open("{}/{}".format(LOG_DIR, file), "r") as f:
+                    ts_from = f.readline().split(",")[0]
+                    for line in f:
+                        pass
+                    ts_to = line.split(",")[0]
+                    files_info.append({
+                        "file_name": file,
+                        "ts_from": ts_from,
+                        "ts_to": ts_to
+                    })
+            except Exception as e:
+                _logger.exc(e, "Cannot read file '{}'".format(file))
+
+    gc.collect()
+    return files_info
+
+
 def initialize_root_logger(level, logfile=None):
     gc.collect()
     try:

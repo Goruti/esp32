@@ -16,7 +16,7 @@ SD_mounted = mount_sd_card()
 if SD_mounted:
     create_dir(LOG_DIR)
     logfile = "{}/{}".format(LOG_DIR, LOG_FILENAME)
-initialize_root_logger(level=logging.INFO, logfile=logfile)
+initialize_root_logger(level=logging.DEBUG, logfile=logfile)
 _logger = logging.getLogger("main")
 gc.collect()
 

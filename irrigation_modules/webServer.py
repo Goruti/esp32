@@ -7,7 +7,7 @@ from irrigation_tools.conf import AP_SSID, AP_PWD, TEMPLATES_DIR, LOG_DIR, WEBRE
 from irrigation_tools.wifi import is_connected, wifi_disconnect, start_ap, get_ip, get_available_networks,\
     wifi_connect
 from irrigation_tools.libraries import get_net_configuration, get_irrigation_state, get_irrigation_status,\
-    test_irrigation_system, get_web_repl_configuration, get_log_files_names, get_smartthings_configuration,\
+    test_irrigation_system, get_web_repl_configuration, get_logs_files_info, get_smartthings_configuration,\
     start_pump, stop_pump, get_st_handler
 from irrigation_tools.manage_data import save_network, save_webrepl_config, save_smartthings_config,\
     save_irrigation_config, read_irrigation_config
@@ -136,7 +136,7 @@ def index_get(request, response):
                 "irrigationState": get_irrigation_state(),
                 "WebRepl": get_web_repl_configuration(),
                 "smartThings": get_smartthings_configuration(),
-                "log_files_name": get_log_files_names()
+                "log_files": get_logs_files_info()
             }
         except Exception as e:
             _logger.exc(e, "Fail getting index")

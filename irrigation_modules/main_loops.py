@@ -50,7 +50,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     _logger.debug("reading_moister - Start a new reading")
                     moisture_status = {}
                     for key, values in systems_info["pump_info"].items():
-                        _logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
+                        #_logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
 
                         moisture = libraries.read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         moisture_status[values["connected_to_port"]] = libraries.moisture_to_hum(values["connected_to_port"], moisture)

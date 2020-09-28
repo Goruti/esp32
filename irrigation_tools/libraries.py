@@ -54,6 +54,7 @@ def moisture_to_hum(port, moisture):
 
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
     gc.collect()
+    _logger.info("Starting irrigation on Port {}".format(port))
     sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor"),
     started = start_pump(port)
     if started:

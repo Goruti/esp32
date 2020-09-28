@@ -4,7 +4,7 @@ import uerrno
 import gc
 import logging
 
-_logger = logging.getLogger("Irrigation")
+_logger = logging.getLogger("urequest")
 
 
 class Response:

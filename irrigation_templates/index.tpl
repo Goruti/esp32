@@ -9,7 +9,7 @@
         .choice_C { background-color:white; border-color:#000000;text-align:center;vertical-align:middle }
         .choice_D { background-color:#f44336; border-color:#000000;text-align:center;vertical-align:middle }
         .choice_E { background-color:black; color: white; border-color:#000000;text-align:center;vertical-align:middle }
-        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg  {border-collapse:collapse;border-spacing:0;margin-right:auto;margin-left:auto;}
         .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
           overflow:hidden;padding:10px 5px;word-break:normal;}
         .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
@@ -45,11 +45,11 @@
     <hr>
     <div class="row">
         <div class="column">
-            <h2>Irrigation System Configuration</h2>
+            <h2 style="text-align: center;">Irrigation System Configuration</h2>
             <div id="irrigation_configuration"></div>
         </div>
         <div class="column">
-            <h2>Available logs</h2>
+            <h2 style="text-align: center;">Available logs</h2>
             <div id="logs_files"></div>
         </div>
     </div>

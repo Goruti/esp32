@@ -263,12 +263,14 @@ class WebApp:
         self.url_map.append((url, func, kwargs))
 
     def _load_template(self, tmpl_name):
+        gc.collect()
         if self.template_loader is None:
             import utemplate.source
             self.template_loader = utemplate.source.Loader(self.pkg, self.tmpl_dir)
         return self.template_loader.load(tmpl_name)
 
     def render_template(self, writer, tmpl_name, args=()):
+        gc.collect()
         tmpl = self._load_template(tmpl_name)
         for s in tmpl(*args):
             yield from writer.awritestr(s)

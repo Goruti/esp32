@@ -1,5 +1,6 @@
 # (c) 2014-2019 Paul Sokolovsky. MIT license.
 from . import compiled
+import uos
 
 
 class Compiler:
@@ -32,8 +33,8 @@ class Compiler:
     def literal(self, s):
         if not s:
             return
+        self.indent()
         if not self.in_literal:
-            self.indent()
             self.file_out.write('yield """')
             self.in_literal = True
         self.file_out.write(s.replace('"', '\\"'))
@@ -176,6 +177,8 @@ class Loader(compiled.Loader):
             return super().load(name)
         except (OSError, ImportError):
             pass
+        except Exception:
+            uos.remove(self.pkg_path + self.compiled_path(name))
 
         compiled_path = self.pkg_path + self.compiled_path(name)
 

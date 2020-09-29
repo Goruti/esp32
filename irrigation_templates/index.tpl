@@ -1,5 +1,4 @@
 {% args data %}
-
 <html>
     <style>
         .row { display: flex; }
@@ -9,7 +8,7 @@
         .choice_C { background-color:white; border-color:#000000;text-align:center;vertical-align:middle }
         .choice_D { background-color:#f44336; border-color:#000000;text-align:center;vertical-align:middle }
         .choice_E { background-color:black; color: white; border-color:#000000;text-align:center;vertical-align:middle }
-        .tg  {border-collapse:collapse;border-spacing:0;margin-right:auto;margin-left:auto;}
+        .tg {border-collapse:collapse;border-spacing:0;margin-right:auto;margin-left:auto;}
         .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
           overflow:hidden;padding:10px 5px;word-break:normal;}
         .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
@@ -55,7 +54,6 @@
     </div>
     </body>
 </html>
-
 <script>
     var webRepl_wrapper = document.getElementById("irrigation_state");
     var myHTML = ``;
@@ -69,7 +67,6 @@
         myHTML += `</h1>`
     }
     webRepl_wrapper.innerHTML = myHTML;
-
     var webRepl_wrapper = document.getElementById("web_repl_config");
     var myHTML = ``;
     if ("{{ data["WebRepl"]["enabled"] }}" === "True") {
@@ -80,7 +77,6 @@
         myHTML += `<button disabled onclick="window.location = '/config_web_repl?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
-
     var webRepl_wrapper = document.getElementById("smartthings_config");
     var myHTML = ``;
     if ("{{ data["smartThings"]["enabled"] }}" === "True") {
@@ -93,7 +89,6 @@
         myHTML += `<button disabled onclick="window.location = '/enable_smartthings?action=disable';" style="margin-left:1em;font-weight: bold;border-width: thin;opacity:0.6">Disable </button>`
     }
     webRepl_wrapper.innerHTML = myHTML;
-
     var net_wrapper = document.getElementById("network_configuration");
     var myHTML = `<p><u>Wifi Connected</u>: <b>{{ data["net_config"]["connected"] }}</b></p>`;
 
@@ -107,18 +102,14 @@
          myHTML += `<p style="margin-left: 40px; text-align: left;"><button onclick="window.location = '/config_wifi';">Configure Wifi</button>`;
     }
     net_wrapper.innerHTML = myHTML;
-
     var irrigation_wrapper = document.getElementById("irrigation_configuration");
     var myHTML = ``;
     myHTML += `<p><u>Water Level:</u> <b>{{ data["irrigation_config"]["water_level"] }}</b></p>`;
-
     if ( "{{ data["irrigation_config"]["total_pumps"] }}" !== "0" ) {
         var total_pump = {{ data["irrigation_config"]["total_pumps"] }}
         var pump_info = {{ data["irrigation_config"]["pump_info"] }}
-
         myHTML += `<p><u>Number of Plant(s) to Irrigate:</u> <b>` + total_pump + `</b></p>`;
         myHTML += `<p><u>Plant(s) Details</u></p>`;
-
         myHTML +=  `<table class="tg">`;
         myHTML +=  `<thead>`;
         myHTML +=  `<tr>`;
@@ -135,17 +126,14 @@
         myHTML +=  `</tr>`;
         myHTML +=  `</thead>`;
         myHTML +=  `<tbody>`;
-
         for (var i = 1; i <= total_pump; i++) {
             myHTML += `<tr>`;
-
             myHTML += `<td class="tg-xwyw">#` + i + `</td>`;
             myHTML += `<td class="choice_` + pump_info[i]["connected_to_port"] + `">` + pump_info[i]["connected_to_port"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["pump_status"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture_threshold"] + ` (` + pump_info[i]["threshold_pct"].toFixed(1) + `%)</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["moisture"] + `</td>`;
             myHTML += `<td class="tg-xwyw">` + pump_info[i]["humidity"].toFixed(1) + `%</td>`;
-
             if ( pump_info[i]["pump_status"] === "on") {
                 myHTML += `<td class="tg-xwyw"><button disabled onclick="onStartButton('` + pump_info[i]["connected_to_port"] + `')" style="opacity:0.6">Start</button></td>`;
                 myHTML += `<td class="tg-xwyw"><button onclick="window.location = '/pump_action?action=off&pump=` + pump_info[i]["connected_to_port"] + `';" style="border-width: thin">Stop</button></td>`;
@@ -158,15 +146,12 @@
         }
         myHTML += `</tbody>`;
         myHTML += `</table>`;
-
         myHTML += `<p><button onclick="window.location = '/irrigation_config';">Reconfigure Irrigation System</button></p>`;
-
     } else {
          myHTML += `<p style="margin-left: 40px; color: #ff5722"><b>You need to configure your Irrigation System</b></p>`;
          myHTML += `<p><button onclick="window.location = '/irrigation_config';">Configure Irrigation System</button>`;
     }
     irrigation_wrapper.innerHTML = myHTML;
-
     var webRepl_wrapper = document.getElementById("logs_files");
     var myHTML = ``;
     myHTML += `<table class="tg">`;
@@ -179,8 +164,8 @@
     myHTML += `</tr>`;
     myHTML += `</thead>`;
     myHTML += `<tbody>`;
-    var log_files = {{ data["log_files"] }};
-    log_files.forEach(file => {
+    var files_info = {{ data["log_files"] }};
+    files_info.forEach(file => {
         myHTML += `<tr>`;
         myHTML += `<td class="tg-xwyw">` + file["file_name"] + `</td>`;
         myHTML += `<td class="tg-xwyw">` + file["ts_from"] + `</td>`;
@@ -191,7 +176,6 @@
     myHTML += `</tbody>`;
     myHTML += `</table>`;
     webRepl_wrapper.innerHTML = myHTML;
-
     function onStartButton(pump_port) {
         if ( "{{ data["irrigation_config"]["water_level"] }}" === "empty" ) {
             alert("Water level is to low. Please refill the water tank before starting the pump");

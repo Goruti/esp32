@@ -96,15 +96,15 @@ def initialize_irrigation_app():
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
         #  TODO (uncomment the following line)
-        import webrepl
-        webrepl.stop()
-        manage_data.save_webrepl_config(**{"enabled": False})
+        #import webrepl
+        #webrepl.stop()
+        #manage_data.save_webrepl_config(**{"enabled": False})
 
         #  TODO (Comment the following line)
         #import webrepl
         #webrepl.start(password=WEBREPL_PWD)
-        #manage_data.save_webrepl_config(**{"enabled": True})
-        #manage_data.save_irrigation_state(**{"running": True})
+        manage_data.save_webrepl_config(**{"enabled": True})
+        manage_data.save_irrigation_state(**{"running": True})
 
     except Exception as e:
         manage_data.save_irrigation_state(**{"running": False})
@@ -336,10 +336,14 @@ def initialize_root_logger(level, logfile=None):
         gc.collect()
 
 
+def unmount_sd_card():
+    if SD_MOUNTING and str(SD_MOUNTING) != "" and SD_MOUNTING in uos.listdir():
+        uos.umount(SD_MOUNTING)
+
+
 def mount_sd_card():
     gc.collect()
     mounted = False
-
     if SD_MOUNTING and str(SD_MOUNTING) != "":
         try:
             sd = machine.SDCard(slot=2, freq=80000000)
@@ -347,7 +351,6 @@ def mount_sd_card():
             buf = uio.StringIO()
             sys.print_exception(e, buf)
             print("Cannot Crete SDCard Object.\nError: {}".format(buf.getvalue()))
-            return mounted
 
         try:
             uos.mount(sd, "/{}".format(SD_MOUNTING))
@@ -358,7 +361,6 @@ def mount_sd_card():
             print("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
         else:
             mounted = True
-
     gc.collect()
     return mounted
 

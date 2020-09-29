@@ -14,7 +14,7 @@ TEMPLATES_DIR = "irrigation_templates"
 AP_SSID = "My Awesome Irrigation System"
 AP_PWD = "My@wesomeP@sword"
 WEBREPL_PWD = "S@mu3l"
-SD_MOUNTING = "sd"
+SD_MOUNTING = None
 #DB Location
 DB_DIR = "{}/db".format(SD_MOUNTING) if SD_MOUNTING and str(SD_MOUNTING) != "" else "/db"
 DB_FILENAME = "irrigation.db"

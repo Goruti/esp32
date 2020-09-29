@@ -121,9 +121,9 @@ def wifi_connect(network_config, timeout_ms=10000):
                     error_msg = "HANDSHAKE_TIMEOUT"
                 else:
                     error_msg = "Undefined Error"
-                raise ConnectionError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
+                raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
     else:
-        raise ConnectionError("There is not a network_config")
+        raise RuntimeError("There is not a network_config")
 
 
 def wifi_disconnect():

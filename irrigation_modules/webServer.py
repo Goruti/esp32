@@ -305,7 +305,7 @@ def irrigation_config_post(request, response):
                     "system": config
                 }
             }
-        st.notify(payload)
+            st.notify(payload)
 
         save_irrigation_config(**config)
         gc.collect()

@@ -333,7 +333,7 @@ def initialize_root_logger(level, logfile=None):
         logging.basicConfig(level=level)
         _logger = logging.getLogger()
         if logfile:
-            rfh = RotatingFileHandler(logfile, maxBytes=10*1024, backupCount=10)
+            rfh = RotatingFileHandler(logfile, maxBytes=10*1024, backupCount=5)
             _logger.addHandler(rfh)
 
     except Exception as e:

@@ -89,39 +89,41 @@ def wifi_connect(network_config, timeout_ms=10000):
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """
     gc.collect()
+    if network_config:
+        wlan = network.WLAN(network.STA_IF)
+        if not wlan.active():
+            wlan.active(True)
 
-    wlan = network.WLAN(network.STA_IF)
-    if not wlan.active():
-        wlan.active(True)
-
-    if wlan.isconnected():
-        wlan.disconnect()
-    #wlan.active(False)
-    #utime.sleep_ms(1)
-    #wlan.active(True)
-        utime.sleep_ms(100)
-
-    wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
-
-    t = utime.ticks_ms()
-    while not wlan.isconnected():
-        if utime.ticks_diff(utime.ticks_ms(), t) < timeout_ms:
-            machine.idle()
-        else:
+        if wlan.isconnected():
             wlan.disconnect()
+        #wlan.active(False)
+        #utime.sleep_ms(1)
+        #wlan.active(True)
             utime.sleep_ms(100)
-            wlan_status = wlan.status()
-            if wlan_status == network.STAT_NO_AP_FOUND:
-                error_msg = "STAT_NO_AP_FOUND"
-            elif wlan_status == network.STAT_WRONG_PASSWORD or wlan_status == 8:
-                error_msg = "STAT_WRONG_PASSWORD"
-            elif wlan_status == network.STAT_ASSOC_FAIL:
-                error_msg = "STAT_ASSOC_FAIL"
-            elif wlan_status == network.STAT_HANDSHAKE_TIMEOUT:
-                error_msg = "HANDSHAKE_TIMEOUT"
+
+        wlan.connect(str(network_config["ssid"]), str(network_config["password"]))
+
+        t = utime.ticks_ms()
+        while not wlan.isconnected():
+            if utime.ticks_diff(utime.ticks_ms(), t) < timeout_ms:
+                machine.idle()
             else:
-                error_msg = "Undefined Error"
-            raise RuntimeError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
+                wlan.disconnect()
+                utime.sleep_ms(100)
+                wlan_status = wlan.status()
+                if wlan_status == network.STAT_NO_AP_FOUND:
+                    error_msg = "STAT_NO_AP_FOUND"
+                elif wlan_status == network.STAT_WRONG_PASSWORD or wlan_status == 8:
+                    error_msg = "STAT_WRONG_PASSWORD"
+                elif wlan_status == network.STAT_ASSOC_FAIL:
+                    error_msg = "STAT_ASSOC_FAIL"
+                elif wlan_status == network.STAT_HANDSHAKE_TIMEOUT:
+                    error_msg = "HANDSHAKE_TIMEOUT"
+                else:
+                    error_msg = "Undefined Error"
+                raise ConnectionError("Timeout. Could not connect to Wifi. Error: {}, Message: {}".format(wlan_status, error_msg))
+    else:
+        raise ConnectionError("There is not a network_config")
 
 
 def wifi_disconnect():

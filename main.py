@@ -19,6 +19,8 @@ initialize_root_logger(level=logging.DEBUG, logfile=logfile)
 _logger = logging.getLogger("main")
 gc.collect()
 
+_logger.info("############# STARTING IRRIGATION SYSTEM #############")
+create_dir(DB_DIR)
 
 try:
     wifi_connect(get_network_config())
@@ -37,8 +39,6 @@ for file in uos.listdir('irrigation_templates'):
 gc.collect()
 try:
     import uftp
-    _logger.info("############# STARTING IRRIGATION SYSTEM #############")
-    create_dir(DB_DIR)
     main_app()
 except Exception as e:
     unmount_sd_card()

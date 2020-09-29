@@ -227,7 +227,9 @@ def get_irrigation_configuration():
         "water_level": None
     }
     try:
-        conf.update(manage_data.read_irrigation_config())
+        storage_conf = manage_data.read_irrigation_config()
+        if storage_conf:
+            conf.update(storage_conf)
     except Exception as e:
         _logger.exc(e, "Failed to get Irrigation configuration")
     finally:
@@ -241,7 +243,9 @@ def get_web_repl_configuration():
         "enabled": False
     }
     try:
-        conf.update(manage_data.read_webrepl_config())
+        storage_conf = manage_data.read_webrepl_config()
+        if storage_conf:
+            conf.update(storage_conf)
     except Exception as e:
         _logger.exc(e, "Failed to get webrepl configuration")
     finally:
@@ -257,7 +261,9 @@ def get_smartthings_configuration():
         "st_port": None
     }
     try:
-        conf.update(manage_data.read_smartthings_config())
+        storage_conf = manage_data.read_smartthings_config()
+        if storage_conf:
+            conf.update(storage_conf)
     except Exception as e:
         _logger.exc(e, "Failed to get ST configuration")
     finally:
@@ -271,7 +277,9 @@ def get_irrigation_state():
         "running": None
     }
     try:
-        state.update(manage_data.read_irrigation_state())
+        storage_conf = manage_data.read_irrigation_state()
+        if storage_conf:
+            state.update(storage_conf)
     except Exception as e:
         _logger.exc(e, "Failed Getting Irrigation State")
     finally:

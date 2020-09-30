@@ -4,6 +4,6 @@ import gc
 import micropython
 
 
-esp.osdebug(None)
+#esp.osdebug(None)
 micropython.alloc_emergency_exception_buf(100)
 gc.collect()

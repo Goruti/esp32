@@ -65,7 +65,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         #s.setblocking(False)
     except Exception as e:
         _logger.exc(e, "urequest - Could not create a socket object")
-        raise
+        raise Exception(e)
 
     #  ATTEMPT TO CONNECT
     try:
@@ -74,11 +74,11 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         if e.args[0] not in [uerrno.EINPROGRESS, uerrno.ETIMEDOUT]:
             _logger.exc(e, "urequest - Error 'OSError' while trying to connect")
             s.close()
-            raise
+            raise OSError(e)
     except Exception as e:
         _logger.exc(e, "urequest - General Error while trying to connect")
         s.close()
-        raise
+        raise Exception(e)
 
     #  SEND DATA
     try:
@@ -107,11 +107,11 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
         if e.args[0] not in [uerrno.EINPROGRESS, uerrno.ETIMEDOUT]:
             _logger.exc(e, "urequest - ERROR 'OSError' while trying to write")
             s.close()
-            raise
+            raise OSError(e)
     except Exception as e:
         _logger.exc(e, "urequest - General ERROR while trying to write.")
         s.close()
-        raise
+        raise Exception(e)
 
     #  WAITING FOR A RESPONSE
     #s.settimeout(socket_timeout)
@@ -158,7 +158,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None):
     except Exception as e:
         _logger.exc(e, "urequest - ERROR waiting for a response")
         s.close()
-        raise
+        raise Exception(e)
     else:
         resp = Response(s)
         resp.status_code = status

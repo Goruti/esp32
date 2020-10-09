@@ -1,4 +1,7 @@
 import uasyncio as asyncio
+import logging
+
+_logger = logging.getLogger("uaioHttpClient")
 
 
 class ClientResponse:
@@ -90,7 +93,6 @@ def request_raw(method, url, data, json, headers):
             yield from writer.awrite(("Content-Length: %d\r\n" % len(data)).encode('latin-1'))
 
         yield from writer.awrite(("Connection: close\r\n\r\n").encode('latin-1'))
-
         if data:
             yield from writer.awrite(data)
     except:

@@ -52,7 +52,7 @@ def moisture_to_hum(port, moisture):
         return round(hum, 1)
 
 
-def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=15000):
+def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=2000):
     gc.collect()
     _logger.info("Starting irrigation on Port {}".format(port))
     sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor"),
@@ -96,14 +96,14 @@ def initialize_irrigation_app():
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
 
         #  TODO (uncomment the following line)
-        #import webrepl
-        #webrepl.stop()
-        #manage_data.save_webrepl_config(**{"enabled": False})
-
+        import webrepl
+        webrepl.stop()
+        manage_data.save_webrepl_config(**{"enabled": False})
         #  TODO (Comment the following line)
         #import webrepl
         #webrepl.start(password=WEBREPL_PWD)
-        manage_data.save_webrepl_config(**{"enabled": True})
+        #manage_data.save_webrepl_config(**{"enabled": True})
+
         manage_data.save_irrigation_state(**{"running": True})
 
     except Exception as e:

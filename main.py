@@ -1,11 +1,10 @@
 import gc
 import uos
-import sys
 import logging
 
 from irrigation_tools.wifi import start_ap, stop_ap, wifi_connect
 from irrigation_tools.manage_data import create_dir, get_network_config
-from irrigation_tools.conf import DB_DIR, AP_SSID, AP_PWD, LOG_DIR, LOG_FILENAME, WEBREPL_PWD
+from irrigation_tools.conf import DB_DIR, AP_SSID, AP_PWD, LOG_DIR, LOG_FILENAME
 from irrigation_tools.libraries import initialize_root_logger, mount_sd_card, unmount_sd_card
 from irrigation_modules.app import main_app
 gc.collect()

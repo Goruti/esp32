@@ -59,7 +59,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                                                     port=values["connected_to_port"],
                                                     moisture=moisture,
                                                     threshold=values["moisture_threshold"],
-                                                    max_irrigation_time_ms=10000
+                                                    max_irrigation_time_ms=5000
                                             )
 
                     if st and utime.ticks_diff(utime.ticks_ms(), report_time) > 0:

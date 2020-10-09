@@ -84,7 +84,7 @@ def get_available_networks():
     return nets
 
 
-def wifi_connect(network_config, timeout_ms=10000):
+def wifi_connect(network_config, timeout_ms=20000):
     """
     Connect to the WiFi network based on the configuration. Fails if there is no configuration.
     """

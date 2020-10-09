@@ -8,8 +8,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from collections import OrderedDict
 from irrigation_tools import manage_data, smartthings_handler
-from irrigation_tools.conf import PORT_PIN_MAPPING, WEBREPL_PWD, LOG_DIR, LOG_FILENAME, SD_MOUNTING,\
-                                    WATER_LEVEL_SENSOR_PIN
+from irrigation_tools.conf import PORT_PIN_MAPPING, LOG_DIR, SD_MOUNTING, WATER_LEVEL_SENSOR_PIN
 from irrigation_tools.wifi import is_connected, get_mac_address
 gc.collect()
 
@@ -55,13 +54,11 @@ def moisture_to_hum(port, moisture):
 def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=2000):
     gc.collect()
     _logger.info("Starting irrigation on Port {}".format(port))
-    sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor"),
+    sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor")
     started = start_pump(port)
     if started:
         t = utime.ticks_ms()
-        while ((moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms)
-                or
-                (abs(utime.ticks_diff(utime.ticks_ms(), t)) < 5000)):
+        while moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
             moisture = read_adc(sensor_pin)
             utime.sleep_ms(100)
 

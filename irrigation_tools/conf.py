@@ -4,7 +4,7 @@ PORT_PIN_MAPPING = {
     "B": {"pin_sensor": 34, "pin_pump": 26, "dry_value": 3400, "water_value": 1200},
     "C": {"pin_sensor": 35, "pin_pump": 22, "dry_value": 3100, "water_value": 600},
     "D": {"pin_sensor": 32, "pin_pump": 21, "dry_value": 3150, "water_value": 550},
-    "E": {"pin_sensor": 33, "pin_pump": 14, "dry_value": 3300, "water_value": 1640},
+    "E": {"pin_sensor": 33, "pin_pump": 14, "dry_value": 3430, "water_value": 1615},
 }
 WATER_LEVEL_SENSOR_PIN = 27
 

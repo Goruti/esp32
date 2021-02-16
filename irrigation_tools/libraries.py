@@ -62,7 +62,7 @@ def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=2000):
             moisture = read_adc(sensor_pin)
             utime.sleep_ms(100)
 
-        stop_pump(port)
+        stop_pump(port, moisture)
 
 
 def read_gpio(pin):
@@ -134,7 +134,7 @@ def start_pump(port, notify=True):
         return started
 
 
-def stop_pump(port, notify=True):
+def stop_pump(port, notify=True, moisture=-1):
     gc.collect()
     pin = PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
@@ -145,6 +145,11 @@ def stop_pump(port, notify=True):
                 st = get_st_handler(retry_num=1, retry_sec=1)
                 if st:
                     payload = {"type": "pump_status", "body": {port: "off"}}
+                    if moisture > 0:
+                        payload = {
+                            "type": "moisture_status",
+                            "body": {port: moisture_to_hum(port, moisture)}
+                        }
                     st.notify(payload)
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")

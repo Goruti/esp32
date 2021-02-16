@@ -2,7 +2,7 @@ import gc
 import utime
 import uasyncio as asyncio
 import logging
-from machine import Pin
+from machine import Pin, reset
 from irrigation_tools import libraries
 from irrigation_tools.wifi import is_connected
 from irrigation_tools.conf import PORT_PIN_MAPPING, WATER_LEVEL_SENSOR_PIN
@@ -25,6 +25,9 @@ async def initialize_rtc(frequency_loop=3600):
                     _logger.exc(e, "Fail to set time")
             else:
                 _logger.info("Device is Offline")
+                _logger.info("restarting the system")
+                reset()
+
         except BaseException as e:
             _logger.exc(e, "Fail to Initialize RTC")
         finally:

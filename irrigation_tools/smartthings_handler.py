@@ -1,5 +1,6 @@
 import gc
 import utime
+from machine import reset
 from irrigation_tools.wifi import is_connected
 import urequests as requests
 import logging
@@ -40,6 +41,8 @@ class SmartThings:
                 gc.collect()
         else:
             _logger.debug("Discarding message since device is not connected")
+            _logger.info("restarting the system")
+            reset()
 
     def _send_values(self, body):
         failed = True

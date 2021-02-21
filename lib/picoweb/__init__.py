@@ -273,7 +273,7 @@ class WebApp:
         gc.collect()
         tmpl = self._load_template(tmpl_name)
         for s in tmpl(*args):
-            yield from writer.awritestr(s)
+            yield from writer.awritestr(s.encode('utf-8'))
 
     def render_str(self, tmpl_name, args=()):
         #TODO: bloat

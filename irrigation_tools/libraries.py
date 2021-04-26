@@ -376,8 +376,12 @@ def mount_sd_card():
 
 
 def get_watter_level(value=None):
-    if not value:
-        value = read_gpio(WATER_LEVEL_SENSOR_PIN)
+    try:
+        if not value:
+            value = read_gpio(WATER_LEVEL_SENSOR_PIN)
+    except Exception as e:
+        _logger.exc(e, "Cannot read tank level")
+        value = 1
     return "empty" if value else "good"
 
 

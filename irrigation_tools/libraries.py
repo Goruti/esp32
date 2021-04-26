@@ -87,10 +87,12 @@ def read_adc(pin):
 def initialize_irrigation_app():
     gc.collect()
     _logger.info("Initializing Ports")
+    st_payload = []
     try:
         for key, value in PORT_PIN_MAPPING.items():
             #  Initialize Pumps pin as OUT_PUTS
             machine.Pin(value["pin_pump"], machine.Pin.OUT, value=0)
+            st_payload.append({"type": "pump_status", "body": {key: "off"}})
 
         #  TODO (uncomment the following line)
         import webrepl
@@ -100,6 +102,19 @@ def initialize_irrigation_app():
         #import webrepl
         #webrepl.start(password=WEBREPL_PWD)
         #manage_data.save_webrepl_config(**{"enabled": True})
+
+        # initialize Water Tank Level
+        pin = machine.Pin(WATER_LEVEL_SENSOR_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
+        w_level = get_watter_level(pin.value())
+        st_payload.append({
+            "type": "water_level_status",
+            "body": {
+                "status": w_level
+            }
+        })
+        st = get_st_handler(retry_num=5, retry_sec=1)
+        if st:
+            st.notify(st_payload)
 
         manage_data.save_irrigation_state(**{"running": True})
 
@@ -124,7 +139,7 @@ def start_pump(port, notify=True):
                 st = get_st_handler(retry_num=1, retry_sec=1)
                 if st:
                     payload = {"type": "pump_status", "body": {port: "on"}}
-                    st.notify(payload)
+                    st.notify([payload])
         else:
             _logger.info("cannot start 'pump {}' since tank is empty".format(port))
     except Exception as e:
@@ -150,7 +165,7 @@ def stop_pump(port, notify=True, moisture=-1):
                             "type": "moisture_status",
                             "body": {port: moisture_to_hum(port, moisture)}
                         }
-                    st.notify(payload)
+                    st.notify([payload])
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:

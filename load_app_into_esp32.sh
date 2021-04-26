@@ -3,7 +3,7 @@ delimiter=esp32/
 
 
 function usage() {
-  echo $"Usage: $0 -{first_load|load_all_files|}"
+  echo $"Usage: $0 -{first_load | load_all_files}"
 }
 
 function check_loaded_files() {

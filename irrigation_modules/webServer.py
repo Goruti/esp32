@@ -305,7 +305,7 @@ def irrigation_config_post(request, response):
                     "system": config
                 }
             }
-            st.notify(payload)
+            st.notify([payload])
 
         save_irrigation_config(**config)
         gc.collect()
@@ -439,7 +439,7 @@ def enable_smartthings_get(request, response):
                         "status": "disable"
                     }
                 }
-                st.notify(payload)
+                st.notify([payload])
 
             st_conf = {
                 "enabled": False,
@@ -492,7 +492,7 @@ def enable_smartthings_post(request, response):
         }
         st = get_st_handler(retry_num=5, retry_sec=1)
         if st:
-            st.notify(payload)
+            st.notify([payload])
 
     except Exception as e:
         _logger.exc(e, "Fail Saving ST configuration")

@@ -154,18 +154,17 @@ def stop_pump(port, notify=True, moisture=-1):
     pin = PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
         _logger.info("Stopping Port {} in Pin {}".format(port, pin))
-        if machine.Pin(pin).value():
-            machine.Pin(pin).off()
-            if notify:
-                st = get_st_handler(retry_num=1, retry_sec=1)
-                if st:
-                    payload = {"type": "pump_status", "body": {port: "off"}}
-                    if moisture > 0:
-                        payload = {
-                            "type": "moisture_status",
-                            "body": {port: moisture_to_hum(port, moisture)}
-                        }
-                    st.notify([payload])
+        machine.Pin(pin).off()
+        if notify:
+            st = get_st_handler(retry_num=1, retry_sec=1)
+            if st:
+                payload = {"type": "pump_status", "body": {port: "off"}}
+                if moisture > 0:
+                    payload = {
+                        "type": "moisture_status",
+                        "body": {port: moisture_to_hum(port, moisture)}
+                    }
+                st.notify([payload])
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:

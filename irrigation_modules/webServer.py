@@ -357,11 +357,13 @@ def pump_action_get(request, response):
             }
         }
         if action == "on":
-            started = start_pump(port)
+            started = start_pump(port, False)
             if started:
-                api_data["body"][port] = "on"
+                utime.sleep(4)
+                stop_pump(port, False)
+                #api_data["body"][port] = "on"
         elif action == "off":
-            stop_pump(port)
+            stop_pump(port, False)
 
         if b"text/html" in request.headers[b"Accept"]:
             headers = {"Location": "/"}

@@ -55,14 +55,23 @@ def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=2000):
     gc.collect()
     _logger.info("Starting irrigation on Port {}".format(port))
     sensor_pin = PORT_PIN_MAPPING.get(port).get("pin_sensor")
-    started = start_pump(port)
+    started = start_pump(port=port, notify=False)
     if started:
         t = utime.ticks_ms()
         while moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
             moisture = read_adc(sensor_pin)
             utime.sleep_ms(100)
 
-        stop_pump(port, moisture)
+        stop_pump(port=port, notify=False)
+
+    st = get_st_handler(retry_num=1, retry_sec=1)
+    if st:
+        payload = {
+            "type": "moisture_status",
+            "body": {port: moisture_to_hum(port, moisture)}
+        }
+    st.notify(payload)
+
 
 
 def read_gpio(pin):
@@ -149,7 +158,7 @@ def start_pump(port, notify=True):
         return started
 
 
-def stop_pump(port, notify=True, moisture=-1):
+def stop_pump(port, notify=True):
     gc.collect()
     pin = PORT_PIN_MAPPING.get(port).get("pin_pump")
     try:
@@ -158,13 +167,9 @@ def stop_pump(port, notify=True, moisture=-1):
         if notify:
             st = get_st_handler(retry_num=1, retry_sec=1)
             if st:
-                payload = {"type": "pump_status", "body": {port: "off"}}
-                if moisture > 0:
-                    payload = {
-                        "type": "moisture_status",
-                        "body": {port: moisture_to_hum(port, moisture)}
-                    }
-                st.notify([payload])
+                payload = [{"type": "pump_status", "body": {port: "off"}}]
+                st.notify(payload)
+
     except Exception as e:
         _logger.exc(e, "Failed Stopping Pump")
     finally:
@@ -367,7 +372,6 @@ def unmount_sd_card():
 
 def mount_sd_card():
     gc.collect()
-    mounted = False
     if SD_MOUNTING and str(SD_MOUNTING) != "":
         try:
             sd = machine.SDCard(slot=2, freq=80000000)
@@ -383,10 +387,7 @@ def mount_sd_card():
             buf = uio.StringIO()
             sys.print_exception(e, buf)
             print("Cannot Mount SD Card.\nError: {}".format(buf.getvalue()))
-        else:
-            mounted = True
     gc.collect()
-    return mounted
 
 
 def get_watter_level(value=None):

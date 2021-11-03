@@ -14,8 +14,10 @@ function check_loaded_files() {
 
 function first_load() {
   for filename in $dir/*; do
-    if [ $filename != "/Users/diego/git/esp32/README.md" ] &&\
-       [ $filename != "/Users/diego/git/esp32/load_app_into_esp32.sh" ]; then
+    file="$(basename $filename)"
+    if [ $file != "README.md" ] &&\
+       [ $file != "esp32-20210902-v1.17.bin" ] &&\
+       [ $file != "/Users/antonind/git/esp32/load_app_into_esp32.sh" ]; then
       cmd="ampy -p /dev/tty.usbserial-0001 -d 1.5 put $filename"
       echo "loading $filename with command: $cmd"
       eval "$cmd"

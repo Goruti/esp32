@@ -25,8 +25,6 @@ async def initialize_rtc(frequency_loop=3600):
                     _logger.exc(e, "Fail to set time")
             else:
                 _logger.info("Device is Offline")
-                _logger.info("restarting the system")
-                reset()
 
         except BaseException as e:
             _logger.exc(e, "Fail to Initialize RTC")
@@ -39,9 +37,9 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
     _logger.debug("Start Reading Moister Loop")
     try:
         systems_info = libraries.get_irrigation_configuration()
-        st = libraries.get_st_handler(retry_num=5, retry_sec=1)
+        st = libraries.get_st_handler(retry_num=2, retry_sec=1)
     except BaseException as e:
-        _logger.exc(e, "Fail to Read Systems Information RTC")
+        _logger.exc(e, "Fail to Start Moister Loop")
         save_irrigation_state(**{"running": False})
         gc.collect()
     else:
@@ -53,7 +51,7 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     _logger.debug("reading_moister - Start a new reading")
                     moisture_status = {}
                     for key, values in systems_info["pump_info"].items():
-                        #_logger.debug("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
+                        _logger.trace("reading_moister - evaluating port: {}".format(values["connected_to_port"]))
 
                         moisture = libraries.read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         #moisture_status[values["connected_to_port"]] = libraries.moisture_to_hum(values["connected_to_port"], moisture)
@@ -83,22 +81,9 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                     await asyncio.sleep_ms(frequency_loop_ms)
 
 
-async def wait_pin_change(pin, bounces=5):
-    # wait for pin to change value
-    # it needs to be stable for a continuous 5sec
-    cur_value = pin.value()
-    active = 0
-    while active < bounces:
-        if pin.value() != cur_value:
-            active += 1
-        else:
-            active = 0
-        await asyncio.sleep(1)
-
-
 async def reading_water_level():
     pin = Pin(WATER_LEVEL_SENSOR_PIN, Pin.IN, Pin.PULL_UP)
-    st = libraries.get_st_handler(retry_num=5, retry_sec=1)
+    st = libraries.get_st_handler(retry_num=1, retry_sec=1)
     while True:
         try:
             await wait_pin_change(pin)
@@ -118,3 +103,16 @@ async def reading_water_level():
             _logger.exc(e, "failed to read water level")
         finally:
             gc.collect()
+
+
+async def wait_pin_change(pin, bounces=5):
+    # wait for pin to change value
+    # it needs to be stable for a continuous 5sec
+    cur_value = pin.value()
+    active = 0
+    while active < bounces:
+        if pin.value() != cur_value:
+            active += 1
+        else:
+            active = 0
+        await asyncio.sleep(1)

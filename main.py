@@ -10,10 +10,9 @@ from irrigation_modules.app import main_app
 gc.collect()
 
 #  Initialize Logging
-logfile = None
-if mount_sd_card():
-    create_dir(LOG_DIR)
-    logfile = "{}/{}".format(LOG_DIR, LOG_FILENAME)
+mount_sd_card()
+create_dir(LOG_DIR)
+logfile = "{}/{}".format(LOG_DIR, LOG_FILENAME)
 initialize_root_logger(level=logging.DEBUG, logfile=logfile)
 _logger = logging.getLogger("main")
 gc.collect()
